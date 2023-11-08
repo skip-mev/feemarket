@@ -65,7 +65,7 @@ BUILD_TARGETS := build-test-app
 build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
-	cd $(CURDIR)/tests/app && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+	cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
 $(BUILD_DIR)/:
 	mkdir -p $(BUILD_DIR)/
