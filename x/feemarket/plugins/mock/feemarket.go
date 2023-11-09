@@ -3,53 +3,57 @@ package mock
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/feemarket/feemarket"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-var _ feemarket.FeeMarket = FeeMarket{}
+var _ types.FeeMarketImplementation = &MockFeeMarket{}
 
-// FeeMarket is a simple mock fee market implmentation that should only be used for testing.
-type FeeMarket struct{}
+type MockFeeMarket struct{} //nolint
+
+// ValidateBasic is a no-op.
+func (fm *MockFeeMarket) ValidateBasic() error {
+	return nil
+}
 
 // Init which initializes the fee market (in InitGenesis)
-func (fm FeeMarket) Init(_ sdk.Context) error {
+func (fm *MockFeeMarket) Init(_ sdk.Context) error {
 	return nil
 }
 
 // EndBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the EndBlock chain.
-func (fm FeeMarket) EndBlockUpdateHandler(_ sdk.Context) feemarket.UpdateHandler {
+func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
 	return nil
 }
 
 // EpochUpdateHandler allows the fee market to be updated
 // after every given epoch identifier. This maps the epoch
 // identifier to the UpdateHandler that should be executed.
-func (fm FeeMarket) EpochUpdateHandler(_ sdk.Context) map[string]feemarket.UpdateHandler {
+func (fm *MockFeeMarket) EpochUpdateHandler(_ sdk.Context) map[string]types.UpdateHandler {
 	return nil
 }
 
 // GetMinGasPrice retrieves the minimum gas price(s) needed
 // to be included in the block for the given transaction
-func (fm FeeMarket) GetMinGasPrice(_ sdk.Context, _ sdk.Tx) sdk.Coins {
+func (fm *MockFeeMarket) GetMinGasPrice(_ sdk.Context, _ sdk.Tx) sdk.Coins {
 	return sdk.NewCoins()
 }
 
 // GetFeeMarketInfo retrieves the fee market's information about
 // how to pay for a transaction (min gas price, min tip,
 // where the fees are being distributed, etc.).
-func (fm FeeMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
+func (fm *MockFeeMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
 	return nil
 }
 
 // GetID returns the identifier of the fee market
-func (fm FeeMarket) GetID() string {
+func (fm *MockFeeMarket) GetID() string {
 	return "mock"
 }
 
 // FeeAnteHandler will be called in the module AnteHandler.
 // Performs no actions.
-func (fm FeeMarket) FeeAnteHandler(
+func (fm *MockFeeMarket) FeeAnteHandler(
 	_ sdk.Context,
 	_ sdk.Tx,
 	_ bool,
@@ -62,7 +66,7 @@ func (fm FeeMarket) FeeAnteHandler(
 
 // FeePostHandler will be called in the module PostHandler
 // if PostHandlers are implemented. Performs no actions.
-func (fm FeeMarket) FeePostHandler(
+func (fm *MockFeeMarket) FeePostHandler(
 	_ sdk.Context,
 	_ sdk.Tx,
 	_,
