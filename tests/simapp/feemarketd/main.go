@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/log"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
+
 	"github.com/skip-mev/feemarket/tests/simapp"
 	cmd "github.com/skip-mev/feemarket/tests/simapp/feemarketd/testappd"
 )
