@@ -8,7 +8,7 @@ import (
 	_ "github.com/cosmos/cosmos-proto"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
+	interfaces "github.com/skip-mev/feemarket/x/feemarket/interfaces"
 	io "io"
 	math "math"
 	math_bits "math/bits"

@@ -10,7 +10,9 @@ import (
 
 // NewFeeMarket returns an instance of a new MockFeeMarket.
 func NewFeeMarket() *MockFeeMarket {
-	return &MockFeeMarket{}
+	return &MockFeeMarket{
+		TestData: "test",
+	}
 }
 
 // ValidateBasic is a no-op.
