@@ -3,11 +3,10 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
-
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
 )
 
 // NewDefaultGenesisState returns a default genesis state for the module.
