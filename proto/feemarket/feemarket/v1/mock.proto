@@ -13,5 +13,5 @@ message MockFeeMarket {
   option (cosmos_proto.implements_interface) =
       "feemarket.feemarket.v1.FeeMarketImplementation";
 
-  string testData = 1;
+  string test_data = 1;
 }
