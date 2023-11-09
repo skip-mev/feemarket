@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -18,20 +20,18 @@ type FeeMarketImplementation interface {
 	// Init which initializes the fee market (in InitGenesis)
 	Init(ctx sdk.Context) error
 
+	// Export which exports the fee market (in ExportGenesis)
+	Export(ctx sdk.Context) (json.RawMessage, error)
+
+	// BeginBlockUpdateHandler allows the fee market to be updated
+	// after every block. This will be added to the BeginBlock chain.
+	BeginBlockUpdateHandler(ctx sdk.Context) UpdateHandler
+
 	// EndBlockUpdateHandler allows the fee market to be updated
 	// after every block. This will be added to the EndBlock chain.
 	EndBlockUpdateHandler(ctx sdk.Context) UpdateHandler
 
-	// EpochUpdateHandler allows the fee market to be updated
-	// after every given epoch identifier. This maps the epoch
-	// identifier to the UpdateHandler that should be executed.
-	EpochUpdateHandler(ctx sdk.Context) map[string]UpdateHandler
-
 	// ------------------- Fee Market Queries ------------------- //
-
-	// GetMinGasPrice retrieves the minimum gas price(s) needed
-	// to be included in the block for the given transaction
-	GetMinGasPrice(ctx sdk.Context, tx sdk.Tx) sdk.Coins
 
 	// GetFeeMarketInfo retrieves the fee market's information about
 	// how to pay for a transaction (min gas price, min tip,
