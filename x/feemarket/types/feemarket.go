@@ -16,6 +16,12 @@ type FeeMarketImplementation interface {
 	// doesn't require access to any other information.
 	ValidateBasic() error
 
+	// Marshal Marshall the feemarket into bytes.
+	Marshal() ([]byte, error)
+
+	// Unmarshal the feemarket from bytes.
+	Unmarshal([]byte) error
+
 	// ------------------- Fee Market Parameters ------------------- //
 
 	// Init which initializes the fee market (in InitGenesis)

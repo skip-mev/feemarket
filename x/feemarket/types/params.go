@@ -13,3 +13,7 @@ func NewParams(enabled bool) Params {
 		Enabled: enabled,
 	}
 }
+
+func (p *Params) ValidateBasic() error {
+	return nil
+}

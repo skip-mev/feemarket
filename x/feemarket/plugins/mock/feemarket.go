@@ -10,6 +10,11 @@ import (
 
 var _ types.FeeMarketImplementation = &MockFeeMarket{}
 
+// NewFeeMarket returns an instance of a new MockFeeMarket.
+func NewFeeMarket() *MockFeeMarket {
+	return &MockFeeMarket{}
+}
+
 // ValidateBasic is a no-op.
 func (fm *MockFeeMarket) ValidateBasic() error {
 	return nil
