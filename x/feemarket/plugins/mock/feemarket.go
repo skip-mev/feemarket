@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"encoding/json"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
@@ -18,23 +20,25 @@ func (fm *MockFeeMarket) Init(_ sdk.Context) error {
 	return nil
 }
 
+// Export which exports the fee market (in ExportGenesis)
+func (fm *MockFeeMarket) Export(_ sdk.Context) (json.RawMessage, error) {
+	return nil, nil
+}
+
+// BeginBlockUpdateHandler allows the fee market to be updated
+// after every block. This will be added to the BeginBlock chain.
+func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
+	return func(ctx sdk.Context) error {
+		return nil
+	}
+}
+
 // EndBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the EndBlock chain.
 func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
-	return nil
-}
-
-// EpochUpdateHandler allows the fee market to be updated
-// after every given epoch identifier. This maps the epoch
-// identifier to the UpdateHandler that should be executed.
-func (fm *MockFeeMarket) EpochUpdateHandler(_ sdk.Context) map[string]types.UpdateHandler {
-	return nil
-}
-
-// GetMinGasPrice retrieves the minimum gas price(s) needed
-// to be included in the block for the given transaction
-func (fm *MockFeeMarket) GetMinGasPrice(_ sdk.Context, _ sdk.Tx) sdk.Coins {
-	return sdk.NewCoins()
+	return func(ctx sdk.Context) error {
+		return nil
+	}
 }
 
 // GetFeeMarketInfo retrieves the fee market's information about
