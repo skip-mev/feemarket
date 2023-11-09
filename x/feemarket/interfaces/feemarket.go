@@ -2,20 +2,10 @@ package interfaces
 
 import (
 	"encoding/json"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/gogoproto/proto"
 )
-
-// ValidateBasic performs stateless checks on a FeeMarket to check validity.
-func (fm *FeeMarket) ValidateBasic() error {
-	if len(fm.Implementation) == 0 {
-		return fmt.Errorf("fee market implementation cannot be empty")
-	}
-
-	return nil
-}
 
 // FeeMarketImplementation represents the interface of various FeeMarket types implemented
 // by other modules or packages.
