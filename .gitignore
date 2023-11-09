@@ -20,7 +20,6 @@ build/
 
 # Go workspace file
 go.work
-go.work.sum
 
 # editor
 .idea/
