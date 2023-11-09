@@ -3,10 +3,13 @@ package mock
 import (
 	"encoding/json"
 
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
+
+// type assertion in test to prevent import cycle
+var _ interfaces.FeeMarketImplementation = &MockFeeMarket{}
 
 // NewFeeMarket returns an instance of a new MockFeeMarket.
 func NewFeeMarket() *MockFeeMarket {
