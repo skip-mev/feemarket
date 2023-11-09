@@ -28,6 +28,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 //
 // NOTE: This is an example of a mock fee market. It is not used in production.
 type MockFeeMarket struct {
+	// TestData represents dummy test data for the MockFeeMarket
 	TestData string `protobuf:"bytes,1,opt,name=test_data,json=testData,proto3" json:"test_data,omitempty"`
 }
 

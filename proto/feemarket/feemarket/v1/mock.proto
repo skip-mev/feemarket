@@ -13,5 +13,6 @@ message MockFeeMarket {
   option (cosmos_proto.implements_interface) =
       "feemarket.feemarket.v1.FeeMarketImplementation";
 
+  // TestData represents dummy test data for the MockFeeMarket
   string test_data = 1;
 }
