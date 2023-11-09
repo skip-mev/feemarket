@@ -1,0 +1,23 @@
+syntax = "proto3";
+package feemarket.feemarket.v1;
+
+option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "feemarket/feemarket/v1/genesis.proto";
+
+
+// GenesisState defines the feemarket module's genesis state.
+message GenesisState {
+  // Params are the parameters for the feemarket module.
+  Params params = 3 [
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// Params defines the parameters for the feemarket module.
+message Params {
+  // Enabled is a flag to enable or disable the feemarket module.
+  bool enabled = 1;
+}
