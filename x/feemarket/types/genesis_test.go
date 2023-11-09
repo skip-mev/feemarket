@@ -3,10 +3,9 @@ package types_test
 import (
 	"testing"
 
-	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
-
 	"github.com/stretchr/testify/require"
 
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
