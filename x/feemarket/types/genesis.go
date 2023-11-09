@@ -36,7 +36,7 @@ func (gs *GenesisState) ValidateBasic() error {
 	return gs.Params.ValidateBasic()
 }
 
-// GetGenesisStateFromAppState returns x/sla GenesisState given raw application
+// GetGenesisStateFromAppState returns x/feemarket GenesisState given raw application
 // genesis state.
 func GetGenesisStateFromAppState(cdc codec.Codec, appState map[string]json.RawMessage) GenesisState {
 	var gs GenesisState
