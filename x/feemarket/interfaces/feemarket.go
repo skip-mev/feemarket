@@ -1,4 +1,4 @@
-package types
+package interfaces
 
 import (
 	"encoding/json"
@@ -15,6 +15,12 @@ type FeeMarketImplementation interface {
 	// ValidateBasic does a simple validation check that
 	// doesn't require access to any other information.
 	ValidateBasic() error
+
+	// Marshal Marshall the feemarket into bytes.
+	Marshal() ([]byte, error)
+
+	// Unmarshal the feemarket from bytes.
+	Unmarshal([]byte) error
 
 	// ------------------- Fee Market Parameters ------------------- //
 

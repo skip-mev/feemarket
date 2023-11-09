@@ -1,33 +1,40 @@
-package mock
+package defaultmarket
 
 import (
 	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
 
-var _ types.FeeMarketImplementation = &MockFeeMarket{}
+var _ interfaces.FeeMarketImplementation = &DefaultMarket{}
+
+// NewDefaultFeeMarket returns an instance of a new DefaultFeeMarket.
+func NewDefaultFeeMarket() *DefaultMarket {
+	return &DefaultMarket{
+		Data: []byte("default"),
+	}
+}
 
 // ValidateBasic is a no-op.
-func (fm *MockFeeMarket) ValidateBasic() error {
+func (fm *DefaultMarket) ValidateBasic() error {
 	return nil
 }
 
-// Init which initializes the fee market (in InitGenesis)
-func (fm *MockFeeMarket) Init(_ sdk.Context) error {
+// Init which initializes the fee market (in InitGenesis).
+func (fm *DefaultMarket) Init(_ sdk.Context) error {
 	return nil
 }
 
-// Export which exports the fee market (in ExportGenesis)
-func (fm *MockFeeMarket) Export(_ sdk.Context) (json.RawMessage, error) {
+// Export which exports the fee market (in ExportGenesis).
+func (fm *DefaultMarket) Export(_ sdk.Context) (json.RawMessage, error) {
 	return nil, nil
 }
 
 // BeginBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the BeginBlock chain.
-func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
+func (fm *DefaultMarket) BeginBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		return nil
 	}
@@ -35,7 +42,7 @@ func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) types.UpdateHand
 
 // EndBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the EndBlock chain.
-func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
+func (fm *DefaultMarket) EndBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		return nil
 	}
@@ -44,18 +51,18 @@ func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) types.UpdateHandle
 // GetFeeMarketInfo retrieves the fee market's information about
 // how to pay for a transaction (min gas price, min tip,
 // where the fees are being distributed, etc.).
-func (fm *MockFeeMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
+func (fm *DefaultMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
 	return nil
 }
 
-// GetID returns the identifier of the fee market
-func (fm *MockFeeMarket) GetID() string {
-	return "mock"
+// GetID returns the identifier of the fee market.
+func (fm *DefaultMarket) GetID() string {
+	return "default"
 }
 
 // FeeAnteHandler will be called in the module AnteHandler.
 // Performs no actions.
-func (fm *MockFeeMarket) FeeAnteHandler(
+func (fm *DefaultMarket) FeeAnteHandler(
 	_ sdk.Context,
 	_ sdk.Tx,
 	_ bool,
@@ -68,7 +75,7 @@ func (fm *MockFeeMarket) FeeAnteHandler(
 
 // FeePostHandler will be called in the module PostHandler
 // if PostHandlers are implemented. Performs no actions.
-func (fm *MockFeeMarket) FeePostHandler(
+func (fm *DefaultMarket) FeePostHandler(
 	_ sdk.Context,
 	_ sdk.Tx,
 	_,
