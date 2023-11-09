@@ -3,12 +3,10 @@ package mock
 import (
 	"encoding/json"
 
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
-
-var _ types.FeeMarketImplementation = &MockFeeMarket{}
 
 // NewFeeMarket returns an instance of a new MockFeeMarket.
 func NewFeeMarket() *MockFeeMarket {
@@ -32,7 +30,7 @@ func (fm *MockFeeMarket) Export(_ sdk.Context) (json.RawMessage, error) {
 
 // BeginBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the BeginBlock chain.
-func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
+func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		return nil
 	}
@@ -40,7 +38,7 @@ func (fm *MockFeeMarket) BeginBlockUpdateHandler(_ sdk.Context) types.UpdateHand
 
 // EndBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the EndBlock chain.
-func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) types.UpdateHandler {
+func (fm *MockFeeMarket) EndBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		return nil
 	}

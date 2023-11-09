@@ -1,11 +1,13 @@
 package types_test
 
 import (
-	"github.com/skip-mev/feemarket/x/feemarket/plugins/mock"
 	"testing"
+
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/mock"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -17,41 +19,14 @@ func TestGenesis(t *testing.T) {
 
 	t.Run("can accept a valid genesis state with a valid FeeMarket type", func(t *testing.T) {
 		plugin := types.MustNewPlugin(mock.NewFeeMarket())
-		gs := types.NewGenesisState(plugin, types.Params{Enabled: false})
+		gs := types.NewGenesisState(plugin, types.NewParams(false))
 		require.NoError(t, gs.ValidateBasic())
 	})
 
-	t.Run("can accept a valid genesis state with multiple incentive types", func(t *testing.T) {
-		badPrice := types.NewIncentives("badprice", [][]byte{[]byte("incentive1")})
-		goodPrice := types.NewIncentives("goodprice", [][]byte{[]byte("incentive1")})
+	t.Run("can reject a genesis with empty implementation", func(t *testing.T) {
+		plugin := interfaces.FeeMarket{Implementation: make([]byte, 0)}
 
-		gs := types.NewGenesisState([]types.IncentivesByType{badPrice, goodPrice})
-
-		require.NoError(t, gs.ValidateBasic())
-	})
-
-	t.Run("can reject a genesis state with duplicate incentive types", func(t *testing.T) {
-		badPrice := types.NewIncentives("badprice", [][]byte{[]byte("incentive1")})
-		goodPrice := types.NewIncentives("badprice", [][]byte{[]byte("incentive1")})
-
-		gs := types.NewGenesisState([]types.IncentivesByType{badPrice, goodPrice})
-
-		require.Error(t, gs.ValidateBasic())
-	})
-
-	t.Run("can reject a genesis state with an empty incentive type", func(t *testing.T) {
-		badPrice := types.NewIncentives("", [][]byte{[]byte("incentive1")})
-
-		gs := types.NewGenesisState([]types.IncentivesByType{badPrice})
-
-		require.Error(t, gs.ValidateBasic())
-	})
-
-	t.Run("can reject a genesis state with an empty incentive", func(t *testing.T) {
-		badPrice := types.NewIncentives("badprice", [][]byte{[]byte("")})
-
-		gs := types.NewGenesisState([]types.IncentivesByType{badPrice})
-
+		gs := types.NewGenesisState(plugin, types.NewParams(false))
 		require.Error(t, gs.ValidateBasic())
 	})
 }

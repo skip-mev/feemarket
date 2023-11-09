@@ -2,7 +2,11 @@ package types
 
 import (
 	"encoding/json"
+
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/skip-mev/feemarket/x/feemarket/plugins/mock"
 )
 
@@ -15,7 +19,7 @@ func NewDefaultGenesisState() *GenesisState {
 }
 
 // NewGenesisState returns a new genesis state for the module.
-func NewGenesisState(plugin FeeMarket, params Params) *GenesisState {
+func NewGenesisState(plugin interfaces.FeeMarket, params Params) *GenesisState {
 	return &GenesisState{
 		Plugin: plugin,
 		Params: params,
@@ -25,9 +29,9 @@ func NewGenesisState(plugin FeeMarket, params Params) *GenesisState {
 // ValidateBasic performs basic validation of the genesis state data returning an
 // error for any failed validation criteria.
 func (gs *GenesisState) ValidateBasic() error {
-	fmimpl := FeeMarketImplementation{}
-
-	err :=
+	if err := gs.Plugin.ValidateBasic(); err != nil {
+		return err
+	}
 
 	return gs.Params.ValidateBasic()
 }

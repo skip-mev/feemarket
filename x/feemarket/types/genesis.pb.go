@@ -8,6 +8,7 @@ import (
 	_ "github.com/cosmos/cosmos-proto"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -27,7 +28,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // GenesisState defines the feemarket module's genesis state.
 type GenesisState struct {
 	// Plugin is the FeeMarket implementation plugged into the feemarket module.
-	Plugin FeeMarket `protobuf:"bytes,1,opt,name=plugin,proto3" json:"plugin"`
+	Plugin interfaces.FeeMarket `protobuf:"bytes,1,opt,name=plugin,proto3" json:"plugin"`
 	// Params are the parameters for the feemarket module.
 	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
 }
@@ -65,11 +66,11 @@ func (m *GenesisState) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GenesisState proto.InternalMessageInfo
 
-func (m *GenesisState) GetPlugin() FeeMarket {
+func (m *GenesisState) GetPlugin() interfaces.FeeMarket {
 	if m != nil {
 		return m.Plugin
 	}
-	return FeeMarket{}
+	return interfaces.FeeMarket{}
 }
 
 func (m *GenesisState) GetParams() Params {

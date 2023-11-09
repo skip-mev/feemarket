@@ -4,9 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var (
-	_ sdk.Msg = &MsgParams{}
-)
+var _ sdk.Msg = &MsgParams{}
 
 // NewMsgParams returns a new message to update the x/feemarket module's parameters.
 func NewMsgParams(authority string, params Params) MsgParams {

@@ -1,7 +1,8 @@
-package types
+package interfaces
 
 import (
 	"encoding/json"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/gogoproto/proto"
@@ -75,3 +76,12 @@ type FeeMarketImplementation interface {
 // UpdateHandler is responsible for updating the parameters of the
 // fee market plugin. Fees can optionally also be extracted here.
 type UpdateHandler func(ctx sdk.Context) error
+
+// ValidateBasic performs stateless checks on a FeeMarket to check validity.
+func (fm *FeeMarket) ValidateBasic() error {
+	if len(fm.Implementation) == 0 {
+		return fmt.Errorf("fee market implementation cannot be empty")
+	}
+
+	return nil
+}
