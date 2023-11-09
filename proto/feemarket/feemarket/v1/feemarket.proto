@@ -1,0 +1,17 @@
+syntax = "proto3";
+package feemarket.feemarket.v1;
+
+option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
+
+import "google/protobuf/any.proto";
+import "cosmos_proto/cosmos.proto";
+
+// FeeMarket is the fee market implementation to be used by the x/feemarket
+// module.
+message FeeMarket {
+  // Implementation is a byte array that must implement
+  // x/feemarket/types/FeeMarketImplementation
+  bytes implementation = 1
+      [ (cosmos_proto.accepts_interface) =
+            "feemarket.feemarket.v1.FeeMarketImplementation" ];
+}

@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/gogoproto/proto"
 )
 
 // FeeMarketImplementation represents the interface of various FeeMarket types implemented
 // by other modules or packages.
 type FeeMarketImplementation interface {
-	// proto.Message TODO: add
+	proto.Message
 
 	// ValidateBasic does a simple validation check that
 	// doesn't require access to any other information.

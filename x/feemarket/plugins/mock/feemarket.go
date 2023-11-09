@@ -10,8 +10,6 @@ import (
 
 var _ types.FeeMarketImplementation = &MockFeeMarket{}
 
-type MockFeeMarket struct{} //nolint
-
 // ValidateBasic is a no-op.
 func (fm *MockFeeMarket) ValidateBasic() error {
 	return nil

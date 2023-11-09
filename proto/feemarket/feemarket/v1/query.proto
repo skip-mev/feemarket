@@ -1,0 +1,24 @@
+syntax = "proto3";
+package feemarket.feemarket.v1;
+
+option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "feemarket/feemarket/v1/genesis.proto";
+
+// Query Service for the feemarket module.
+service Query {
+  // Params returns the current feemarket module parameters.
+  rpc Params(ParamsRequest) returns (ParamsResponse) {
+    option (google.api.http) = {
+      get : "/feemarket/feemarket/v1/params"
+    };
+  };
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message ParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message ParamsResponse { Params params = 1 [ (gogoproto.nullable) = false ]; }
