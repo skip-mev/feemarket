@@ -1,0 +1,15 @@
+syntax = "proto3";
+package feemarket.feemarket.v1;
+
+option go_package = "github.com/skip-mev/feemarket/x/feemarket/plugins/mock";
+
+import "cosmos_proto/cosmos.proto";
+
+// MockFeeMarket is a message that contains the information about a mock fee
+// market implementation.
+//
+// NOTE: This is an example of a mock fee market. It is not used in production.
+message MockFeeMarket {
+  option (cosmos_proto.implements_interface) =
+      "feemarket.feemarket.v1.FeeMarketImplementation";
+}

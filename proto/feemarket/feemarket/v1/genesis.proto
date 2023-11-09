@@ -5,15 +5,15 @@ option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
-import "feemarket/feemarket/v1/genesis.proto";
-
+import "feemarket/feemarket/v1/feemarket.proto";
 
 // GenesisState defines the feemarket module's genesis state.
 message GenesisState {
+  // Plugin is the FeeMarket implementation plugged into the feemarket module.
+  FeeMarket plugin = 1 [ (gogoproto.nullable) = false ];
+
   // Params are the parameters for the feemarket module.
-  Params params = 3 [
-    (gogoproto.nullable)   = false
-  ];
+  Params params = 2 [ (gogoproto.nullable) = false ];
 }
 
 // Params defines the parameters for the feemarket module.
