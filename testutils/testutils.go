@@ -74,43 +74,6 @@ func RandomAccounts(r *rand.Rand, n int) []Account {
 	return accs
 }
 
-func CreateTx(txCfg client.TxConfig, account Account, nonce, timeout uint64, msgs []sdk.Msg, fees ...sdk.Coin) (authsigning.Tx, error) {
-	txBuilder := txCfg.NewTxBuilder()
-	if err := txBuilder.SetMsgs(msgs...); err != nil {
-		return nil, err
-	}
-
-	sigV2 := signing.SignatureV2{
-		PubKey: account.PrivKey.PubKey(),
-		Data: &signing.SingleSignatureData{
-			SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
-			Signature: nil,
-		},
-		Sequence: nonce,
-	}
-	if err := txBuilder.SetSignatures(sigV2); err != nil {
-		return nil, err
-	}
-
-	txBuilder.SetTimeoutHeight(timeout)
-
-	txBuilder.SetFeeAmount(fees)
-
-	return txBuilder.GetTx(), nil
-}
-
-func CreateFreeTx(txCfg client.TxConfig, account Account, nonce, timeout uint64, validator string, amount sdk.Coin, fees ...sdk.Coin) (authsigning.Tx, error) {
-	msgs := []sdk.Msg{
-		&stakingtypes.MsgDelegate{
-			DelegatorAddress: account.Address.String(),
-			ValidatorAddress: validator,
-			Amount:           amount,
-		},
-	}
-
-	return CreateTx(txCfg, account, nonce, timeout, msgs, fees...)
-}
-
 func CreateRandomTx(txCfg client.TxConfig, account Account, nonce, numberMsgs, timeout uint64, gasLimit uint64, fees ...sdk.Coin) (authsigning.Tx, error) {
 	msgs := make([]sdk.Msg, numberMsgs)
 	for i := 0; i < int(numberMsgs); i++ {
@@ -153,36 +116,6 @@ func CreateRandomTxBz(txCfg client.TxConfig, account Account, nonce, numberMsgs,
 	}
 
 	return txCfg.TxEncoder()(tx)
-}
-
-func CreateTxWithSigners(txCfg client.TxConfig, nonce, timeout uint64, signers []Account) (authsigning.Tx, error) {
-	msgs := []sdk.Msg{}
-	for _, signer := range signers {
-		msg := CreateRandomMsgs(signer.Address, 1)
-		msgs = append(msgs, msg...)
-	}
-
-	txBuilder := txCfg.NewTxBuilder()
-	if err := txBuilder.SetMsgs(msgs...); err != nil {
-		return nil, err
-	}
-
-	sigV2 := signing.SignatureV2{
-		PubKey: signers[0].PrivKey.PubKey(),
-		Data: &signing.SingleSignatureData{
-			SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
-			Signature: nil,
-		},
-		Sequence: nonce,
-	}
-
-	if err := txBuilder.SetSignatures(sigV2); err != nil {
-		return nil, err
-	}
-
-	txBuilder.SetTimeoutHeight(timeout)
-
-	return txBuilder.GetTx(), nil
 }
 
 func CreateRandomMsgs(acc sdk.AccAddress, numberMsgs int) []sdk.Msg {
