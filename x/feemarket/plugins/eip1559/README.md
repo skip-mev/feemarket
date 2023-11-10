@@ -109,3 +109,15 @@ newBaseFee := 10 * (1 + 0.11875 * (0 - 50) / 50) == 10
 ```
 
 As we can see, the base fee remained the same and the learning rate decreased.
+
+## Default EIP-1559 With AIMD EIP-1559
+
+It is entirely possible to implement the default EIP-1559 fee market with the AIMD EIP-1559 fee market. This can be done by setting the following parameters:
+
+* `Alpha = 0.0`
+* `Beta = 1.0`
+* `Gamma = 1.0`
+* `MAX_LEARNING_RATE = 0.125`
+* `MIN_LEARNING_RATE = 0.125`
+* `Delta = 0`
+* `Window = 1`
