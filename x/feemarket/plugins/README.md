@@ -5,5 +5,5 @@ plugged into the `x/feemarket` module.
 
 Current implementations include:
 
-- [Mock:](mock/feemarket.go) fee market that can be used for basic testing.
+* [Mock:](mock/feemarket.go) fee market that can be used for basic testing.
 DO NOT use in production.
