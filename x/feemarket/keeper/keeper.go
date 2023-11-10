@@ -26,11 +26,13 @@ func NewKeeper(
 	storeKey storetypes.StoreKey,
 	authority string,
 ) *Keeper {
-	return &Keeper{
+	k := &Keeper{
 		cdc,
 		storeKey,
 		authority,
 	}
+
+	return k
 }
 
 // Logger returns a feemarket module-specific logger.
@@ -44,7 +46,7 @@ func (k *Keeper) GetAuthority() string {
 }
 
 // SetData sets arbitrary byte data in the keeper.
-func (k *Keeper) SetData(ctx sdk.Context, data []byte) {
+func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	// TODO: limit max data size?
 
 	store := ctx.KVStore(k.storeKey)
@@ -52,7 +54,7 @@ func (k *Keeper) SetData(ctx sdk.Context, data []byte) {
 }
 
 // GetData gets arbitrary byte data in the keeper.
-func (k *Keeper) GetData(ctx sdk.Context) ([]byte, error) {
+func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyData)
 
