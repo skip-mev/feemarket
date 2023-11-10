@@ -21,6 +21,13 @@ func NewState(
 	}
 }
 
+// IncrementHeight increments the height of state. This is used to
+// start a new block entry in the block utilization window.
+func (s *State) IncrementHeight() {
+	s.Index = (s.Index + 1) % uint64(len(s.BlockUtilizationWindow))
+	s.BlockUtilizationWindow[s.Index] = 0
+}
+
 // ValidateBasic performs basic validation on the state.
 func (s *State) ValidateBasic() error {
 	if s.BaseFee.IsNil() || s.BaseFee.LT(math.ZeroInt()) {
