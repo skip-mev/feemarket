@@ -63,11 +63,6 @@ func (fm *DefaultMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
 	return Info
 }
 
-// GetID returns the identifier of the fee market.
-func (fm *DefaultMarket) GetID() string {
-	return "default"
-}
-
 // FeeAnteHandler will be called in the module AnteHandler.
 // Performs no actions.
 func (fm *DefaultMarket) FeeAnteHandler(
