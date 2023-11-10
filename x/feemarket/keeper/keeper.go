@@ -8,7 +8,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -46,7 +45,6 @@ func (k *Keeper) GetAuthority() string {
 	return k.authority
 }
 
-// SetData sets arbitrary byte data in the keeper.
 func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	// TODO: limit max data size?
 
@@ -54,7 +52,7 @@ func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	store.Set(types.KeyData, data)
 }
 
-// GetData gets arbitrary byte data in the keeper.
+// getData gets arbitrary byte data in the keeper.
 func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyData)
