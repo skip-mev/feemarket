@@ -53,3 +53,20 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
 }
+
+func (s *KeeperTestSuite) TestData() {
+	s.Run("get with no data returns error", func() {
+		_, err := s.feemarketKeeper.GetData(s.ctx)
+		s.Require().Error(err)
+	})
+
+	s.Run("set and get valid data", func() {
+		data := []byte("testdata")
+
+		s.feemarketKeeper.SetData(s.ctx, data)
+
+		gotData, err := s.feemarketKeeper.GetData(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(data, gotData)
+	})
+}
