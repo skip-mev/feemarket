@@ -28,7 +28,7 @@ import (
 	modulev1 "github.com/skip-mev/feemarket/api/feemarket/feemarket/module/v1"
 )
 
-// ConsensusVersion is the x/sla module's consensus version identifier.
+// ConsensusVersion is the x/feemarket module's consensus version identifier.
 const ConsensusVersion = 1
 
 var (
@@ -39,28 +39,28 @@ var (
 	_ appmodule.AppModule = AppModule{}
 )
 
-// AppModuleBasic defines the base interface that the x/sla module exposes to the application.
+// AppModuleBasic defines the base interface that the x/feemarket module exposes to the application.
 type AppModuleBasic struct {
 	cdc codec.Codec
 }
 
-// Name returns the name of x/sla module.
+// Name returns the name of x/feemarket module.
 func (amb AppModuleBasic) Name() string { return types.ModuleName }
 
-// RegisterLegacyAminoCodec registers the necessary types from the x/sla module for amino
+// RegisterLegacyAminoCodec registers the necessary types from the x/feemarket module for amino
 // serialization.
 func (amb AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	types.RegisterLegacyAminoCodec(cdc)
 }
 
-// RegisterInterfaces registers the necessary implementations / interfaces in the x/sla
+// RegisterInterfaces registers the necessary implementations / interfaces in the x/feemarket
 // module w/ the interface-registry.
 func (amb AppModuleBasic) RegisterInterfaces(ir codectypes.InterfaceRegistry) {
 	types.RegisterInterfaces(ir)
 }
 
 // RegisterGRPCGatewayRoutes registers the necessary REST routes for the GRPC-gateway to
-// the x/sla module QueryService on mux. This method panics on failure.
+// the x/feemarket module QueryService on mux. This method panics on failure.
 func (amb AppModuleBasic) RegisterGRPCGatewayRoutes(cliCtx client.Context, mux *runtime.ServeMux) {
 	// Register the gate-way routes w/ the provided mux.
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(cliCtx)); err != nil {
@@ -74,19 +74,19 @@ func (amb AppModuleBasic) GetTxCmd() *cobra.Command {
 	return nil
 }
 
-// GetQueryCmd returns the x/sla module base query cli-command.
+// GetQueryCmd returns the x/feemarket module base query cli-command.
 func (amb AppModuleBasic) GetQueryCmd() *cobra.Command {
 	return cli.GetQueryCmd()
 }
 
-// AppModule represents an application module for the x/sla module.
+// AppModule represents an application module for the x/feemarket module.
 type AppModule struct {
 	AppModuleBasic
 
 	k keeper.Keeper
 }
 
-// NewAppModule returns an application module for the x/sla module.
+// NewAppModule returns an application module for the x/feemarket module.
 func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{
@@ -121,13 +121,13 @@ func (am AppModule) RegisterServices(cfc module.Configurator) {
 	types.RegisterQueryServer(cfc.QueryServer(), keeper.NewQueryServer(am.k))
 }
 
-// DefaultGenesis returns default genesis state as raw bytes for the sla
+// DefaultGenesis returns default genesis state as raw bytes for the feemarket
 // module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.NewDefaultGenesisState())
 }
 
-// ValidateGenesis performs genesis state validation for the sla module.
+// ValidateGenesis performs genesis state validation for the feemarket module.
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
 	var gs types.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
@@ -137,7 +137,7 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 	return gs.ValidateBasic()
 }
 
-// InitGenesis performs the genesis initialization for the x/sla module. This method returns
+// InitGenesis performs the genesis initialization for the x/feemarket module. This method returns
 // no validator set updates. This method panics on any errors.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, bz json.RawMessage) []abci.ValidatorUpdate {
 	var gs types.GenesisState
@@ -148,7 +148,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, bz json.Ra
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the sla module's exported genesis state as raw
+// ExportGenesis returns the feemarket module's exported genesis state as raw
 // JSON bytes. This method panics on any error.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	gs := am.k.ExportGenesis(ctx)
