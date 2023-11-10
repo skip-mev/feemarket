@@ -3,6 +3,7 @@ package keeper_test
 import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
+
 	"github.com/skip-mev/feemarket/testutils"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
