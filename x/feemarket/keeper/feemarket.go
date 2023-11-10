@@ -8,7 +8,7 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
 
-// ------------------- Fee Market Parameters ------------------- //
+// ------------------- Fee Market Updates ------------------- //
 
 // Init which initializes the fee market (in InitGenesis)
 func (k *Keeper) Init(ctx sdk.Context) error {
