@@ -56,7 +56,7 @@ func (k *Keeper) Plugin() interfaces.FeeMarketImplementation {
 	return k.plugin
 }
 
-// SetFeeMarket sets the fee market implementation data in the keeper
+// SetFeeMarket sets the fee market implementation data in the keeper.
 func (k *Keeper) SetFeeMarket(ctx sdk.Context, fm interfaces.FeeMarketImplementation) error {
 	bz, err := fm.Marshal()
 	if err != nil {
@@ -64,11 +64,12 @@ func (k *Keeper) SetFeeMarket(ctx sdk.Context, fm interfaces.FeeMarketImplementa
 	}
 
 	k.setData(ctx, bz)
+	k.plugin = fm
 
 	return nil
 }
 
-// GetFeeMarket gets arbitrary byte data in the keeper.
+// GetFeeMarket gets the fee market implementation data in the keeper.  Will
 func (k *Keeper) GetFeeMarket(ctx sdk.Context) (interfaces.FeeMarketImplementation, error) {
 	bz, err := k.getData(ctx)
 	if err != nil {
@@ -79,7 +80,7 @@ func (k *Keeper) GetFeeMarket(ctx sdk.Context) (interfaces.FeeMarketImplementati
 	return k.plugin, err
 }
 
-// SetData sets arbitrary byte data in the keeper.
+// setData sets arbitrary byte data in the keeper.
 func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	// TODO: limit max data size?
 
@@ -87,7 +88,7 @@ func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	store.Set(types.KeyData, data)
 }
 
-// GetData gets arbitrary byte data in the keeper.
+// getData gets arbitrary byte data in the keeper.
 func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyData)
