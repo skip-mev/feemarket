@@ -13,7 +13,8 @@ var _ interfaces.FeeMarketImplementation = &PanicMarket{}
 // NewPanicMarket returns an instance of a new PanicMarket.
 func NewPanicMarket() *PanicMarket {
 	return &PanicMarket{
-		Data: []byte("panic"),
+		StateA: "a",
+		StateB: "b",
 	}
 }
 
