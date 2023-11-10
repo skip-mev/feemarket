@@ -49,13 +49,13 @@ func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	// TODO: limit max data size?
 
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyData, data)
+	store.Set(types.KeyState, data)
 }
 
 // getData gets arbitrary byte data in the keeper.
 func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyData)
+	bz := store.Get(types.KeyState)
 
 	if len(bz) == 0 {
 		return nil, fmt.Errorf("no data set in the keeper")
