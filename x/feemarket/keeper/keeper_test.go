@@ -50,19 +50,18 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.Require().NoError(err)
 }
 
-func (s *KeeperTestSuite) TestData() {
+func (s *KeeperTestSuite) TestSetFeeMarket() {
 	s.Run("get with no data returns error", func() {
-		_, err := s.feemarketKeeper.GetData(s.ctx)
+		_, err := s.feemarketKeeper.GetFeeMarket(s.ctx)
 		s.Require().Error(err)
 	})
 
 	s.Run("set and get valid data", func() {
-		data := []byte("testdata")
+		plugin := defaultmarket.NewDefaultFeeMarket()
+		s.feemarketKeeper.SetFeeMarket(s.ctx, plugin)
 
-		s.feemarketKeeper.SetData(s.ctx, data)
-
-		gotData, err := s.feemarketKeeper.GetData(s.ctx)
+		gotPlugin, err := s.feemarketKeeper.GetFeeMarket(s.ctx)
 		s.Require().NoError(err)
-		s.Require().Equal(data, gotData)
+		s.Require().Equal(plugin, gotPlugin)
 	})
 }

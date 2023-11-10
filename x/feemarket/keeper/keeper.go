@@ -32,15 +32,17 @@ func NewKeeper(
 	plugin interfaces.FeeMarketImplementation,
 	authority string,
 ) *Keeper {
-	return &Keeper{
+	k := &Keeper{
 		cdc,
 		storeKey,
 		plugin,
 		authority,
 	}
+
+	return k
 }
 
-// Logger returns a auction module-specific logger.
+// Logger returns a feemarket module-specific logger.
 func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+types.ModuleName)
 }
@@ -55,8 +57,31 @@ func (k *Keeper) Plugin() interfaces.FeeMarketImplementation {
 	return k.plugin
 }
 
+// SetFeeMarket sets the fee market implementation data in the keeper
+func (k *Keeper) SetFeeMarket(ctx sdk.Context, fm interfaces.FeeMarketImplementation) error {
+	bz, err := fm.Marshal()
+	if err != nil {
+		return fmt.Errorf("unable to marshal fee market implemenation: %w", err)
+	}
+
+	k.setData(ctx, bz)
+
+	return nil
+}
+
+// GetFeeMarket gets arbitrary byte data in the keeper.
+func (k *Keeper) GetFeeMarket(ctx sdk.Context) (interfaces.FeeMarketImplementation, error) {
+	bz, err := k.getData(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.plugin.Unmarshal(bz)
+	return k.plugin, err
+}
+
 // SetData sets arbitrary byte data in the keeper.
-func (k *Keeper) SetData(ctx sdk.Context, data []byte) {
+func (k *Keeper) setData(ctx sdk.Context, data []byte) {
 	// TODO: limit max data size?
 
 	store := ctx.KVStore(k.storeKey)
@@ -64,7 +89,7 @@ func (k *Keeper) SetData(ctx sdk.Context, data []byte) {
 }
 
 // GetData gets arbitrary byte data in the keeper.
-func (k *Keeper) GetData(ctx sdk.Context) ([]byte, error) {
+func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyData)
 
