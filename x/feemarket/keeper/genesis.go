@@ -25,7 +25,9 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 	if err := k.plugin.Unmarshal(gs.Plugin); err != nil {
 		panic(err)
 	}
-
+if err := k.plugin.ValidateBasic(); err != nil {
+    panic(err)
+}
 	if err := k.Init(ctx); err != nil {
 		panic(err)
 	}
