@@ -2,15 +2,17 @@ package feemarket
 
 import (
 	"context"
-	"cosmossdk.io/api/tendermint/abci"
 	"encoding/json"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+
+	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
 	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
-	cometabci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -94,9 +96,14 @@ func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 	}
 }
 
-// BeginBlock returns an beginblocker for the x/feemarket module.
-func (am AppModule) BeginBlock(ctx sdk.Context) ([]cometabci.ValidatorUpdate, error) {
+// BeginBlock returns a beginblocker for the x/feemarket module.
+func (am AppModule) BeginBlock(ctx sdk.Context) ([]abci.ValidatorUpdate, error) {
 	return am.k.BeginBlock(ctx)
+}
+
+// EndBlock returns an endblocker for the x/feemarket module.
+func (am AppModule) EndBlock(ctx sdk.Context, req abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return am.k.EndBlock(ctx, req)
 }
 
 // IsAppModule implements the appmodule.AppModule interface.
