@@ -1,54 +1,13 @@
 package types
 
-import "cosmossdk.io/math"
+import (
+	fmt "fmt"
 
-var (
-	// DefaultWindow is the default window size for the sliding window
-	// used to calculate the base fee.
-	DefaultWindow uint64 = 8
-
-	// DefaultAlpha is the default alpha value for the learning
-	// rate calculation. This value determines how much we want to additively
-	// increase the learning rate when the target block size is exceeded.
-	DefaultAlpha math.LegacyDec = math.LegacyMustNewDecFromStr("0.025")
-
-	// DefaultBeta is the default beta value for the learning rate
-	// calculation. This value determines how much we want to multiplicatively
-	// decrease the learning rate when the target utilization is not met.
-	DefaultBeta math.LegacyDec = math.LegacyMustNewDecFromStr("0.95")
-
-	// DefaultTheta is the default threshold for determining whether
-	// to increase or decrease the learning rate. In this case, we increase
-	// the learning rate if the block utilization within the window is greater
-	// than 0.75 or less than 0.25. Otherwise, we multiplicatively decrease
-	// the learning rate.
-	DefaultTheta math.LegacyDec = math.LegacyMustNewDecFromStr("0.25")
-
-	// DefaultDelta is the default delta value for how much we additively increase
-	// or decrease the base fee when the net block utilization within the window
-	// is not equal to the target utilization.
-	DefaultDelta math.LegacyDec = math.LegacyMustNewDecFromStr("0.0")
-
-	// DefaultTargetBlockSize is the default target block size. This is the default
-	// on Ethereum.
-	DefaultTargetBlockSize uint64 = 15_000_000
-
-	// DefaultMaxBlockSize is the default maximum block size. This is the default
-	// on Ethereum.
-	DefaultMaxBlockSize uint64 = 30_000_000
-
-	// DefaultMinBaseFee is the default minimum base fee. This is the default
-	// on Ethereum.
-	DefaultMinBaseFee math.Int = math.NewInt(1_000_000_000)
-
-	// DefaultMinLearningRate is the default minimum learning rate.
-	DefaultMinLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.01")
-
-	// DefaultMaxLearningRate is the default maximum learning rate.
-	DefaultMaxLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.50")
+	"cosmossdk.io/math"
 )
 
-// NewParams instantiates a new EIP-1559 Params object.
+// NewParams instantiates a new EIP-1559 Params object. This params object is utilized
+// to implement both the base EIP-1559 fee and AIMD EIP-1559 fee market implementations.
 func NewParams(
 	window uint64,
 	alpha math.LegacyDec,
@@ -75,18 +34,55 @@ func NewParams(
 	}
 }
 
-// DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		Window:          DefaultWindow,
-		Alpha:           DefaultAlpha,
-		Beta:            DefaultBeta,
-		Theta:           DefaultTheta,
-		Delta:           DefaultDelta,
-		TargetBlockSize: DefaultTargetBlockSize,
-		MaxBlockSize:    DefaultMaxBlockSize,
-		MinBaseFee:      DefaultMinBaseFee,
-		MinLearningRate: DefaultMinLearningRate,
-		MaxLearningRate: DefaultMaxLearningRate,
+// ValidateBasic performs basic validation on the parameters.
+func (p *Params) ValidateBasic() error {
+	if p.Window == 0 {
+		return fmt.Errorf("window cannot be zero")
 	}
+
+	if p.Alpha.IsNil() || p.Alpha.IsNegative() {
+		return fmt.Errorf("alpha cannot be nil must be between [0, inf)")
+	}
+
+	if p.Beta.IsNil() || p.Beta.IsNegative() || p.Beta.GT(math.LegacyOneDec()) {
+		return fmt.Errorf("beta cannot be nil and must be between [0, 1]")
+	}
+
+	if p.Theta.IsNil() || p.Theta.IsNegative() || p.Theta.GT(math.LegacyOneDec()) {
+		return fmt.Errorf("theta cannot be nil and must be between [0, 1]")
+	}
+
+	if p.Delta.IsNil() || p.Delta.IsNegative() {
+		return fmt.Errorf("delta cannot be nil and must be between [0, inf)")
+	}
+
+	if p.TargetBlockSize == 0 {
+		return fmt.Errorf("target block size cannot be zero")
+	}
+
+	if p.MaxBlockSize == 0 {
+		return fmt.Errorf("max block size cannot be zero")
+	}
+
+	if p.TargetBlockSize > p.MaxBlockSize {
+		return fmt.Errorf("target block size cannot be greater than max block size")
+	}
+
+	if p.MinBaseFee.IsNil() || !p.MinBaseFee.GTE(math.ZeroInt()) {
+		return fmt.Errorf("min base fee cannot be nil and must be greater than or equal to zero")
+	}
+
+	if p.MaxLearningRate.IsNil() || p.MinLearningRate.IsNegative() {
+		return fmt.Errorf("min learning rate cannot be negative or nil")
+	}
+
+	if p.MaxLearningRate.IsNil() || p.MaxLearningRate.IsNegative() {
+		return fmt.Errorf("max learning rate cannot be negative or nil")
+	}
+
+	if p.MinLearningRate.GT(p.MaxLearningRate) {
+		return fmt.Errorf("min learning rate cannot be greater than max learning rate")
+	}
+
+	return nil
 }
