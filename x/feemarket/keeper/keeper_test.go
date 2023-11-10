@@ -56,7 +56,6 @@ func (s *KeeperTestSuite) SetupTest() {
 
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
-
 }
 
 func (s *KeeperTestSuite) TestSetFeeMarket() {

@@ -10,13 +10,11 @@ import (
 
 var _ interfaces.FeeMarketImplementation = &DefaultMarket{}
 
-var (
-	// Info is the info returned by GetFeeMarketInfo().
-	Info = map[string]string{
-		"alpha": "0.1",
-		"beta":  "0.2",
-	}
-)
+// Info is the info returned by GetFeeMarketInfo().
+var Info = map[string]string{
+	"alpha": "0.1",
+	"beta":  "0.2",
+}
 
 // NewDefaultFeeMarket returns an instance of a new DefaultFeeMarket.
 func NewDefaultFeeMarket() *DefaultMarket {
