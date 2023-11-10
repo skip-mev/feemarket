@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"encoding/json"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
 
