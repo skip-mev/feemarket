@@ -45,9 +45,6 @@ type FeeMarketImplementation interface {
 	// where the fees are being distributed, etc.).
 	GetFeeMarketInfo(ctx sdk.Context) map[string]string
 
-	// GetID returns the identifier of the fee market
-	GetID() string
-
 	// ------------------- Fee Market Extraction ------------------- //
 
 	// FeeAnteHandler will be called in the module AnteHandler,
