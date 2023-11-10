@@ -8,9 +8,17 @@ import (
 
 // InitGenesis initializes the feemarket module's state from a given genesis state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
+	if err := gs.Params.ValidateBasic(); err != nil {
+		panic(err)
+	}
+
 	// Set the feemarket module's parameters.
 	if err := k.SetParams(ctx, gs.Params); err != nil {
 		panic(err)
+	}
+
+	if len(gs.Plugin) == 0 && gs.Params.Enabled {
+		panic("plugin must be set if feemarket is enabled")
 	}
 
 	// set the fee market implementation
