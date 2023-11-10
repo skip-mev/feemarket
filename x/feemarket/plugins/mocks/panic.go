@@ -20,22 +20,16 @@ func NewPanicMarket() *PanicMarket {
 // ValidateBasic is a no-op.
 func (fm *PanicMarket) ValidateBasic() error {
 	panic("panic feemarket")
-
-	return nil
 }
 
 // Init which initializes the fee market (in InitGenesis).
 func (fm *PanicMarket) Init(_ sdk.Context) error {
 	panic("panic feemarket")
-
-	return nil
 }
 
 // Export which exports the fee market (in ExportGenesis).
 func (fm *PanicMarket) Export(_ sdk.Context) (json.RawMessage, error) {
 	panic("panic feemarket")
-
-	return nil, nil
 }
 
 // BeginBlockUpdateHandler allows the fee market to be updated
@@ -43,8 +37,6 @@ func (fm *PanicMarket) Export(_ sdk.Context) (json.RawMessage, error) {
 func (fm *PanicMarket) BeginBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		panic("panic feemarket")
-
-		return nil
 	}
 }
 
@@ -53,8 +45,6 @@ func (fm *PanicMarket) BeginBlockUpdateHandler(_ sdk.Context) interfaces.UpdateH
 func (fm *PanicMarket) EndBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHandler {
 	return func(ctx sdk.Context) error {
 		panic("panic feemarket")
-
-		return nil
 	}
 }
 
@@ -63,8 +53,6 @@ func (fm *PanicMarket) EndBlockUpdateHandler(_ sdk.Context) interfaces.UpdateHan
 // where the fees are being distributed, etc.).
 func (fm *PanicMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
 	panic("panic feemarket")
-
-	return nil
 }
 
 // GetID returns the identifier of the fee market.
@@ -78,12 +66,10 @@ func (fm *PanicMarket) FeeAnteHandler(
 	_ sdk.Context,
 	_ sdk.Tx,
 	_ bool,
-	next sdk.AnteHandler,
+	_ sdk.AnteHandler,
 ) sdk.AnteHandler {
 	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, err error) {
 		panic("panic feemarket")
-
-		return next(ctx, tx, simulate)
 	}
 }
 
@@ -94,11 +80,9 @@ func (fm *PanicMarket) FeePostHandler(
 	_ sdk.Tx,
 	_,
 	_ bool,
-	next sdk.PostHandler,
+	_ sdk.PostHandler,
 ) sdk.PostHandler {
 	return func(ctx sdk.Context, tx sdk.Tx, simulate, success bool) (newCtx sdk.Context, err error) {
 		panic("panic feemarket")
-
-		return next(ctx, tx, simulate, success)
 	}
 }
