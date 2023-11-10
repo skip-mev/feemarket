@@ -9,10 +9,17 @@ import "feemarket/feemarket/v1/params.proto";
 
 // GenesisState defines the feemarket module's genesis state.
 message GenesisState {
+<<<<<<< HEAD
   // Params are the parameters for the feemarket module. These parameters
   // can be utilized to implement both the base EIP-1559 fee market and
   // and the AIMD EIP-1559 fee market.
   Params params = 1 [ (gogoproto.nullable) = false ];
+=======
+  // Plugin is the FeeMarket implementation plugged into the feemarket module.
+  // Must implement x/feemarket/types/FeeMarketImplementation
+  bytes plugin = 1 [ (cosmos_proto.accepts_interface) =
+                         "feemarket.feemarket.v1.FeeMarketImplementation" ];
+>>>>>>> 025fdc0 (clean)
 
   // BaseFee is the current base fee. This is denominated in the fee
   // per gas unit.
