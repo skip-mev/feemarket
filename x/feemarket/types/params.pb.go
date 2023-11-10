@@ -40,9 +40,11 @@ type Params struct {
 	// learning rate by Beta.
 	Theta cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=theta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"theta"`
 	// Delta is the amount we additively increase/decrease the base fee when the
-	// net block utilization difference in the window is above/below the target utilization.
+	// net block utilization difference in the window is above/below the target
+	// utilization.
 	Delta cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=delta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"delta"`
-	// MinBaseFee determines the initial base fee of the module and the global minimum
+	// MinBaseFee determines the initial base fee of the module and the global
+	// minimum
 	// for the network. This is denominated in fee per gas unit.
 	MinBaseFee cosmossdk_io_math.Int `protobuf:"bytes,5,opt,name=min_base_fee,json=minBaseFee,proto3,customtype=cosmossdk.io/math.Int" json:"min_base_fee"`
 	// MinLearningRate is the lower bound for the learning rate.
@@ -56,7 +58,8 @@ type Params struct {
 	// Window defines the window size for calculating an adaptive learning rate
 	// over a moving window of blocks.
 	Window uint64 `protobuf:"varint,10,opt,name=window,proto3" json:"window,omitempty"`
-	// Enabled is a boolean that determines whether the EIP1559 fee market is enabled.
+	// Enabled is a boolean that determines whether the EIP1559 fee market is
+	// enabled.
 	Enabled bool `protobuf:"varint,11,opt,name=enabled,proto3" json:"enabled,omitempty"`
 }
 
