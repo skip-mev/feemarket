@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +19,7 @@ import (
 type KeeperTestSuite struct {
 	suite.Suite
 
-	feemarketKeeper  keeper.Keeper
+	feemarketKeeper  *keeper.Keeper
 	encCfg           testutils.EncodingConfig
 	ctx              sdk.Context
 	key              *storetypes.KVStoreKey
@@ -34,13 +36,33 @@ func (s *KeeperTestSuite) SetupTest() {
 	testCtx := testutil.DefaultContextWithDB(s.T(), s.key, storetypes.NewTransientStoreKey("transient_test"))
 	s.ctx = testCtx.Ctx
 
+	plugin := defaultmarket.NewDefaultFeeMarket()
+
 	s.authorityAccount = []byte("authority")
 	s.feemarketKeeper = keeper.NewKeeper(
 		s.encCfg.Codec,
 		s.key,
+		plugin,
 		s.authorityAccount.String(),
 	)
 
 	err := s.feemarketKeeper.SetParams(s.ctx, types.DefaultParams())
 	s.Require().NoError(err)
+}
+
+func (s *KeeperTestSuite) TestData() {
+	s.Run("get with no data returns error", func() {
+		_, err := s.feemarketKeeper.GetData(s.ctx)
+		s.Require().Error(err)
+	})
+
+	s.Run("set and get valid data", func() {
+		data := []byte("testdata")
+
+		s.feemarketKeeper.SetData(s.ctx, data)
+
+		gotData, err := s.feemarketKeeper.GetData(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(data, gotData)
+	})
 }
