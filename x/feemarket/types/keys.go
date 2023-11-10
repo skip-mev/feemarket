@@ -9,13 +9,13 @@ const (
 
 const (
 	prefixParams = iota + 1
-	prefixData
+	prefixState
 )
 
 var (
 	// KeyParams is the store key for the feemarket module's parameters.
 	KeyParams = []byte{prefixParams}
 
-	// KeyData is the store key for the feemarket module's data.
-	KeyData = []byte{prefixData}
+	// KeyState is the store key for the feemarket module's data.
+	KeyState = []byte{prefixState}
 )
