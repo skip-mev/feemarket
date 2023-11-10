@@ -3,13 +3,12 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
-
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
