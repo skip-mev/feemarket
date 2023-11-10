@@ -10,6 +10,14 @@ import (
 
 var _ interfaces.FeeMarketImplementation = &DefaultMarket{}
 
+var (
+	// Info is the info returned by GetFeeMarketInfo().
+	Info = map[string]string{
+		"alpha": "0.1",
+		"beta":  "0.2",
+	}
+)
+
 // NewDefaultFeeMarket returns an instance of a new DefaultFeeMarket.
 func NewDefaultFeeMarket() *DefaultMarket {
 	return &DefaultMarket{
@@ -52,7 +60,7 @@ func (fm *DefaultMarket) EndBlockUpdateHandler(_ sdk.Context) interfaces.UpdateH
 // how to pay for a transaction (min gas price, min tip,
 // where the fees are being distributed, etc.).
 func (fm *DefaultMarket) GetFeeMarketInfo(_ sdk.Context) map[string]string {
-	return nil
+	return Info
 }
 
 // GetID returns the identifier of the fee market.

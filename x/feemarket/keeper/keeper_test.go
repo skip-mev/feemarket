@@ -26,6 +26,9 @@ type KeeperTestSuite struct {
 
 	// Message server variables
 	msgServer types.MsgServer
+
+	// Query server variables
+	queryServer types.QueryServer
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -52,6 +55,8 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
+	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
+
 }
 
 func (s *KeeperTestSuite) TestSetFeeMarket() {
