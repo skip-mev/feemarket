@@ -32,19 +32,6 @@ func (s *KeeperTestSuite) TestInitGenesis() {
 		})
 	})
 
-	s.Run("0 bytes plugin bytes should panic", func() {
-		gs := types.GenesisState{
-			Plugin: make([]byte, 0),
-			Params: types.Params{
-				Enabled: true,
-			},
-		}
-
-		s.Require().Panics(func() {
-			s.feemarketKeeper.InitGenesis(s.ctx, gs)
-		})
-	})
-
 	s.Run("invalid plugin bytes should panic if module enabled", func() {
 		gs := types.GenesisState{
 			Plugin: []byte("invalid"),

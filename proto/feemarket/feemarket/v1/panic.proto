@@ -13,9 +13,6 @@ message PanicMarket {
   option (cosmos_proto.implements_interface) =
       "feemarket.feemarket.v1.FeeMarketImplementation";
 
-  // State1 represents arbitrary data stored in the implementation.
-  string stateA = 1;
-
-  // State2 represents arbitrary data stored in the implementation.
-  string stateB = 2;
+  // Data represents arbitrary data stored in the implementation.
+  bytes data = 1;
 }
