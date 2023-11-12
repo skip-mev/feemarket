@@ -10,9 +10,8 @@ import "cosmos_proto/cosmos.proto";
 message GenesisState {
   // Plugin is the FeeMarket implementation plugged into the feemarket module.
   // Must implement x/feemarket/types/FeeMarketImplementation
-  bytes plugin = 1
-  [ (cosmos_proto.accepts_interface) =
-      "feemarket.feemarket.v1.FeeMarketImplementation" ];
+  bytes plugin = 1 [ (cosmos_proto.accepts_interface) =
+                         "feemarket.feemarket.v1.FeeMarketImplementation" ];
 
   // Params are the parameters for the feemarket module.
   Params params = 2 [ (gogoproto.nullable) = false ];
