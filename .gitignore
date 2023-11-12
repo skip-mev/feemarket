@@ -18,8 +18,8 @@ build/
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Go workspace file
-go.work
+# Workspace state
+go.work*
 
 # editor
 .idea/

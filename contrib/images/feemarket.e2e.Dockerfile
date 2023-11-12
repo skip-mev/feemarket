@@ -3,8 +3,6 @@ FROM golang:1.21-bullseye AS builder
 WORKDIR /src/feemarket
 COPY . .
 
-RUN go work init
-RUN go work edit -use ./
 RUN make tidy
 RUN make build-test-app
 
