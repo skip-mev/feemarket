@@ -1,0 +1,47 @@
+syntax = "proto3";
+package feemarket.eip1559.v1;
+
+option go_package = "github.com/skip-mev/feemarket/x/feemarket/plugins/eip1559/types";
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "feemarket/eip1559/v1/params.proto";
+
+// EIP1559 is the contains the Additive Increase Multiplicative Decrease
+// (AIMD) EIP-1559 fee market parameters and state. This can be utilized
+// to implement AIMD EIP-1559 and legacy EIP-1559 fee market.
+message EIP1559 {
+  option (cosmos_proto.implements_interface) =
+      "feemarket.feemarket.v1.FeeMarketImplementation";
+
+  // Params are the parameters of the AIMD fee market.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+
+  // State is the current state of the AIMD fee market.
+  State state = 2 [ (gogoproto.nullable) = false ];
+}
+
+// State contains the current state of the AIMD fee market.
+message State {
+  // BaseFee is the current base fee. This is denominated in the fee
+  // per gas unit.
+  string base_fee = 1 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  // LearningRate is the current learning rate.
+  string learning_rate = 2 [
+    (cosmos_proto.scalar) = "cosmos.Legacy",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // BlockUtilizationWindow contains a list of the last blocks' utilization
+  // values. This is used to calculate the next base fee.
+  repeated uint64 block_utilization_window = 3;
+
+  // Index is the index of the current block in the block utilization window.
+  uint64 index = 4;
+}

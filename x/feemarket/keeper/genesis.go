@@ -17,12 +17,12 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic(err)
 	}
 
-	if len(gs.Plugin) == 0 && gs.Params.Enabled {
-		panic("plugin must be set if feemarket is enabled")
-	}
-
 	// set the fee market implementation
 	if err := k.plugin.Unmarshal(gs.Plugin); err != nil {
+		panic(err)
+	}
+
+	if err := k.plugin.ValidateBasic(); err != nil {
 		panic(err)
 	}
 

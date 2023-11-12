@@ -9,72 +9,74 @@ import "gogoproto/gogo.proto";
 // Params contains the required set of parameters for the EIP1559 fee market
 // plugin implementation.
 message Params {
-    // Window determines the number of previous blocks to consider when
-	// calculating block utilization.
-	uint64 window = 1;
+  // Window determines the number of previous blocks to consider when
+  // calculating block utilization.
+  uint64 window = 1;
 
-	// Alpha is the amount we additively increase the learninig rate 
-	// when it is above or below the target +/- threshold.
-	string alpha = 2 [
-        (cosmos_proto.scalar)  = "cosmos.Dec",
-        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-        (gogoproto.nullable)   = false
-    ];
-
-	// Beta is the amount we multiplicatively decrease the learning rate 
-	// when it is within the target +/- threshold.
-	string beta = 3 [
-        (cosmos_proto.scalar)  = "cosmos.Dec",
-        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-        (gogoproto.nullable)   = false
-    ];
-
-	// Theta is the threshold for the learning rate. If the learning rate is
-	// above or below the target +/- threshold, we additively increase the
-	// learning rate by Alpha. Otherwise, we multiplicatively decrease the
-	// learning rate by Beta.
-	string theta = 4 [
-        (cosmos_proto.scalar)  = "cosmos.Dec",
-        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-        (gogoproto.nullable)   = false
-    ];
-
-    // Delta is the amount we additively increase/decrease the base fee when the
-    // net block utilization difference in the window is above/below the target utilization.
-    string delta = 5 [
-        (cosmos_proto.scalar)  = "cosmos.Dec",
-        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-        (gogoproto.nullable)   = false
-    ];
-
-	// TargetBlockSize is the target block utilization rate. This is denominated in
-    // gas units consumed.
-	uint64 target_block_size = 6;
-
-    // MaxBlockSize is the upper bound for the block size. This is denominated in
-    // gas units consumed.
-    uint64 max_block_size = 7;
-
-	// MinBaseFee determines the initial base fee of the module and the global minimum
-    // for the network. This is denominated in fee per gas unit.
-	string min_base_fee = 8 [
-        (cosmos_proto.scalar)  = "cosmos.Int",
-        (gogoproto.customtype) = "cosmossdk.io/math.Int",
-        (gogoproto.nullable)   = false
-    ];
-
-    
-	// MinLearningRate is the lower bound for the learning rate.
-    string min_learning_rate = 9 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
+  // Alpha is the amount we additively increase the learninig rate
+  // when it is above or below the target +/- threshold.
+  string alpha = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable)   = false
-        ];
+    (gogoproto.nullable) = false
+  ];
 
-    // MaxLearningRate is the upper bound for the learning rate.
-    string max_learning_rate = 10 [
-        (cosmos_proto.scalar)  = "cosmos.Dec",
-        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-        (gogoproto.nullable)   = false
-    ];
+  // Beta is the amount we multiplicatively decrease the learning rate
+  // when it is within the target +/- threshold.
+  string beta = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // Theta is the threshold for the learning rate. If the learning rate is
+  // above or below the target +/- threshold, we additively increase the
+  // learning rate by Alpha. Otherwise, we multiplicatively decrease the
+  // learning rate by Beta.
+  string theta = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // Delta is the amount we additively increase/decrease the base fee when the
+  // net block utilization difference in the window is above/below the target
+  // utilization.
+  string delta = 5 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // TargetBlockSize is the target block utilization rate. This is denominated
+  // in
+  // gas units consumed.
+  uint64 target_block_size = 6;
+
+  // MaxBlockSize is the upper bound for the block size. This is denominated in
+  // gas units consumed.
+  uint64 max_block_size = 7;
+
+  // MinBaseFee determines the initial base fee of the module and the global
+  // minimum
+  // for the network. This is denominated in fee per gas unit.
+  string min_base_fee = 8 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  // MinLearningRate is the lower bound for the learning rate.
+  string min_learning_rate = 9 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // MaxLearningRate is the upper bound for the learning rate.
+  string max_learning_rate = 10 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
 }
