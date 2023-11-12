@@ -4,11 +4,12 @@ package simapp
 
 import (
 	"encoding/json"
-	"github.com/skip-mev/feemarket/x/feemarket"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/skip-mev/feemarket/x/feemarket"
 
 	"cosmossdk.io/depinject"
 	dbm "github.com/cometbft/cometbft-db"
