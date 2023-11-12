@@ -15,28 +15,28 @@ import (
 )
 
 var (
-	md_AIMDEIP1559        protoreflect.MessageDescriptor
-	fd_AIMDEIP1559_params protoreflect.FieldDescriptor
-	fd_AIMDEIP1559_state  protoreflect.FieldDescriptor
+	md_EIP1559        protoreflect.MessageDescriptor
+	fd_EIP1559_params protoreflect.FieldDescriptor
+	fd_EIP1559_state  protoreflect.FieldDescriptor
 )
 
 func init() {
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_init()
-	md_AIMDEIP1559 = File_feemarket_eip1559_v1_aimd_eip_1559_proto.Messages().ByName("AIMDEIP1559")
-	fd_AIMDEIP1559_params = md_AIMDEIP1559.Fields().ByName("params")
-	fd_AIMDEIP1559_state = md_AIMDEIP1559.Fields().ByName("state")
+	file_feemarket_eip1559_v1_feemarket_proto_init()
+	md_EIP1559 = File_feemarket_eip1559_v1_feemarket_proto.Messages().ByName("EIP1559")
+	fd_EIP1559_params = md_EIP1559.Fields().ByName("params")
+	fd_EIP1559_state = md_EIP1559.Fields().ByName("state")
 }
 
-var _ protoreflect.Message = (*fastReflection_AIMDEIP1559)(nil)
+var _ protoreflect.Message = (*fastReflection_EIP1559)(nil)
 
-type fastReflection_AIMDEIP1559 AIMDEIP1559
+type fastReflection_EIP1559 EIP1559
 
-func (x *AIMDEIP1559) ProtoReflect() protoreflect.Message {
-	return (*fastReflection_AIMDEIP1559)(x)
+func (x *EIP1559) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_EIP1559)(x)
 }
 
-func (x *AIMDEIP1559) slowProtoReflect() protoreflect.Message {
-	mi := &file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[0]
+func (x *EIP1559) slowProtoReflect() protoreflect.Message {
+	mi := &file_feemarket_eip1559_v1_feemarket_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -47,43 +47,43 @@ func (x *AIMDEIP1559) slowProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-var _fastReflection_AIMDEIP1559_messageType fastReflection_AIMDEIP1559_messageType
-var _ protoreflect.MessageType = fastReflection_AIMDEIP1559_messageType{}
+var _fastReflection_EIP1559_messageType fastReflection_EIP1559_messageType
+var _ protoreflect.MessageType = fastReflection_EIP1559_messageType{}
 
-type fastReflection_AIMDEIP1559_messageType struct{}
+type fastReflection_EIP1559_messageType struct{}
 
-func (x fastReflection_AIMDEIP1559_messageType) Zero() protoreflect.Message {
-	return (*fastReflection_AIMDEIP1559)(nil)
+func (x fastReflection_EIP1559_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_EIP1559)(nil)
 }
-func (x fastReflection_AIMDEIP1559_messageType) New() protoreflect.Message {
-	return new(fastReflection_AIMDEIP1559)
+func (x fastReflection_EIP1559_messageType) New() protoreflect.Message {
+	return new(fastReflection_EIP1559)
 }
-func (x fastReflection_AIMDEIP1559_messageType) Descriptor() protoreflect.MessageDescriptor {
-	return md_AIMDEIP1559
+func (x fastReflection_EIP1559_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_EIP1559
 }
 
 // Descriptor returns message descriptor, which contains only the protobuf
 // type information for the message.
-func (x *fastReflection_AIMDEIP1559) Descriptor() protoreflect.MessageDescriptor {
-	return md_AIMDEIP1559
+func (x *fastReflection_EIP1559) Descriptor() protoreflect.MessageDescriptor {
+	return md_EIP1559
 }
 
 // Type returns the message type, which encapsulates both Go and protobuf
 // type information. If the Go type information is not needed,
 // it is recommended that the message descriptor be used instead.
-func (x *fastReflection_AIMDEIP1559) Type() protoreflect.MessageType {
-	return _fastReflection_AIMDEIP1559_messageType
+func (x *fastReflection_EIP1559) Type() protoreflect.MessageType {
+	return _fastReflection_EIP1559_messageType
 }
 
 // New returns a newly allocated and mutable empty message.
-func (x *fastReflection_AIMDEIP1559) New() protoreflect.Message {
-	return new(fastReflection_AIMDEIP1559)
+func (x *fastReflection_EIP1559) New() protoreflect.Message {
+	return new(fastReflection_EIP1559)
 }
 
 // Interface unwraps the message reflection interface and
 // returns the underlying ProtoMessage interface.
-func (x *fastReflection_AIMDEIP1559) Interface() protoreflect.ProtoMessage {
-	return (*AIMDEIP1559)(x)
+func (x *fastReflection_EIP1559) Interface() protoreflect.ProtoMessage {
+	return (*EIP1559)(x)
 }
 
 // Range iterates over every populated field in an undefined order,
@@ -91,16 +91,16 @@ func (x *fastReflection_AIMDEIP1559) Interface() protoreflect.ProtoMessage {
 // Range returns immediately if f returns false.
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
-func (x *fastReflection_AIMDEIP1559) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+func (x *fastReflection_EIP1559) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
 	if x.Params != nil {
 		value := protoreflect.ValueOfMessage(x.Params.ProtoReflect())
-		if !f(fd_AIMDEIP1559_params, value) {
+		if !f(fd_EIP1559_params, value) {
 			return
 		}
 	}
 	if x.State != nil {
 		value := protoreflect.ValueOfMessage(x.State.ProtoReflect())
-		if !f(fd_AIMDEIP1559_state, value) {
+		if !f(fd_EIP1559_state, value) {
 			return
 		}
 	}
@@ -117,17 +117,17 @@ func (x *fastReflection_AIMDEIP1559) Range(f func(protoreflect.FieldDescriptor, 
 // In other cases (aside from the nullable cases above),
 // a proto3 scalar field is populated if it contains a non-zero value, and
 // a repeated field is populated if it is non-empty.
-func (x *fastReflection_AIMDEIP1559) Has(fd protoreflect.FieldDescriptor) bool {
+func (x *fastReflection_EIP1559) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		return x.Params != nil
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		return x.State != nil
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -137,17 +137,17 @@ func (x *fastReflection_AIMDEIP1559) Has(fd protoreflect.FieldDescriptor) bool {
 // associated with the given field number.
 //
 // Clear is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_AIMDEIP1559) Clear(fd protoreflect.FieldDescriptor) {
+func (x *fastReflection_EIP1559) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		x.Params = nil
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		x.State = nil
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -157,19 +157,19 @@ func (x *fastReflection_AIMDEIP1559) Clear(fd protoreflect.FieldDescriptor) {
 // the default value of a bytes scalar is guaranteed to be a copy.
 // For unpopulated composite types, it returns an empty, read-only view
 // of the value; to obtain a mutable reference, use Mutable.
-func (x *fastReflection_AIMDEIP1559) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_EIP1559) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		value := x.Params
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		value := x.State
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	default:
 		if descriptor.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", descriptor.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", descriptor.FullName()))
 	}
 }
 
@@ -183,17 +183,17 @@ func (x *fastReflection_AIMDEIP1559) Get(descriptor protoreflect.FieldDescriptor
 // empty, read-only value, then it panics.
 //
 // Set is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_AIMDEIP1559) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+func (x *fastReflection_EIP1559) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		x.Params = value.Message().Interface().(*Params)
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		x.State = value.Message().Interface().(*State)
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -207,52 +207,52 @@ func (x *fastReflection_AIMDEIP1559) Set(fd protoreflect.FieldDescriptor, value 
 // It panics if the field does not contain a composite type.
 //
 // Mutable is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_AIMDEIP1559) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_EIP1559) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		if x.Params == nil {
 			x.Params = new(Params)
 		}
 		return protoreflect.ValueOfMessage(x.Params.ProtoReflect())
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		if x.State == nil {
 			x.State = new(State)
 		}
 		return protoreflect.ValueOfMessage(x.State.ProtoReflect())
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", fd.FullName()))
 	}
 }
 
 // NewField returns a new value that is assignable to the field
 // for the given descriptor. For scalars, this returns the default value.
 // For lists, maps, and messages, this returns a new, empty, mutable value.
-func (x *fastReflection_AIMDEIP1559) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_EIP1559) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.AIMDEIP1559.params":
+	case "feemarket.eip1559.v1.EIP1559.params":
 		m := new(Params)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "feemarket.eip1559.v1.AIMDEIP1559.state":
+	case "feemarket.eip1559.v1.EIP1559.state":
 		m := new(State)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.AIMDEIP1559"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.EIP1559"))
 		}
-		panic(fmt.Errorf("message feemarket.eip1559.v1.AIMDEIP1559 does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message feemarket.eip1559.v1.EIP1559 does not contain field %s", fd.FullName()))
 	}
 }
 
 // WhichOneof reports which field within the oneof is populated,
 // returning nil if none are populated.
 // It panics if the oneof descriptor does not belong to this message.
-func (x *fastReflection_AIMDEIP1559) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+func (x *fastReflection_EIP1559) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
 	switch d.FullName() {
 	default:
-		panic(fmt.Errorf("%s is not a oneof field in feemarket.eip1559.v1.AIMDEIP1559", d.FullName()))
+		panic(fmt.Errorf("%s is not a oneof field in feemarket.eip1559.v1.EIP1559", d.FullName()))
 	}
 	panic("unreachable")
 }
@@ -260,7 +260,7 @@ func (x *fastReflection_AIMDEIP1559) WhichOneof(d protoreflect.OneofDescriptor) 
 // GetUnknown retrieves the entire list of unknown fields.
 // The caller may only mutate the contents of the RawFields
 // if the mutated bytes are stored back into the message with SetUnknown.
-func (x *fastReflection_AIMDEIP1559) GetUnknown() protoreflect.RawFields {
+func (x *fastReflection_EIP1559) GetUnknown() protoreflect.RawFields {
 	return x.unknownFields
 }
 
@@ -271,7 +271,7 @@ func (x *fastReflection_AIMDEIP1559) GetUnknown() protoreflect.RawFields {
 // An empty RawFields may be passed to clear the fields.
 //
 // SetUnknown is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_AIMDEIP1559) SetUnknown(fields protoreflect.RawFields) {
+func (x *fastReflection_EIP1559) SetUnknown(fields protoreflect.RawFields) {
 	x.unknownFields = fields
 }
 
@@ -283,7 +283,7 @@ func (x *fastReflection_AIMDEIP1559) SetUnknown(fields protoreflect.RawFields) {
 // message type, but the details are implementation dependent.
 // Validity is not part of the protobuf data model, and may not
 // be preserved in marshaling or other operations.
-func (x *fastReflection_AIMDEIP1559) IsValid() bool {
+func (x *fastReflection_EIP1559) IsValid() bool {
 	return x != nil
 }
 
@@ -293,9 +293,9 @@ func (x *fastReflection_AIMDEIP1559) IsValid() bool {
 // The returned methods type is identical to
 // "google.golang.org/protobuf/runtime/protoiface".Methods.
 // Consult the protoiface package documentation for details.
-func (x *fastReflection_AIMDEIP1559) ProtoMethods() *protoiface.Methods {
+func (x *fastReflection_EIP1559) ProtoMethods() *protoiface.Methods {
 	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
-		x := input.Message.Interface().(*AIMDEIP1559)
+		x := input.Message.Interface().(*EIP1559)
 		if x == nil {
 			return protoiface.SizeOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -325,7 +325,7 @@ func (x *fastReflection_AIMDEIP1559) ProtoMethods() *protoiface.Methods {
 	}
 
 	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
-		x := input.Message.Interface().(*AIMDEIP1559)
+		x := input.Message.Interface().(*EIP1559)
 		if x == nil {
 			return protoiface.MarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -383,7 +383,7 @@ func (x *fastReflection_AIMDEIP1559) ProtoMethods() *protoiface.Methods {
 		}, nil
 	}
 	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
-		x := input.Message.Interface().(*AIMDEIP1559)
+		x := input.Message.Interface().(*EIP1559)
 		if x == nil {
 			return protoiface.UnmarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -415,10 +415,10 @@ func (x *fastReflection_AIMDEIP1559) ProtoMethods() *protoiface.Methods {
 			fieldNum := int32(wire >> 3)
 			wireType := int(wire & 0x7)
 			if wireType == 4 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: AIMDEIP1559: wiretype end group for non-group")
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: EIP1559: wiretype end group for non-group")
 			}
 			if fieldNum <= 0 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: AIMDEIP1559: illegal tag %d (wire type %d)", fieldNum, wire)
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: EIP1559: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
 			case 1:
@@ -528,63 +528,67 @@ func (x *fastReflection_AIMDEIP1559) ProtoMethods() *protoiface.Methods {
 	}
 }
 
-var _ protoreflect.List = (*_State_2_list)(nil)
+var _ protoreflect.List = (*_State_3_list)(nil)
 
-type _State_2_list struct {
+type _State_3_list struct {
 	list *[]uint64
 }
 
-func (x *_State_2_list) Len() int {
+func (x *_State_3_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_State_2_list) Get(i int) protoreflect.Value {
+func (x *_State_3_list) Get(i int) protoreflect.Value {
 	return protoreflect.ValueOfUint64((*x.list)[i])
 }
 
-func (x *_State_2_list) Set(i int, value protoreflect.Value) {
+func (x *_State_3_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.Uint()
 	concreteValue := valueUnwrapped
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_State_2_list) Append(value protoreflect.Value) {
+func (x *_State_3_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.Uint()
 	concreteValue := valueUnwrapped
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_State_2_list) AppendMutable() protoreflect.Value {
+func (x *_State_3_list) AppendMutable() protoreflect.Value {
 	panic(fmt.Errorf("AppendMutable can not be called on message State at list field BlockUtilizationWindow as it is not of Message kind"))
 }
 
-func (x *_State_2_list) Truncate(n int) {
+func (x *_State_3_list) Truncate(n int) {
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_State_2_list) NewElement() protoreflect.Value {
+func (x *_State_3_list) NewElement() protoreflect.Value {
 	v := uint64(0)
 	return protoreflect.ValueOfUint64(v)
 }
 
-func (x *_State_2_list) IsValid() bool {
+func (x *_State_3_list) IsValid() bool {
 	return x.list != nil
 }
 
 var (
 	md_State                          protoreflect.MessageDescriptor
-	fd_State_current_base_fee         protoreflect.FieldDescriptor
+	fd_State_base_fee                 protoreflect.FieldDescriptor
+	fd_State_learning_rate            protoreflect.FieldDescriptor
 	fd_State_block_utilization_window protoreflect.FieldDescriptor
+	fd_State_index                    protoreflect.FieldDescriptor
 )
 
 func init() {
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_init()
-	md_State = File_feemarket_eip1559_v1_aimd_eip_1559_proto.Messages().ByName("State")
-	fd_State_current_base_fee = md_State.Fields().ByName("current_base_fee")
+	file_feemarket_eip1559_v1_feemarket_proto_init()
+	md_State = File_feemarket_eip1559_v1_feemarket_proto.Messages().ByName("State")
+	fd_State_base_fee = md_State.Fields().ByName("base_fee")
+	fd_State_learning_rate = md_State.Fields().ByName("learning_rate")
 	fd_State_block_utilization_window = md_State.Fields().ByName("block_utilization_window")
+	fd_State_index = md_State.Fields().ByName("index")
 }
 
 var _ protoreflect.Message = (*fastReflection_State)(nil)
@@ -596,7 +600,7 @@ func (x *State) ProtoReflect() protoreflect.Message {
 }
 
 func (x *State) slowProtoReflect() protoreflect.Message {
-	mi := &file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[1]
+	mi := &file_feemarket_eip1559_v1_feemarket_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -652,15 +656,27 @@ func (x *fastReflection_State) Interface() protoreflect.ProtoMessage {
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_State) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.CurrentBaseFee != "" {
-		value := protoreflect.ValueOfString(x.CurrentBaseFee)
-		if !f(fd_State_current_base_fee, value) {
+	if x.BaseFee != "" {
+		value := protoreflect.ValueOfString(x.BaseFee)
+		if !f(fd_State_base_fee, value) {
+			return
+		}
+	}
+	if x.LearningRate != "" {
+		value := protoreflect.ValueOfString(x.LearningRate)
+		if !f(fd_State_learning_rate, value) {
 			return
 		}
 	}
 	if len(x.BlockUtilizationWindow) != 0 {
-		value := protoreflect.ValueOfList(&_State_2_list{list: &x.BlockUtilizationWindow})
+		value := protoreflect.ValueOfList(&_State_3_list{list: &x.BlockUtilizationWindow})
 		if !f(fd_State_block_utilization_window, value) {
+			return
+		}
+	}
+	if x.Index != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Index)
+		if !f(fd_State_index, value) {
 			return
 		}
 	}
@@ -679,10 +695,14 @@ func (x *fastReflection_State) Range(f func(protoreflect.FieldDescriptor, protor
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_State) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.State.current_base_fee":
-		return x.CurrentBaseFee != ""
+	case "feemarket.eip1559.v1.State.base_fee":
+		return x.BaseFee != ""
+	case "feemarket.eip1559.v1.State.learning_rate":
+		return x.LearningRate != ""
 	case "feemarket.eip1559.v1.State.block_utilization_window":
 		return len(x.BlockUtilizationWindow) != 0
+	case "feemarket.eip1559.v1.State.index":
+		return x.Index != uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -699,10 +719,14 @@ func (x *fastReflection_State) Has(fd protoreflect.FieldDescriptor) bool {
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_State) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.State.current_base_fee":
-		x.CurrentBaseFee = ""
+	case "feemarket.eip1559.v1.State.base_fee":
+		x.BaseFee = ""
+	case "feemarket.eip1559.v1.State.learning_rate":
+		x.LearningRate = ""
 	case "feemarket.eip1559.v1.State.block_utilization_window":
 		x.BlockUtilizationWindow = nil
+	case "feemarket.eip1559.v1.State.index":
+		x.Index = uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -719,15 +743,21 @@ func (x *fastReflection_State) Clear(fd protoreflect.FieldDescriptor) {
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_State) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "feemarket.eip1559.v1.State.current_base_fee":
-		value := x.CurrentBaseFee
+	case "feemarket.eip1559.v1.State.base_fee":
+		value := x.BaseFee
+		return protoreflect.ValueOfString(value)
+	case "feemarket.eip1559.v1.State.learning_rate":
+		value := x.LearningRate
 		return protoreflect.ValueOfString(value)
 	case "feemarket.eip1559.v1.State.block_utilization_window":
 		if len(x.BlockUtilizationWindow) == 0 {
-			return protoreflect.ValueOfList(&_State_2_list{})
+			return protoreflect.ValueOfList(&_State_3_list{})
 		}
-		listValue := &_State_2_list{list: &x.BlockUtilizationWindow}
+		listValue := &_State_3_list{list: &x.BlockUtilizationWindow}
 		return protoreflect.ValueOfList(listValue)
+	case "feemarket.eip1559.v1.State.index":
+		value := x.Index
+		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -748,12 +778,16 @@ func (x *fastReflection_State) Get(descriptor protoreflect.FieldDescriptor) prot
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_State) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.State.current_base_fee":
-		x.CurrentBaseFee = value.Interface().(string)
+	case "feemarket.eip1559.v1.State.base_fee":
+		x.BaseFee = value.Interface().(string)
+	case "feemarket.eip1559.v1.State.learning_rate":
+		x.LearningRate = value.Interface().(string)
 	case "feemarket.eip1559.v1.State.block_utilization_window":
 		lv := value.List()
-		clv := lv.(*_State_2_list)
+		clv := lv.(*_State_3_list)
 		x.BlockUtilizationWindow = *clv.list
+	case "feemarket.eip1559.v1.State.index":
+		x.Index = value.Uint()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -778,10 +812,14 @@ func (x *fastReflection_State) Mutable(fd protoreflect.FieldDescriptor) protoref
 		if x.BlockUtilizationWindow == nil {
 			x.BlockUtilizationWindow = []uint64{}
 		}
-		value := &_State_2_list{list: &x.BlockUtilizationWindow}
+		value := &_State_3_list{list: &x.BlockUtilizationWindow}
 		return protoreflect.ValueOfList(value)
-	case "feemarket.eip1559.v1.State.current_base_fee":
-		panic(fmt.Errorf("field current_base_fee of message feemarket.eip1559.v1.State is not mutable"))
+	case "feemarket.eip1559.v1.State.base_fee":
+		panic(fmt.Errorf("field base_fee of message feemarket.eip1559.v1.State is not mutable"))
+	case "feemarket.eip1559.v1.State.learning_rate":
+		panic(fmt.Errorf("field learning_rate of message feemarket.eip1559.v1.State is not mutable"))
+	case "feemarket.eip1559.v1.State.index":
+		panic(fmt.Errorf("field index of message feemarket.eip1559.v1.State is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -795,11 +833,15 @@ func (x *fastReflection_State) Mutable(fd protoreflect.FieldDescriptor) protoref
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_State) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "feemarket.eip1559.v1.State.current_base_fee":
+	case "feemarket.eip1559.v1.State.base_fee":
+		return protoreflect.ValueOfString("")
+	case "feemarket.eip1559.v1.State.learning_rate":
 		return protoreflect.ValueOfString("")
 	case "feemarket.eip1559.v1.State.block_utilization_window":
 		list := []uint64{}
-		return protoreflect.ValueOfList(&_State_2_list{list: &list})
+		return protoreflect.ValueOfList(&_State_3_list{list: &list})
+	case "feemarket.eip1559.v1.State.index":
+		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: feemarket.eip1559.v1.State"))
@@ -869,7 +911,11 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		l = len(x.CurrentBaseFee)
+		l = len(x.BaseFee)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.LearningRate)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -879,6 +925,9 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 				l += runtime.Sov(uint64(e))
 			}
 			n += 1 + runtime.Sov(uint64(l)) + l
+		}
+		if x.Index != 0 {
+			n += 1 + runtime.Sov(uint64(x.Index))
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -909,6 +958,11 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
+		if x.Index != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Index))
+			i--
+			dAtA[i] = 0x20
+		}
 		if len(x.BlockUtilizationWindow) > 0 {
 			var pksize2 int
 			for _, num := range x.BlockUtilizationWindow {
@@ -927,12 +981,19 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 			}
 			i = runtime.EncodeVarint(dAtA, i, uint64(pksize2))
 			i--
+			dAtA[i] = 0x1a
+		}
+		if len(x.LearningRate) > 0 {
+			i -= len(x.LearningRate)
+			copy(dAtA[i:], x.LearningRate)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.LearningRate)))
+			i--
 			dAtA[i] = 0x12
 		}
-		if len(x.CurrentBaseFee) > 0 {
-			i -= len(x.CurrentBaseFee)
-			copy(dAtA[i:], x.CurrentBaseFee)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.CurrentBaseFee)))
+		if len(x.BaseFee) > 0 {
+			i -= len(x.BaseFee)
+			copy(dAtA[i:], x.BaseFee)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.BaseFee)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -987,7 +1048,7 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CurrentBaseFee", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BaseFee", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1015,9 +1076,41 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.CurrentBaseFee = string(dAtA[iNdEx:postIndex])
+				x.BaseFee = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field LearningRate", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.LearningRate = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType == 0 {
 					var v uint64
 					for shift := uint(0); ; shift += 7 {
@@ -1093,6 +1186,25 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 				} else {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BlockUtilizationWindow", wireType)
 				}
+			case 4:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+				}
+				x.Index = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Index |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -1132,7 +1244,7 @@ func (x *fastReflection_State) ProtoMethods() *protoiface.Methods {
 // versions:
 // 	protoc-gen-go v1.27.0
 // 	protoc        (unknown)
-// source: feemarket/eip1559/v1/aimd_eip_1559.proto
+// source: feemarket/eip1559/v1/feemarket.proto
 
 const (
 	// Verify that this generated code is sufficiently up-to-date.
@@ -1141,9 +1253,10 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// AIMDEIP1559 is the contains the Additive Increase Multiplicative Decrease
-// (AIMD) EIP-1559 fee market parameters and state.
-type AIMDEIP1559 struct {
+// EIP1559 is the contains the Additive Increase Multiplicative Decrease
+// (AIMD) EIP-1559 fee market parameters and state. This can be utilized
+// to implement AIMD EIP-1559 and legacy EIP-1559 fee market.
+type EIP1559 struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1154,34 +1267,34 @@ type AIMDEIP1559 struct {
 	State *State `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
 }
 
-func (x *AIMDEIP1559) Reset() {
-	*x = AIMDEIP1559{}
+func (x *EIP1559) Reset() {
+	*x = EIP1559{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[0]
+		mi := &file_feemarket_eip1559_v1_feemarket_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *AIMDEIP1559) String() string {
+func (x *EIP1559) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AIMDEIP1559) ProtoMessage() {}
+func (*EIP1559) ProtoMessage() {}
 
-// Deprecated: Use AIMDEIP1559.ProtoReflect.Descriptor instead.
-func (*AIMDEIP1559) Descriptor() ([]byte, []int) {
-	return file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use EIP1559.ProtoReflect.Descriptor instead.
+func (*EIP1559) Descriptor() ([]byte, []int) {
+	return file_feemarket_eip1559_v1_feemarket_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AIMDEIP1559) GetParams() *Params {
+func (x *EIP1559) GetParams() *Params {
 	if x != nil {
 		return x.Params
 	}
 	return nil
 }
 
-func (x *AIMDEIP1559) GetState() *State {
+func (x *EIP1559) GetState() *State {
 	if x != nil {
 		return x.State
 	}
@@ -1194,18 +1307,22 @@ type State struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// CurrentBaseFee is the current base fee. This is denominated in the fee
+	// BaseFee is the current base fee. This is denominated in the fee
 	// per gas unit.
-	CurrentBaseFee string `protobuf:"bytes,1,opt,name=current_base_fee,json=currentBaseFee,proto3" json:"current_base_fee,omitempty"`
+	BaseFee string `protobuf:"bytes,1,opt,name=base_fee,json=baseFee,proto3" json:"base_fee,omitempty"`
+	// LearningRate is the current learning rate.
+	LearningRate string `protobuf:"bytes,2,opt,name=learning_rate,json=learningRate,proto3" json:"learning_rate,omitempty"`
 	// BlockUtilizationWindow contains a list of the last blocks' utilization
 	// values. This is used to calculate the next base fee.
-	BlockUtilizationWindow []uint64 `protobuf:"varint,2,rep,packed,name=block_utilization_window,json=blockUtilizationWindow,proto3" json:"block_utilization_window,omitempty"`
+	BlockUtilizationWindow []uint64 `protobuf:"varint,3,rep,packed,name=block_utilization_window,json=blockUtilizationWindow,proto3" json:"block_utilization_window,omitempty"`
+	// Index is the index of the current block in the block utilization window.
+	Index uint64 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`
 }
 
 func (x *State) Reset() {
 	*x = State{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[1]
+		mi := &file_feemarket_eip1559_v1_feemarket_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1219,12 +1336,19 @@ func (*State) ProtoMessage() {}
 
 // Deprecated: Use State.ProtoReflect.Descriptor instead.
 func (*State) Descriptor() ([]byte, []int) {
-	return file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescGZIP(), []int{1}
+	return file_feemarket_eip1559_v1_feemarket_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *State) GetCurrentBaseFee() string {
+func (x *State) GetBaseFee() string {
 	if x != nil {
-		return x.CurrentBaseFee
+		return x.BaseFee
+	}
+	return ""
+}
+
+func (x *State) GetLearningRate() string {
+	if x != nil {
+		return x.LearningRate
 	}
 	return ""
 }
@@ -1236,77 +1360,89 @@ func (x *State) GetBlockUtilizationWindow() []uint64 {
 	return nil
 }
 
-var File_feemarket_eip1559_v1_aimd_eip_1559_proto protoreflect.FileDescriptor
+func (x *State) GetIndex() uint64 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
+}
 
-var file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDesc = []byte{
-	0x0a, 0x28, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69, 0x70, 0x31,
-	0x35, 0x35, 0x39, 0x2f, 0x76, 0x31, 0x2f, 0x61, 0x69, 0x6d, 0x64, 0x5f, 0x65, 0x69, 0x70, 0x5f,
-	0x31, 0x35, 0x35, 0x39, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x14, 0x66, 0x65, 0x65, 0x6d,
-	0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x76, 0x31,
-	0x1a, 0x19, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x14, 0x67, 0x6f, 0x67,
-	0x6f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x1a, 0x21, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69, 0x70,
-	0x31, 0x35, 0x35, 0x39, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x22, 0xb6, 0x01, 0x0a, 0x0b, 0x41, 0x49, 0x4d, 0x44, 0x45, 0x49, 0x50,
-	0x31, 0x35, 0x35, 0x39, 0x12, 0x3a, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74,
-	0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x61,
-	0x6d, 0x73, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73,
-	0x12, 0x37, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x1b, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31,
-	0x35, 0x35, 0x39, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x65, 0x42, 0x04, 0xc8, 0xde,
-	0x1f, 0x00, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x3a, 0x32, 0xca, 0xb4, 0x2d, 0x2e, 0x66,
-	0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b,
-	0x65, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x46, 0x65, 0x65, 0x4d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x49,
-	0x6d, 0x70, 0x6c, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x98, 0x01,
-	0x0a, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x55, 0x0a, 0x10, 0x63, 0x75, 0x72, 0x72, 0x65,
-	0x6e, 0x74, 0x5f, 0x62, 0x61, 0x73, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+var File_feemarket_eip1559_v1_feemarket_proto protoreflect.FileDescriptor
+
+var file_feemarket_eip1559_v1_feemarket_proto_rawDesc = []byte{
+	0x0a, 0x24, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69, 0x70, 0x31,
+	0x35, 0x35, 0x39, 0x2f, 0x76, 0x31, 0x2f, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x14, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65,
+	0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x76, 0x31, 0x1a, 0x19, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x14, 0x67, 0x6f, 0x67, 0x6f, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x21, 0x66,
+	0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39,
+	0x2f, 0x76, 0x31, 0x2f, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x22, 0xb2, 0x01, 0x0a, 0x07, 0x45, 0x49, 0x50, 0x31, 0x35, 0x35, 0x39, 0x12, 0x3a, 0x0a, 0x06,
+	0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x66,
+	0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39,
+	0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00,
+	0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x37, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72,
+	0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x76, 0x31, 0x2e, 0x53,
+	0x74, 0x61, 0x74, 0x65, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74,
+	0x65, 0x3a, 0x32, 0xca, 0xb4, 0x2d, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74,
+	0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x46, 0x65,
+	0x65, 0x4d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x49, 0x6d, 0x70, 0x6c, 0x65, 0x6d, 0x65, 0x6e, 0x74,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0xfa, 0x01, 0x0a, 0x05, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12,
+	0x46, 0x0a, 0x08, 0x62, 0x61, 0x73, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x42, 0x2b, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x15, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
 	0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x49, 0x6e, 0x74,
-	0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x49, 0x6e, 0x74, 0x52, 0x0e,
-	0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x42, 0x61, 0x73, 0x65, 0x46, 0x65, 0x65, 0x12, 0x38,
-	0x0a, 0x18, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x75, 0x74, 0x69, 0x6c, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x5f, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x18, 0x02, 0x20, 0x03, 0x28, 0x04,
-	0x52, 0x16, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x55, 0x74, 0x69, 0x6c, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x42, 0xcf, 0x01, 0x0a, 0x18, 0x63, 0x6f, 0x6d,
-	0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35,
-	0x35, 0x39, 0x2e, 0x76, 0x31, 0x42, 0x10, 0x41, 0x69, 0x6d, 0x64, 0x45, 0x69, 0x70, 0x31, 0x35,
-	0x35, 0x39, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x66, 0x65, 0x65, 0x6d,
-	0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2f, 0x76, 0x31,
-	0x3b, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x46, 0x45, 0x58,
-	0xaa, 0x02, 0x14, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x45, 0x69, 0x70,
-	0x31, 0x35, 0x35, 0x39, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x14, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72,
-	0x6b, 0x65, 0x74, 0x5c, 0x45, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x5c, 0x56, 0x31, 0xe2, 0x02,
-	0x20, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x45, 0x69, 0x70, 0x31, 0x35,
-	0x35, 0x39, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
-	0x61, 0xea, 0x02, 0x16, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x3a, 0x3a, 0x45,
-	0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x49, 0x6e, 0x74, 0x52, 0x07,
+	0x62, 0x61, 0x73, 0x65, 0x46, 0x65, 0x65, 0x12, 0x59, 0x0a, 0x0d, 0x6c, 0x65, 0x61, 0x72, 0x6e,
+	0x69, 0x6e, 0x67, 0x5f, 0x72, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x34,
+	0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64,
+	0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79,
+	0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0d, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x4c, 0x65,
+	0x67, 0x61, 0x63, 0x79, 0x52, 0x0c, 0x6c, 0x65, 0x61, 0x72, 0x6e, 0x69, 0x6e, 0x67, 0x52, 0x61,
+	0x74, 0x65, 0x12, 0x38, 0x0a, 0x18, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x75, 0x74, 0x69, 0x6c,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x18, 0x03,
+	0x20, 0x03, 0x28, 0x04, 0x52, 0x16, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x55, 0x74, 0x69, 0x6c, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x12, 0x14, 0x0a, 0x05,
+	0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04, 0x52, 0x05, 0x69, 0x6e, 0x64,
+	0x65, 0x78, 0x42, 0xcd, 0x01, 0x0a, 0x18, 0x63, 0x6f, 0x6d, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61,
+	0x72, 0x6b, 0x65, 0x74, 0x2e, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x76, 0x31, 0x42,
+	0x0e, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50,
+	0x01, 0x5a, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f,
+	0x61, 0x70, 0x69, 0x2f, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x65, 0x69,
+	0x70, 0x31, 0x35, 0x35, 0x39, 0x2f, 0x76, 0x31, 0x3b, 0x65, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39,
+	0x76, 0x31, 0xa2, 0x02, 0x03, 0x46, 0x45, 0x58, 0xaa, 0x02, 0x14, 0x46, 0x65, 0x65, 0x6d, 0x61,
+	0x72, 0x6b, 0x65, 0x74, 0x2e, 0x45, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x2e, 0x56, 0x31, 0xca,
+	0x02, 0x14, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x45, 0x69, 0x70, 0x31,
+	0x35, 0x35, 0x39, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x20, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b,
+	0x65, 0x74, 0x5c, 0x45, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50,
+	0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x16, 0x46, 0x65, 0x65, 0x6d,
+	0x61, 0x72, 0x6b, 0x65, 0x74, 0x3a, 0x3a, 0x45, 0x69, 0x70, 0x31, 0x35, 0x35, 0x39, 0x3a, 0x3a,
+	0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescOnce sync.Once
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescData = file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDesc
+	file_feemarket_eip1559_v1_feemarket_proto_rawDescOnce sync.Once
+	file_feemarket_eip1559_v1_feemarket_proto_rawDescData = file_feemarket_eip1559_v1_feemarket_proto_rawDesc
 )
 
-func file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescGZIP() []byte {
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescOnce.Do(func() {
-		file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescData = protoimpl.X.CompressGZIP(file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescData)
+func file_feemarket_eip1559_v1_feemarket_proto_rawDescGZIP() []byte {
+	file_feemarket_eip1559_v1_feemarket_proto_rawDescOnce.Do(func() {
+		file_feemarket_eip1559_v1_feemarket_proto_rawDescData = protoimpl.X.CompressGZIP(file_feemarket_eip1559_v1_feemarket_proto_rawDescData)
 	})
-	return file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDescData
+	return file_feemarket_eip1559_v1_feemarket_proto_rawDescData
 }
 
-var file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_feemarket_eip1559_v1_aimd_eip_1559_proto_goTypes = []interface{}{
-	(*AIMDEIP1559)(nil), // 0: feemarket.eip1559.v1.AIMDEIP1559
-	(*State)(nil),       // 1: feemarket.eip1559.v1.State
-	(*Params)(nil),      // 2: feemarket.eip1559.v1.Params
+var file_feemarket_eip1559_v1_feemarket_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_feemarket_eip1559_v1_feemarket_proto_goTypes = []interface{}{
+	(*EIP1559)(nil), // 0: feemarket.eip1559.v1.EIP1559
+	(*State)(nil),   // 1: feemarket.eip1559.v1.State
+	(*Params)(nil),  // 2: feemarket.eip1559.v1.Params
 }
-var file_feemarket_eip1559_v1_aimd_eip_1559_proto_depIdxs = []int32{
-	2, // 0: feemarket.eip1559.v1.AIMDEIP1559.params:type_name -> feemarket.eip1559.v1.Params
-	1, // 1: feemarket.eip1559.v1.AIMDEIP1559.state:type_name -> feemarket.eip1559.v1.State
+var file_feemarket_eip1559_v1_feemarket_proto_depIdxs = []int32{
+	2, // 0: feemarket.eip1559.v1.EIP1559.params:type_name -> feemarket.eip1559.v1.Params
+	1, // 1: feemarket.eip1559.v1.EIP1559.state:type_name -> feemarket.eip1559.v1.State
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -1314,15 +1450,15 @@ var file_feemarket_eip1559_v1_aimd_eip_1559_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_feemarket_eip1559_v1_aimd_eip_1559_proto_init() }
-func file_feemarket_eip1559_v1_aimd_eip_1559_proto_init() {
-	if File_feemarket_eip1559_v1_aimd_eip_1559_proto != nil {
+func init() { file_feemarket_eip1559_v1_feemarket_proto_init() }
+func file_feemarket_eip1559_v1_feemarket_proto_init() {
+	if File_feemarket_eip1559_v1_feemarket_proto != nil {
 		return
 	}
 	file_feemarket_eip1559_v1_params_proto_init()
 	if !protoimpl.UnsafeEnabled {
-		file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AIMDEIP1559); i {
+		file_feemarket_eip1559_v1_feemarket_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*EIP1559); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1333,7 +1469,7 @@ func file_feemarket_eip1559_v1_aimd_eip_1559_proto_init() {
 				return nil
 			}
 		}
-		file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_feemarket_eip1559_v1_feemarket_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*State); i {
 			case 0:
 				return &v.state
@@ -1350,18 +1486,18 @@ func file_feemarket_eip1559_v1_aimd_eip_1559_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDesc,
+			RawDescriptor: file_feemarket_eip1559_v1_feemarket_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_feemarket_eip1559_v1_aimd_eip_1559_proto_goTypes,
-		DependencyIndexes: file_feemarket_eip1559_v1_aimd_eip_1559_proto_depIdxs,
-		MessageInfos:      file_feemarket_eip1559_v1_aimd_eip_1559_proto_msgTypes,
+		GoTypes:           file_feemarket_eip1559_v1_feemarket_proto_goTypes,
+		DependencyIndexes: file_feemarket_eip1559_v1_feemarket_proto_depIdxs,
+		MessageInfos:      file_feemarket_eip1559_v1_feemarket_proto_msgTypes,
 	}.Build()
-	File_feemarket_eip1559_v1_aimd_eip_1559_proto = out.File
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_rawDesc = nil
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_goTypes = nil
-	file_feemarket_eip1559_v1_aimd_eip_1559_proto_depIdxs = nil
+	File_feemarket_eip1559_v1_feemarket_proto = out.File
+	file_feemarket_eip1559_v1_feemarket_proto_rawDesc = nil
+	file_feemarket_eip1559_v1_feemarket_proto_goTypes = nil
+	file_feemarket_eip1559_v1_feemarket_proto_depIdxs = nil
 }
