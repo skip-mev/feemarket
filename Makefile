@@ -70,6 +70,11 @@ $(BUILD_TARGETS): $(BUILD_DIR)/
 $(BUILD_DIR)/:
 	mkdir -p $(BUILD_DIR)/
 
+tidy:
+	@go mod tidy
+
+.PHONY: tidy
+
 # build-and-start-app builds a fee market simulation application binary in the build folder
 # and initializes a single validator configuration. If desired, users can suppliment
 # other addresses using "genesis add-genesis-account address 10000000000000000000000000stake".
@@ -96,7 +101,7 @@ docker-build:
 
 docker-build-integration:
 	@echo "Building integration-test Docker image..."
-	@DOCKER_BUILDKIT=1 docker build -t feemarket-integration -f contrib/images/feemarket.integration.Dockerfile .
+	@DOCKER_BUILDKIT=1 docker build -t feemarket-integration -f contrib/images/feemarket.e2e.Dockerfile .
 
 ###############################################################################
 ###                                  Tests                                  ###
@@ -107,7 +112,7 @@ TEST_INTEGRATION_TAGS = integration
 
 test-integration: $(TEST_INTEGRATION_DEPS)
 	@echo "Running integration tests..."
-	@go test ./tests/integration/feemarket_integration_test.go -timeout 30m -p 1 -race -v -tags='$(TEST_INTEGRATION_TAGS)'
+	@go test ./tests/integration/suite.go -timeout 30m -p 1 -race -v -tags='$(TEST_INTEGRATION_TAGS)'
 
 test:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
@@ -168,8 +173,6 @@ lint-markdown:
 ###############################################################################
 ###                                Formatting                               ###
 ###############################################################################
-
-format:
 
 format:
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run mvdan.cc/gofumpt -w .

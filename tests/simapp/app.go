@@ -4,6 +4,7 @@ package simapp
 
 import (
 	"encoding/json"
+	"github.com/skip-mev/feemarket/x/feemarket"
 	"io"
 	"os"
 	"path/filepath"
@@ -65,6 +66,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
+
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 )
 
 var (
@@ -100,6 +103,7 @@ var (
 		vesting.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
+		feemarket.AppModuleBasic{},
 	)
 )
 
@@ -136,6 +140,7 @@ type SimApp struct {
 	GroupKeeper           groupkeeper.Keeper
 	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
+	FeeMarketKeeper       feemarketkeeper.Keeper
 
 	// simulation manager
 	sm            *module.SimulationManager
@@ -220,6 +225,7 @@ func NewSimApp(
 		&app.GroupKeeper,
 		&app.NFTKeeper,
 		&app.ConsensusParamsKeeper,
+		&app.FeeMarketKeeper,
 	); err != nil {
 		panic(err)
 	}
