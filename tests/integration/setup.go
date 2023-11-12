@@ -1,4 +1,4 @@
-package integration_test
+package integration
 
 import (
 	"archive/tar"
@@ -233,25 +233,27 @@ func (s *TestSuite) BroadcastTxsWithCallback(
 }
 
 // QueryValidators queries for all the network's validators
-func QueryValidators(t *testing.T, chain *cosmos.CosmosChain) []sdk.ValAddress {
+func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress {
+	s.T().Helper()
+
 	// get grpc client of the node
 	grpcAddr := chain.GetHostGRPCAddress()
 	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	require.NoError(t, err)
+	s.Require().NoError(err)
+	defer cc.Close()
 
 	client := stakingtypes.NewQueryClient(cc)
 
 	// query validators
 	resp, err := client.Validators(context.Background(), &stakingtypes.QueryValidatorsRequest{})
-	require.NoError(t, err)
+	s.Require().NoError(err)
 
 	addrs := make([]sdk.ValAddress, len(resp.Validators))
 
 	// unmarshal validators
 	for i, val := range resp.Validators {
 		addrBz, err := sdk.GetFromBech32(val.OperatorAddress, chain.Config().Bech32Prefix+sdk.PrefixValidator+sdk.PrefixOperator)
-		require.NoError(t, err)
+		s.Require().NoError(err)
 
 		addrs[i] = sdk.ValAddress(addrBz)
 	}
@@ -259,51 +261,57 @@ func QueryValidators(t *testing.T, chain *cosmos.CosmosChain) []sdk.ValAddress {
 }
 
 // QueryAccountBalance queries a given account's balance on the chain
-func QueryAccountBalance(t *testing.T, chain ibc.Chain, address, denom string) int64 {
+func (s *TestSuite) QueryAccountBalance(chain ibc.Chain, address, denom string) int64 {
+	s.T().Helper()
+
 	// cast the chain to a cosmos-chain
 	cosmosChain, ok := chain.(*cosmos.CosmosChain)
-	require.True(t, ok)
+	s.Require().True(ok)
 	// get nodes
 	balance, err := cosmosChain.GetBalance(context.Background(), address, denom)
-	require.NoError(t, err)
+	s.Require().NoError(err)
 	return balance.Int64()
 }
 
 // QueryAccountSequence
-func QueryAccountSequence(t *testing.T, chain *cosmos.CosmosChain, address string) uint64 {
+func (s *TestSuite) QueryAccountSequence(chain *cosmos.CosmosChain, address string) uint64 {
+	s.T().Helper()
+
 	// get nodes
 	nodes := chain.Nodes()
-	require.True(t, len(nodes) > 0)
+	s.Require().True(len(nodes) > 0)
 
 	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "account", address)
-	require.NoError(t, err)
+	s.Require().NoError(err)
 	// unmarshal json response
 	var accResp codectypes.Any
-	require.NoError(t, json.Unmarshal(resp, &accResp))
+	s.Require().NoError(json.Unmarshal(resp, &accResp))
 
 	// unmarshal into baseAccount
 	var acc authtypes.BaseAccount
-	require.NoError(t, acc.Unmarshal(accResp.Value))
+	s.Require().NoError(acc.Unmarshal(accResp.Value))
 
 	return acc.GetSequence()
 }
 
 // Block returns the block at the given height
-func Block(t *testing.T, chain *cosmos.CosmosChain, height int64) *rpctypes.ResultBlock {
+func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.ResultBlock {
+	s.T().Helper()
+
 	// get nodes
 	nodes := chain.Nodes()
-	require.True(t, len(nodes) > 0)
+	s.Require().True(len(nodes) > 0)
 
 	client := nodes[0].Client
 
 	resp, err := client.Block(context.Background(), &height)
-	require.NoError(t, err)
+	s.Require().NoError(err)
 
 	return resp
 }
 
 // WaitForHeight waits for the chain to reach the given height
-func WaitForHeight(t *testing.T, chain *cosmos.CosmosChain, height uint64) {
+func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
 	// wait for next height
 	err := testutil.WaitForCondition(30*time.Second, 100*time.Millisecond, func() (bool, error) {
 		pollHeight, err := chain.Height(context.Background())
@@ -312,34 +320,34 @@ func WaitForHeight(t *testing.T, chain *cosmos.CosmosChain, height uint64) {
 		}
 		return pollHeight >= height, nil
 	})
-	require.NoError(t, err)
+	s.Require().NoError(err)
 }
 
 // VerifyBlock takes a Block and verifies that it contains the given bid at the 0-th index, and the bundled txs immediately after
-func VerifyBlock(t *testing.T, block *rpctypes.ResultBlock, offset int, bidTxHash string, txs [][]byte) {
+func (s *TestSuite) VerifyBlock(block *rpctypes.ResultBlock, offset int, bidTxHash string, txs [][]byte) {
 	// verify the block
 	if bidTxHash != "" {
-		require.Equal(t, bidTxHash, TxHash(block.Block.Data.Txs[offset+1]))
+		s.Require().Equal(bidTxHash, TxHash(block.Block.Data.Txs[offset+1]))
 		offset += 1
 	}
 
 	// verify the txs in sequence
 	for i, tx := range txs {
-		require.Equal(t, TxHash(tx), TxHash(block.Block.Data.Txs[i+offset+1]))
+		s.Require().Equal(TxHash(tx), TxHash(block.Block.Data.Txs[i+offset+1]))
 	}
 }
 
 // VerifyBlockWithExpectedBlock takes in a list of raw tx bytes and compares each tx hash to the tx hashes in the block.
 // The expected block is the block that should be returned by the chain at the given height.
-func VerifyBlockWithExpectedBlock(t *testing.T, chain *cosmos.CosmosChain, height uint64, txs [][]byte) {
-	block := Block(t, chain, int64(height))
+func (s *TestSuite) VerifyBlockWithExpectedBlock(chain *cosmos.CosmosChain, height uint64, txs [][]byte) {
+	block := s.Block(chain, int64(height))
 	blockTxs := block.Block.Data.Txs[1:]
 
-	t.Logf("verifying block %d", height)
-	require.Equal(t, len(txs), len(blockTxs))
+	s.T().Logf("verifying block %d", height)
+	s.Require().Equal(len(txs), len(blockTxs))
 	for i, tx := range txs {
-		t.Logf("verifying tx %d; expected %s, got %s", i, TxHash(tx), TxHash(blockTxs[i]))
-		require.Equal(t, TxHash(tx), TxHash(blockTxs[i]))
+		s.T().Logf("verifying tx %d; expected %s, got %s", i, TxHash(tx), TxHash(blockTxs[i]))
+		s.Require().Equal(TxHash(tx), TxHash(blockTxs[i]))
 	}
 }
 
@@ -348,6 +356,8 @@ func TxHash(tx []byte) string {
 }
 
 func (s *TestSuite) setupBroadcaster() {
+	s.T().Helper()
+
 	bc := cosmos.NewBroadcaster(s.T(), s.chain.(*cosmos.CosmosChain))
 
 	if s.broadcasterOverrides == nil {
@@ -415,8 +425,4 @@ func (s *TestSuite) keyringDirFromNode() string {
 	}
 
 	return localDir
-}
-
-func escrowAddressIncrement(bid math.Int, proposerFee math.LegacyDec) int64 {
-	return int64(bid.Sub(math.Int(math.LegacyNewDecFromInt(bid).Mul(proposerFee).RoundInt())).Int64())
 }

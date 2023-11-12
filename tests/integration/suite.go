@@ -1,4 +1,4 @@
-package integration_test
+package integration
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -84,13 +83,13 @@ func (s *TestSuite) SetupSuite() {
 
 func (s *TestSuite) TearDownSuite() {
 	// close the interchain
-	s.ic.Close()
+	s.Require().NoError(s.ic.Close())
 }
 
 func (s *TestSuite) SetupSubTest() {
 	// wait for 1 block height
 	// query height
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
-	require.NoError(s.T(), err)
-	WaitForHeight(s.T(), s.chain.(*cosmos.CosmosChain), height+1)
+	s.Require().NoError(err)
+	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 }

@@ -11,6 +11,7 @@ import (
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/feemarket/tests/integration"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -72,5 +73,5 @@ func MakeEncodingConfig() *testutil.TestEncodingConfig {
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
-	suite.Run(t, NewIntegrationTestSuiteFromSpec(spec))
+	suite.Run(t, integration.NewIntegrationTestSuiteFromSpec(spec))
 }
