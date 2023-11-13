@@ -23,6 +23,16 @@ func NewDefaultFeeMarket() *DefaultMarket {
 	}
 }
 
+// MustMarshal calls Marshal, but panics if there is an error.
+func (fm *DefaultMarket) MustMarshal() []byte {
+	bz, err := fm.Marshal()
+	if err != nil {
+		panic(err)
+	}
+
+	return bz
+}
+
 // ValidateBasic is a no-op.
 func (fm *DefaultMarket) ValidateBasic() error {
 	return nil

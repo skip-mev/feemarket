@@ -177,8 +177,8 @@ type Inputs struct {
 type Outputs struct {
 	depinject.Out
 
-	SLAKeeper keeper.Keeper
-	Module    appmodule.AppModule
+	k      keeper.Keeper
+	Module appmodule.AppModule
 }
 
 func ProvideModule(in Inputs) Outputs {
@@ -202,14 +202,14 @@ func ProvideModule(in Inputs) Outputs {
 		plugin = in.Plugin
 	}
 
-	slaKeeper := keeper.NewKeeper(
+	k := keeper.NewKeeper(
 		in.Cdc,
 		in.Key,
 		plugin,
 		authority.String(),
 	)
 
-	m := NewAppModule(in.Cdc, *slaKeeper)
+	m := NewAppModule(in.Cdc, *k)
 
-	return Outputs{SLAKeeper: *slaKeeper, Module: m}
+	return Outputs{k: *k, Module: m}
 }

@@ -105,7 +105,7 @@ var (
 		// govtypes.ModuleName
 	}
 
-	plugin, _ = defaultmarket.NewDefaultFeeMarket().Marshal()
+	plugin = defaultmarket.NewDefaultFeeMarket().MustMarshal()
 
 	// application configuration (used by depinject)
 	AppConfig = appconfig.Compose(&appv1alpha1.Config{
@@ -115,7 +115,7 @@ var (
 				Config: appconfig.WrapAny(&runtimev1alpha1.Module{
 					AppName: "SimApp",
 					// During begin block slashing happens after distr.BeginBlocker so that
-					// there is nothing left over in the validator fee pool, so as to keep the
+					// there is nothing left over in the validator fee pool, to keep the
 					// CanWithdrawInvariant invariant.
 					// NOTE: staking module is required if HistoricalEntries param > 0
 					// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
