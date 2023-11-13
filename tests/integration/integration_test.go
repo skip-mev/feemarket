@@ -22,7 +22,7 @@ var (
 	denom         = "stake"
 
 	image = ibc.DockerImage{
-		Repository: "block-sdk-integration",
+		Repository: "feemarket-integration",
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
@@ -38,8 +38,8 @@ var (
 
 	// interchain specification
 	spec = &interchaintest.ChainSpec{
-		ChainName:     "block-sdk",
-		Name:          "block-sdk",
+		ChainName:     "feemarket",
+		Name:          "feemarket",
 		NumValidators: &numValidators,
 		NumFullNodes:  &numFullNodes,
 		Version:       "latest",
@@ -50,7 +50,7 @@ var (
 				image,
 			},
 			Type:                "cosmos",
-			Name:                "block-sdk",
+			Name:                "feemarket",
 			Denom:               denom,
 			ChainID:             "chain-id-0",
 			Bin:                 "testappd",
