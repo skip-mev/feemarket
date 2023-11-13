@@ -73,5 +73,6 @@ func MakeEncodingConfig() *testutil.TestEncodingConfig {
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
-	suite.Run(t, integration.NewIntegrationTestSuiteFromSpec(spec))
+	s := integration.NewIntegrationTestSuiteFromSpec(spec)
+	suite.Run(t, s)
 }
