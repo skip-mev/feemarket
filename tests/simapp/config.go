@@ -3,6 +3,8 @@ package simapp
 import (
 	"time"
 
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
+
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	authmodulev1 "cosmossdk.io/api/cosmos/auth/module/v1"
@@ -58,7 +60,8 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/params"       // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/slashing"     // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/staking"      // import for side-effects
-	_ "github.com/skip-mev/feemarket/x/feemarket"   // import for side-effects
+
+	_ "github.com/skip-mev/feemarket/x/feemarket" // import for side-effects
 
 	feemarketmodulev1 "github.com/skip-mev/feemarket/api/feemarket/feemarket/module/v1"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
@@ -101,6 +104,8 @@ var (
 		// We allow the following module accounts to receive funds:
 		// govtypes.ModuleName
 	}
+
+	plugin, _ = defaultmarket.NewDefaultFeeMarket().Marshal()
 
 	// application configuration (used by depinject)
 	AppConfig = appconfig.Compose(&appv1alpha1.Config{
@@ -257,6 +262,7 @@ var (
 				Name: feemarkettypes.ModuleName,
 				Config: appconfig.WrapAny(&feemarketmodulev1.Module{
 					Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+					Plugin:    plugin,
 				}),
 			},
 		},

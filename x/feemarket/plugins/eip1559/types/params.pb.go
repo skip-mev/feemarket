@@ -43,15 +43,18 @@ type Params struct {
 	// learning rate by Beta.
 	Theta cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=theta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"theta"`
 	// Delta is the amount we additively increase/decrease the base fee when the
-	// net block utilization difference in the window is above/below the target utilization.
+	// net block utilization difference in the window is above/below the target
+	// utilization.
 	Delta cosmossdk_io_math.LegacyDec `protobuf:"bytes,5,opt,name=delta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"delta"`
-	// TargetBlockSize is the target block utilization rate. This is denominated in
+	// TargetBlockSize is the target block utilization rate. This is denominated
+	// in
 	// gas units consumed.
 	TargetBlockSize uint64 `protobuf:"varint,6,opt,name=target_block_size,json=targetBlockSize,proto3" json:"target_block_size,omitempty"`
 	// MaxBlockSize is the upper bound for the block size. This is denominated in
 	// gas units consumed.
 	MaxBlockSize uint64 `protobuf:"varint,7,opt,name=max_block_size,json=maxBlockSize,proto3" json:"max_block_size,omitempty"`
-	// MinBaseFee determines the initial base fee of the module and the global minimum
+	// MinBaseFee determines the initial base fee of the module and the global
+	// minimum
 	// for the network. This is denominated in fee per gas unit.
 	MinBaseFee cosmossdk_io_math.Int `protobuf:"bytes,8,opt,name=min_base_fee,json=minBaseFee,proto3,customtype=cosmossdk.io/math.Int" json:"min_base_fee"`
 	// MinLearningRate is the lower bound for the learning rate.

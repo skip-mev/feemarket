@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
+
 	abci "github.com/cometbft/cometbft/abci/types"
 
 	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
@@ -182,6 +184,7 @@ type Outputs struct {
 func ProvideModule(in Inputs) Outputs {
 	var (
 		authority sdk.AccAddress
+		plugin    interfaces.FeeMarketImplementation
 		err       error
 	)
 	if in.Config.Authority != "" {
@@ -193,10 +196,16 @@ func ProvideModule(in Inputs) Outputs {
 		authority = authtypes.NewModuleAddress(govtypes.ModuleName)
 	}
 
+	if in.Plugin == nil {
+		plugin = defaultmarket.NewDefaultFeeMarket()
+	} else {
+		plugin = in.Plugin
+	}
+
 	slaKeeper := keeper.NewKeeper(
 		in.Cdc,
 		in.Key,
-		in.Plugin,
+		plugin,
 		authority.String(),
 	)
 
