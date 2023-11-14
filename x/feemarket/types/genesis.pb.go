@@ -83,8 +83,8 @@ func (m *GenesisState) GetState() State {
 }
 
 // State is utilized to track the current state of the fee market. This includes
-// the current base fee, learning rate, and block utilization within the specified
-// AIMD window.
+// the current base fee, learning rate, and block utilization within the
+// specified AIMD window.
 type State struct {
 	// BaseFee is the current base fee. This is denominated in the fee per gas unit.
 	BaseFee cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=base_fee,json=baseFee,proto3,customtype=cosmossdk.io/math.Int" json:"base_fee"`
