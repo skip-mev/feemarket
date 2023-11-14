@@ -10,9 +10,7 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-var (
-	OneHundred = math.LegacyNewDecFromInt(math.NewInt(100))
-)
+var OneHundred = math.LegacyNewDecFromInt(math.NewInt(100))
 
 func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("empty block with default eip-1559", func(t *testing.T) {

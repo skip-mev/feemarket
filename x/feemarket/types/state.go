@@ -25,7 +25,7 @@ func NewState(window uint64, baseFee math.Int, learningRate math.LegacyDec) Stat
 // see the EIP-1559 specification for more details.
 func (s *State) UpdateBaseFee(params Params) math.Int {
 	// Update the learning rate.
-	s.UpdateLearningRate(params)
+	newLR := s.UpdateLearningRate(params)
 
 	// Calculate the new base fee with the learning rate adjustment.
 	currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(s.Window[s.Index]))
@@ -36,7 +36,7 @@ func (s *State) UpdateBaseFee(params Params) math.Int {
 	//
 	// This is equivalent to
 	// 1 + (learningRate * (currentBlockSize - targetBlockSize) / targetBlockSize)
-	learningRateAdjustment := math.LegacyOneDec().Add(s.LearningRate.Mul(utilization))
+	learningRateAdjustment := math.LegacyOneDec().Add(newLR.Mul(utilization))
 
 	// Calculate the delta adjustment.
 	net := s.GetNetUtilization(params.TargetBlockUtilization)
