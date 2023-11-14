@@ -44,7 +44,7 @@ The calculation for the updated base fee for the next block is as follows:
 ```golang
 
 // sumBlockSizesInWindow returns the sum of the block sizes in the window.
-blockConsumption := sumBlockSizesInWindow(window) / (window * targetBlockSize)
+blockConsumption := sumBlockSizesInWindow(window) / (window * maxBlockSize)
 
 if blockConsumption < gamma || blockConsumption > 1 - gamma {
     // MAX_LEARNING_RATE is a constant that configured by the chain developer
