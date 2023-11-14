@@ -63,21 +63,15 @@ func DefaultParams() Params {
 	)
 }
 
-// DefaultBlockUtilization returns a default block utilization instance
-// that implements the EIP-1559 fee market implementation without the
-// AIMD learning rate adjustment algorithm.
-func DefaultBlockUtilization() BlockUtilization {
-	return NewBlockUtilization(DefaultWindow)
+// DefaultState returns the default state for the EIP-1559 fee market
+// implementation without the AIMD learning rate adjustment algorithm.
+func DefaultState() State {
+	return NewState(DefaultWindow, DefaultMinBaseFee, DefaultMinLearningRate)
 }
 
 // DefaultGenesisState returns a default genesis state that implements
 // the EIP-1559 fee market implementation without the AIMD learning
 // rate adjustment algorithm.
 func DefaultGenesisState() *GenesisState {
-	return NewGenesisState(
-		DefaultParams(),
-		DefaultMinBaseFee,
-		DefaultMinLearningRate,
-		DefaultBlockUtilization(),
-	)
+	return NewGenesisState(DefaultParams(), DefaultState())
 }
