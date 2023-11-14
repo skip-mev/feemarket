@@ -6,11 +6,6 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
-	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
-	"github.com/skip-mev/feemarket/x/feemarket/keeper"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
-
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -26,6 +21,9 @@ import (
 	"github.com/spf13/cobra"
 
 	modulev1 "github.com/skip-mev/feemarket/api/feemarket/feemarket/module/v1"
+	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
+	"github.com/skip-mev/feemarket/x/feemarket/keeper"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // ConsensusVersion is the x/feemarket module's consensus version identifier.
@@ -124,7 +122,7 @@ func (am AppModule) RegisterServices(cfc module.Configurator) {
 // DefaultGenesis returns default genesis state as raw bytes for the feemarket
 // module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.NewDefaultGenesisState())
+	return cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // ValidateGenesis performs genesis state validation for the feemarket module.
@@ -168,8 +166,6 @@ type Inputs struct {
 	Config *modulev1.Module
 	Cdc    codec.Codec
 	Key    *store.KVStoreKey
-
-	Plugin interfaces.FeeMarketImplementation
 }
 
 type Outputs struct {
@@ -196,7 +192,6 @@ func ProvideModule(in Inputs) Outputs {
 	slaKeeper := keeper.NewKeeper(
 		in.Cdc,
 		in.Key,
-		in.Plugin,
 		authority.String(),
 	)
 
