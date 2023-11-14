@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -43,25 +41,6 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority
-}
-
-func (k *Keeper) setData(ctx sdk.Context, data []byte) {
-	// TODO: limit max data size?
-
-	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyState, data)
-}
-
-// getData gets arbitrary byte data in the keeper.
-func (k *Keeper) getData(ctx sdk.Context) ([]byte, error) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyState)
-
-	if len(bz) == 0 {
-		return nil, fmt.Errorf("no data set in the keeper")
-	}
-
-	return bz, nil
 }
 
 // GetParams returns the feemarket module's parameters.
