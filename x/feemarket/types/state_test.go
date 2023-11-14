@@ -12,6 +12,109 @@ import (
 
 var OneHundred = math.LegacyNewDecFromInt(math.NewInt(100))
 
+func TestState_Update(t *testing.T) {
+	t.Run("can add to window", func(t *testing.T) {
+		state := types.DefaultState()
+
+		err := state.Update(100)
+		require.NoError(t, err)
+		require.Equal(t, uint64(100), state.Window[0])
+	})
+
+	t.Run("can add several txs to window", func(t *testing.T) {
+		state := types.DefaultState()
+
+		err := state.Update(100)
+		require.NoError(t, err)
+		require.Equal(t, uint64(100), state.Window[0])
+
+		err = state.Update(200)
+		require.NoError(t, err)
+		require.Equal(t, uint64(300), state.Window[0])
+	})
+
+	t.Run("errors when it exceeds max block utilization", func(t *testing.T) {
+		state := types.DefaultState()
+
+		err := state.Update(state.MaxBlockUtilization + 1)
+		require.Error(t, err)
+	})
+
+	t.Run("can update with several blocks in default eip-1559", func(t *testing.T) {
+		state := types.DefaultState()
+
+		err := state.Update(100)
+		require.NoError(t, err)
+		require.Equal(t, uint64(100), state.Window[0])
+
+		state.IncrementHeight()
+
+		err = state.Update(200)
+		require.NoError(t, err)
+		require.Equal(t, uint64(200), state.Window[0])
+
+		err = state.Update(300)
+		require.NoError(t, err)
+		require.Equal(t, uint64(500), state.Window[0])
+	})
+
+	t.Run("can update with several blocks in default aimd eip-1559", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+
+		err := state.Update(100)
+		require.NoError(t, err)
+		require.Equal(t, uint64(100), state.Window[0])
+
+		state.IncrementHeight()
+
+		err = state.Update(200)
+		require.NoError(t, err)
+		require.Equal(t, uint64(200), state.Window[1])
+
+		state.IncrementHeight()
+
+		err = state.Update(300)
+		require.NoError(t, err)
+		require.Equal(t, uint64(300), state.Window[2])
+
+		state.IncrementHeight()
+
+		err = state.Update(400)
+		require.NoError(t, err)
+		require.Equal(t, uint64(400), state.Window[3])
+	})
+
+	t.Run("correctly wraps around with aimd eip-1559", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		state.Window = make([]uint64, 3)
+
+		err := state.Update(100)
+		require.NoError(t, err)
+		require.Equal(t, uint64(100), state.Window[0])
+
+		state.IncrementHeight()
+
+		err = state.Update(200)
+		require.NoError(t, err)
+		require.Equal(t, uint64(200), state.Window[1])
+
+		state.IncrementHeight()
+
+		err = state.Update(300)
+		require.NoError(t, err)
+		require.Equal(t, uint64(300), state.Window[2])
+
+		state.IncrementHeight()
+		require.Equal(t, uint64(0), state.Window[0])
+
+		err = state.Update(400)
+		require.NoError(t, err)
+		require.Equal(t, uint64(400), state.Window[0])
+		require.Equal(t, uint64(200), state.Window[1])
+		require.Equal(t, uint64(300), state.Window[2])
+	})
+}
+
 func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("empty block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()

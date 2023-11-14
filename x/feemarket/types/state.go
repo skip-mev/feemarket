@@ -37,8 +37,7 @@ func (s *State) Update(gas uint64) error {
 	return nil
 }
 
-// IncrementHeight increments the current height of the state. This is
-// utilized to update the block utilization window.
+// IncrementHeight increments the current height of the state.
 func (s *State) IncrementHeight() {
 	s.Index = (s.Index + 1) % uint64(len(s.Window))
 	s.Window[s.Index] = 0
