@@ -61,13 +61,10 @@ var (
 // within the window.
 func DefaultAIMDParams() Params {
 	return NewParams(
-		DefaultAIMDWindow,
 		DefaultAIMDAlpha,
 		DefaultAIMDBeta,
 		DefaultAIMDTheta,
 		DefaultAIMDDelta,
-		DefaultAIMDTargetBlockSize,
-		DefaultAIMDMaxBlockSize,
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDMaxLearningRate,
@@ -81,5 +78,7 @@ func DefaultAIMDState() State {
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDWindow,
+		DefaultAIMDTargetBlockSize,
+		DefaultAIMDMaxBlockSize,
 	)
 }

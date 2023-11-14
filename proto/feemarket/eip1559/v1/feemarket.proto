@@ -42,6 +42,12 @@ message State {
     // values. This is used to calculate the next base fee.
     repeated uint64 block_utilization_window = 3;
 
+    // TargetBlockUtilization is the target block utilization.
+    uint64 target_block_utilization = 4;
+
+    // MaxBlockUtilization is the maximum block utilization.
+    uint64 max_block_utilization = 5;
+
     // Index is the index of the current block in the block utilization window.
-    uint64 index = 4;
+    uint64 index = 6;
 }

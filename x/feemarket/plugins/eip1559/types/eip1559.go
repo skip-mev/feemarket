@@ -49,13 +49,10 @@ var (
 // rate adjustment algorithm.
 func DefaultParams() Params {
 	return NewParams(
-		DefaultWindow,
 		DefaultAlpha,
 		DefaultBeta,
 		DefaultTheta,
 		DefaultDelta,
-		DefaultTargetBlockSize,
-		DefaultMaxBlockSize,
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 		DefaultMaxLearningRate,
@@ -69,5 +66,7 @@ func DefaultState() State {
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 		DefaultWindow,
+		DefaultTargetBlockSize,
+		DefaultMaxBlockSize,
 	)
 }
