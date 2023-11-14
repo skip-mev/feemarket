@@ -6,9 +6,9 @@ import (
 	"cosmossdk.io/math"
 )
 
-// NewBlockUtilization instantiates a new block utilization instance. This
-// struct is utilized to track how full blocks are over a sliding
-// window.
+// NewState instantiates a new fee market state instance. This is utilized
+// to implement both the base EIP-1559 fee market implementation and the
+// AIMD EIP-1559 fee market implementation.
 func NewState(window uint64, baseFee math.Int, learningRate math.LegacyDec) State {
 	return State{
 		Window:       make([]uint64, window),

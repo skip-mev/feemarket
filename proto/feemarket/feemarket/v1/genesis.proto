@@ -37,7 +37,7 @@ message State {
   ];
 
   // Window contains a list of the last blocks' utilization values. This is used to
-  // calculate the next base fee. This  stores the number of units of gas consumed 
+  // calculate the next base fee. This stores the number of units of gas consumed 
   // per block.
   repeated uint64 window = 3;
 
