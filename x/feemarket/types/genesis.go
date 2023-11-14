@@ -2,35 +2,47 @@ package types
 
 import (
 	"encoding/json"
+	fmt "fmt"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
-
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
-	"github.com/skip-mev/feemarket/x/feemarket/plugins/defaultmarket"
 )
 
-// NewDefaultGenesisState returns a default genesis state for the module.
-func NewDefaultGenesisState() *GenesisState {
+// NewGenesisState returns a new genesis state for the module.
+func NewGenesisState(
+	params Params,
+	baseFee math.Int,
+	learningRate math.LegacyDec,
+	utilization BlockUtilization,
+) *GenesisState {
 	return &GenesisState{
-		Plugin: MustNewPlugin(defaultmarket.NewDefaultFeeMarket()), // TODO replace with another impl
-		Params: DefaultParams(),
-	}
-}
-
-// NewGenesisState returns a new genesis state for the module.  Panics if it cannot marshal plugin.
-func NewGenesisState(plugin interfaces.FeeMarketImplementation, params Params) *GenesisState {
-	bz := MustNewPlugin(plugin)
-
-	return &GenesisState{
-		Plugin: bz,
-		Params: params,
+		Params:       params,
+		BaseFee:      baseFee,
+		LearningRate: learningRate,
+		Utilization:  utilization,
 	}
 }
 
 // ValidateBasic performs basic validation of the genesis state data returning an
 // error for any failed validation criteria.
 func (gs *GenesisState) ValidateBasic() error {
-	return gs.Params.ValidateBasic()
+	if err := gs.Params.ValidateBasic(); err != nil {
+		return err
+	}
+
+	if err := gs.Utilization.ValidateBasic(); err != nil {
+		return err
+	}
+
+	if gs.BaseFee.IsNil() || gs.BaseFee.IsNegative() {
+		return fmt.Errorf("base fee cannot be nil or negative")
+	}
+
+	if gs.LearningRate.IsNil() || gs.LearningRate.IsNegative() {
+		return fmt.Errorf("learning rate cannot be nil or negative")
+	}
+
+	return nil
 }
 
 // GetGenesisStateFromAppState returns x/feemarket GenesisState given raw application

@@ -5,20 +5,42 @@ option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
+import "feemarket/feemarket/v1/params.proto";
 
 // GenesisState defines the feemarket module's genesis state.
 message GenesisState {
-  // Plugin is the FeeMarket implementation plugged into the feemarket module.
-  // Must implement x/feemarket/types/FeeMarketImplementation
-  bytes plugin = 1 [ (cosmos_proto.accepts_interface) =
-                         "feemarket.feemarket.v1.FeeMarketImplementation" ];
+  // Params are the parameters for the feemarket module. These parameters
+  // can be utilized to implement both the base EIP-1559 fee market and
+  // and the AIMD EIP-1559 fee market.
+  Params params = 1 [ (gogoproto.nullable) = false ];
 
-  // Params are the parameters for the feemarket module.
-  Params params = 2 [ (gogoproto.nullable) = false ];
+  // BaseFee is the current base fee. This is denominated in the fee
+  // per gas unit.
+  string base_fee = 2 [
+      (cosmos_proto.scalar)  = "cosmos.Int",
+      (gogoproto.customtype) = "cosmossdk.io/math.Int",
+      (gogoproto.nullable)   = false
+  ];
+
+  // LearningRate is the current learning rate.
+  string learning_rate = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Legacy",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Utilization contains the current state of the AIMD fee market.
+  BlockUtilization utilization = 4 [ (gogoproto.nullable) = false ];
 }
 
-// Params defines the parameters for the feemarket module.
-message Params {
-  // Enabled is a flag to enable or disable the feemarket module.
-  bool enabled = 1;
+// BlockUtilization contains the current state of the AIMD fee market. This 
+// structure tracks total block utilization within a window of blocks.
+message BlockUtilization {
+  // Window contains a list of the last blocks' utilization
+  // values. This is used to calculate the next base fee. This 
+  // stores the number of units of gas consumed per block.
+  repeated uint64 window = 1;
+
+  // Index is the index of the current block in the block utilization window.
+  uint64 index = 4;
 }
