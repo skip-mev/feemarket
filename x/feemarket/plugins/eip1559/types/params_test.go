@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	"github.com/skip-mev/feemarket/x/feemarket/plugins/eip1559/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/skip-mev/feemarket/x/feemarket/plugins/eip1559/types"
 )
 
 func TestParams(t *testing.T) {

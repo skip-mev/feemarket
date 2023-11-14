@@ -12,13 +12,27 @@ service Query {
   // Params returns the current feemarket module parameters.
   rpc Params(ParamsRequest) returns (ParamsResponse) {
     option (google.api.http) = {
-      get : "/feemarket/feemarket/v1/params"
+      get : "/feemarket/v1/params"
+    };
+  };
+
+  // FeeMarketInfo returns the current feemarket module state info.
+  rpc FeeMarketInfo(FeeMarketInfoRequest) returns (FeeMarketInfoResponse) {
+    option (google.api.http) = {
+      get : "/feemarket/v1/info"
     };
   };
 }
 
-// QueryParamsRequest is the request type for the Query/Params RPC method.
+// ParamsRequest is the request type for the Query/Params RPC method.
 message ParamsRequest {}
 
-// QueryParamsResponse is the response type for the Query/Params RPC method.
+// ParamsResponse is the response type for the Query/Params RPC method.
 message ParamsResponse { Params params = 1 [ (gogoproto.nullable) = false ]; }
+
+// FeeMarketInfo is the request type for the Query/FeeMarketInfo RPC method.
+message FeeMarketInfoRequest {}
+
+// QueryFeeMarketInfoResponse is the response type for the Query/FeeMarketInfo
+// RPC method.
+message FeeMarketInfoResponse { map<string, string> info = 1; }

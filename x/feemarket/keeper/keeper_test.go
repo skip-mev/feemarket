@@ -23,6 +23,12 @@ type KeeperTestSuite struct {
 	ctx              sdk.Context
 	key              *storetypes.KVStoreKey
 	authorityAccount sdk.AccAddress
+
+	// Message server variables
+	msgServer types.MsgServer
+
+	// Query server variables
+	queryServer types.QueryServer
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -47,6 +53,9 @@ func (s *KeeperTestSuite) SetupTest() {
 
 	err := s.feemarketKeeper.SetParams(s.ctx, types.DefaultParams())
 	s.Require().NoError(err)
+
+	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
+	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
 }
 
 func (s *KeeperTestSuite) TestSetFeeMarket() {
@@ -57,7 +66,8 @@ func (s *KeeperTestSuite) TestSetFeeMarket() {
 
 	s.Run("set and get valid data", func() {
 		plugin := defaultmarket.NewDefaultFeeMarket()
-		s.feemarketKeeper.SetFeeMarket(s.ctx, plugin)
+		err := s.feemarketKeeper.SetFeeMarket(s.ctx, plugin)
+		s.Require().NoError(err)
 
 		gotPlugin, err := s.feemarketKeeper.GetFeeMarket(s.ctx)
 		s.Require().NoError(err)
