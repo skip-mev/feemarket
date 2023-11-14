@@ -6,16 +6,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
-
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
 
 // RegisterLegacyAminoCodec registers the necessary x/feemarket interfaces (messages) on the
 // provided LegacyAmino codec.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgParams{}, "feemarket/MsgParams")
-
-	cdc.RegisterInterface((*interfaces.FeeMarketImplementation)(nil), nil)
 }
 
 // RegisterInterfaces registers the x/feemarket interfaces (messages + msg server) on the
@@ -23,11 +19,6 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgParams{},
-	)
-
-	registry.RegisterInterface(
-		"feemarket.feemarket.v1.FeeMarketImplementation",
-		(*interfaces.FeeMarketImplementation)(nil),
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
