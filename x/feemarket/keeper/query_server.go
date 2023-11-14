@@ -31,12 +31,3 @@ func (q QueryServer) Params(goCtx context.Context, _ *types.ParamsRequest) (*typ
 
 	return &types.ParamsResponse{Params: params}, nil
 }
-
-// FeeMarketInfo defines a method that returns the current feemarket state info.
-func (q QueryServer) FeeMarketInfo(goCtx context.Context, _ *types.FeeMarketInfoRequest) (*types.FeeMarketInfoResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	info := q.k.GetFeeMarketInfo(ctx)
-
-	return &types.FeeMarketInfoResponse{Info: info}, nil
-}

@@ -17,13 +17,6 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic(err)
 	}
 
-	// set the fee market implementation
-	if err := k.plugin.Unmarshal(gs.Plugin); err != nil {
-		panic(err)
-	}
-	if err := k.plugin.ValidateBasic(); err != nil {
-		panic(err)
-	}
 	if err := k.Init(ctx); err != nil {
 		panic(err)
 	}
@@ -37,5 +30,10 @@ func (k *Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		panic(err)
 	}
 
-	return types.NewGenesisState(k.plugin, params)
+	// TODO get state
+
+	state := types.DefaultGenesisState()
+	state.Params = params
+
+	return state // TODO Return full state
 }

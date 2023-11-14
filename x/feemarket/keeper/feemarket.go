@@ -4,39 +4,45 @@ import (
 	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/skip-mev/feemarket/x/feemarket/interfaces"
 )
+
+// UpdateHandler is responsible for updating the parameters of the
+// fee market plugin.
+// Fees can optionally also be extracted here.
+type UpdateHandler func(ctx sdk.Context) error
 
 // ------------------- Fee Market Updates ------------------- //
 
-// Init which initializes the fee market (in InitGenesis)
+// Init initializes the fee market (in InitGenesis).
 func (k *Keeper) Init(ctx sdk.Context) error {
-	return k.plugin.Init(ctx)
+	// TODO initialize fee market state with params
+
+	return nil
 }
 
-// Export which exports the fee market (in ExportGenesis)
+// Export exports the fee market (in ExportGenesis).
 func (k *Keeper) Export(ctx sdk.Context) (json.RawMessage, error) {
-	return k.plugin.Export(ctx)
+	// TODO export state from fee market state
+
+	return nil, nil
 }
 
 // BeginBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the BeginBlock chain.
-func (k *Keeper) BeginBlockUpdateHandler(ctx sdk.Context) interfaces.UpdateHandler {
-	return k.plugin.BeginBlockUpdateHandler(ctx)
+func (k *Keeper) BeginBlockUpdateHandler(ctx sdk.Context) UpdateHandler {
+	return func(ctx sdk.Context) error {
+		return nil // TODO return handler
+	}
 }
 
 // EndBlockUpdateHandler allows the fee market to be updated
 // after every block. This will be added to the EndBlock chain.
-func (k *Keeper) EndBlockUpdateHandler(ctx sdk.Context) interfaces.UpdateHandler {
-	return k.plugin.EndBlockUpdateHandler(ctx)
+func (k *Keeper) EndBlockUpdateHandler(ctx sdk.Context) UpdateHandler {
+	return func(ctx sdk.Context) error {
+		return nil // TODO return handler
+	}
 }
 
 // ------------------- Fee Market Queries ------------------- //
 
-// GetFeeMarketInfo retrieves the fee market's information about
-// how to pay for a transaction (min gas price, min tip,
-// where the fees are being distributed, etc.).
-func (k *Keeper) GetFeeMarketInfo(ctx sdk.Context) map[string]string {
-	return k.plugin.GetFeeMarketInfo(ctx)
-}
+// TODO add fee market state query
