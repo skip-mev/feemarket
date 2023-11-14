@@ -5,7 +5,7 @@ option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "feemarket/feemarket/v1/genesis.proto";
+import "feemarket/feemarket/v1/params.proto";
 
 // Query Service for the feemarket module.
 service Query {
@@ -15,13 +15,6 @@ service Query {
       get : "/feemarket/v1/params"
     };
   };
-
-  // FeeMarketInfo returns the current feemarket module state info.
-  rpc FeeMarketInfo(FeeMarketInfoRequest) returns (FeeMarketInfoResponse) {
-    option (google.api.http) = {
-      get : "/feemarket/v1/info"
-    };
-  };
 }
 
 // ParamsRequest is the request type for the Query/Params RPC method.
@@ -29,10 +22,3 @@ message ParamsRequest {}
 
 // ParamsResponse is the response type for the Query/Params RPC method.
 message ParamsResponse { Params params = 1 [ (gogoproto.nullable) = false ]; }
-
-// FeeMarketInfo is the request type for the Query/FeeMarketInfo RPC method.
-message FeeMarketInfoRequest {}
-
-// QueryFeeMarketInfoResponse is the response type for the Query/FeeMarketInfo
-// RPC method.
-message FeeMarketInfoResponse { map<string, string> info = 1; }

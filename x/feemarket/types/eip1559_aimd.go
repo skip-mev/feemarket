@@ -71,15 +71,23 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDMaxLearningRate,
+		true,
 	)
 }
 
-// DefaultAIMDState returns a default set of state that implements
+// DefaultAIMDBlockUtilization returns a default block utilization instance
+// that implements the AIMD EIP-1559 fee market implementation.
+func DefaultAIMDBlockUtilization() BlockUtilization {
+	return NewBlockUtilization(DefaultAIMDWindow)
+}
+
+// DefaultAIMDGenesisState returns a default genesis state that implements
 // the AIMD EIP-1559 fee market implementation.
-func DefaultAIMDState() State {
-	return NewState(
+func DefaultAIMDGenesisState() *GenesisState {
+	return NewGenesisState(
+		DefaultAIMDParams(),
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
-		DefaultAIMDWindow,
+		DefaultAIMDBlockUtilization(),
 	)
 }
