@@ -19,8 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Query_Params_FullMethodName        = "/feemarket.feemarket.v1.Query/Params"
-	Query_FeeMarketInfo_FullMethodName = "/feemarket.feemarket.v1.Query/FeeMarketInfo"
+	Query_Params_FullMethodName = "/feemarket.feemarket.v1.Query/Params"
 )
 
 // QueryClient is the client API for Query service.
@@ -29,8 +28,6 @@ const (
 type QueryClient interface {
 	// Params returns the current feemarket module parameters.
 	Params(ctx context.Context, in *ParamsRequest, opts ...grpc.CallOption) (*ParamsResponse, error)
-	// FeeMarketInfo returns the current feemarket module state info.
-	FeeMarketInfo(ctx context.Context, in *FeeMarketInfoRequest, opts ...grpc.CallOption) (*FeeMarketInfoResponse, error)
 }
 
 type queryClient struct {
@@ -50,23 +47,12 @@ func (c *queryClient) Params(ctx context.Context, in *ParamsRequest, opts ...grp
 	return out, nil
 }
 
-func (c *queryClient) FeeMarketInfo(ctx context.Context, in *FeeMarketInfoRequest, opts ...grpc.CallOption) (*FeeMarketInfoResponse, error) {
-	out := new(FeeMarketInfoResponse)
-	err := c.cc.Invoke(ctx, Query_FeeMarketInfo_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
 	// Params returns the current feemarket module parameters.
 	Params(context.Context, *ParamsRequest) (*ParamsResponse, error)
-	// FeeMarketInfo returns the current feemarket module state info.
-	FeeMarketInfo(context.Context, *FeeMarketInfoRequest) (*FeeMarketInfoResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -76,9 +62,6 @@ type UnimplementedQueryServer struct {
 
 func (UnimplementedQueryServer) Params(context.Context, *ParamsRequest) (*ParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
-}
-func (UnimplementedQueryServer) FeeMarketInfo(context.Context, *FeeMarketInfoRequest) (*FeeMarketInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FeeMarketInfo not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -111,24 +94,6 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_FeeMarketInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FeeMarketInfoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).FeeMarketInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Query_FeeMarketInfo_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).FeeMarketInfo(ctx, req.(*FeeMarketInfoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,10 +104,6 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
-		},
-		{
-			MethodName: "FeeMarketInfo",
-			Handler:    _Query_FeeMarketInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
