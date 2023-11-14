@@ -24,6 +24,54 @@ func NewState(
 	}
 }
 
+// UpdateBaseFee updates the learning rate and base fee based on the AIMD
+// learning rate adjustment algorithm. The learning rate is updated
+// based on the average utilization of the block window. The base fee is
+// update using the new learning rate and the delta adjustment. Please
+// see the EIP-1559 specification for more details.
+func (s *State) UpdateBaseFee(params Params) {
+	// Update the learning rate.
+	s.UpdateLearningRate(params)
+
+	// Calculate the new base fee with the learning rate adjustment.
+	currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(s.BlockUtilizationWindow[s.Index]))
+	targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(s.TargetBlockUtilization))
+	factor := (currentBlockSize.Sub(targetBlockSize)).Quo(targetBlockSize)
+	learningRateAdjustment := math.LegacyOneDec().Add(s.LearningRate.Mul(factor)).TruncateInt()
+
+	// Calculate the delta adjustment.
+	net := s.GetNetUtilization()
+	delta := params.Delta.Mul(math.LegacyNewDecFromInt(net)).TruncateInt()
+
+	// Update the base fee.
+	s.BaseFee = s.BaseFee.Mul(learningRateAdjustment).Add(delta)
+}
+
+// UpdateLearningRate updates the learning rate based on the AIMD
+// learning rate adjustment algorithm.
+func (s *State) UpdateLearningRate(params Params) {
+	// Calculate the average utilization of the block window.
+	avg := s.GetAverageUtilization()
+
+	// Determine if the average utilization is above or below the target
+	// threshold and adjust the learning rate accordingly.
+	var updatedLearningRate math.LegacyDec
+	if avg.LTE(params.Theta) || avg.GTE(math.LegacyOneDec().Sub(params.Theta)) {
+		updatedLearningRate = params.Alpha.Add(s.LearningRate)
+		if updatedLearningRate.GT(params.MaxLearningRate) {
+			updatedLearningRate = params.MaxLearningRate
+		}
+	} else {
+		updatedLearningRate = s.LearningRate.Mul(params.Beta)
+		if updatedLearningRate.LT(params.MinLearningRate) {
+			updatedLearningRate = params.MinLearningRate
+		}
+	}
+
+	// Update the current learning rate.
+	s.LearningRate = updatedLearningRate
+}
+
 // GetNetUtilization returns the net utilization of the block window. This
 // is utilized to update base fee.
 func (s *State) GetNetUtilization() math.Int {

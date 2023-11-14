@@ -9,6 +9,81 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/plugins/eip1559/types"
 )
 
+func TestUpdateLearningRate(t *testing.T) {
+	t.Run("empty block update with default eip-1559", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		state.UpdateLearningRate(params)
+
+		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
+		require.True(t, expectedLearningRate.Equal(state.LearningRate))
+	})
+
+	t.Run("full block update with default eip-1559", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		err := state.Update(state.MaxBlockUtilization)
+		require.NoError(t, err)
+
+		state.UpdateLearningRate(params)
+
+		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
+		require.True(t, expectedLearningRate.Equal(state.LearningRate))
+	})
+
+	t.Run("target block with default eip-1559", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		err := state.Update(state.TargetBlockUtilization)
+		require.NoError(t, err)
+
+		state.UpdateLearningRate(params)
+
+		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
+		require.True(t, expectedLearningRate.Equal(state.LearningRate))
+	})
+
+	t.Run("several blocks with different utilizations with default eip-1559", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		err := state.Update(state.TargetBlockUtilization)
+		require.NoError(t, err)
+		state.IncrementHeight()
+
+		err = state.Update(state.MaxBlockUtilization)
+		require.NoError(t, err)
+		state.IncrementHeight()
+
+		err = state.Update(0)
+		require.NoError(t, err)
+
+		state.UpdateLearningRate(params)
+		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
+		require.True(t, expectedLearningRate.Equal(state.LearningRate))
+	})
+
+	t.Run("several blocks under the target", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		params := types.DefaultParams()
+
+		for i := 0; i < len(state.BlockUtilizationWindow)-1; i++ {
+			err := state.Update(state.TargetBlockUtilization - 1*uint64(i))
+			require.NoError(t, err)
+			state.IncrementHeight()
+		}
+		err := state.Update(state.TargetBlockUtilization - 1)
+		require.NoError(t, err)
+
+		state.UpdateLearningRate(params)
+		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
+		require.True(t, expectedLearningRate.Equal(state.LearningRate))
+	})
+}
+
 func TestGetNetUtilization(t *testing.T) {
 	t.Run("target block size is always met with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
