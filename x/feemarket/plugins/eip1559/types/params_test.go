@@ -62,7 +62,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "theta is nil",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 			},
@@ -71,7 +70,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "theta is negative",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 				Theta: math.LegacyMustNewDecFromStr("-0.1"),
@@ -81,7 +79,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "theta is greater than 1",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 				Theta: math.LegacyMustNewDecFromStr("1.1"),
@@ -91,7 +88,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "delta is nil",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 				Theta: math.LegacyMustNewDecFromStr("0.1"),
@@ -101,7 +97,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "delta is negative",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 				Theta: math.LegacyMustNewDecFromStr("0.1"),
@@ -112,7 +107,6 @@ func TestParams(t *testing.T) {
 		{
 			name: "min base fee is nil",
 			p: types.Params{
-
 				Alpha: math.LegacyMustNewDecFromStr("0.1"),
 				Beta:  math.LegacyMustNewDecFromStr("0.1"),
 				Theta: math.LegacyMustNewDecFromStr("0.1"),
