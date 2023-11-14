@@ -31,7 +31,7 @@ type GenesisState struct {
 	// can be utilized to implement both the base EIP-1559 fee market and
 	// and the AIMD EIP-1559 fee market.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
-	// Utilization contains the current state of the AIMD fee market.
+	// State contains the current state of the AIMD fee market.
 	State State `protobuf:"bytes,2,opt,name=state,proto3" json:"state"`
 }
 
@@ -83,17 +83,17 @@ func (m *GenesisState) GetState() State {
 }
 
 // State is utilized to track the current state of the fee market. This includes
-// the current base fee, learning rate, and block utilization within the specified
-// AIMD window.
+// the current base fee, learning rate, and block utilization within the
+// specified AIMD window.
 type State struct {
-	// BaseFee is the current base fee. This is denominated in the fee
-	// per gas unit.
+	// BaseFee is the current base fee. This is denominated in the fee per gas
+	// unit.
 	BaseFee cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=base_fee,json=baseFee,proto3,customtype=cosmossdk.io/math.Int" json:"base_fee"`
 	// LearningRate is the current learning rate.
 	LearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=learning_rate,json=learningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"learning_rate"`
-	// Window contains a list of the last blocks' utilization
-	// values. This is used to calculate the next base fee. This
-	// stores the number of units of gas consumed per block.
+	// Window contains a list of the last blocks' utilization values. This is used
+	// to calculate the next base fee. This stores the number of units of gas
+	// consumed per block.
 	Window []uint64 `protobuf:"varint,3,rep,packed,name=window,proto3" json:"window,omitempty"`
 	// Index is the index of the current block in the block utilization window.
 	Index uint64 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`
