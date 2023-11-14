@@ -8,26 +8,21 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-func TestBlockUtilization(t *testing.T) {
+func TestState_ValidateBasic(t *testing.T) {
 	testCases := []struct {
 		name      string
-		state     types.BlockUtilization
+		state     types.State
 		expectErr bool
 	}{
 		{
 			name:      "default base EIP-1559 state",
-			state:     types.DefaultBlockUtilization(),
+			state:     types.DefaultState(),
 			expectErr: false,
 		},
 		{
 			name:      "default AIMD EIP-1559 state",
-			state:     types.DefaultAIMDBlockUtilization(),
+			state:     types.DefaultAIMDState(),
 			expectErr: false,
-		},
-		{
-			name:      "invalid window",
-			state:     types.BlockUtilization{},
-			expectErr: true,
 		},
 	}
 
