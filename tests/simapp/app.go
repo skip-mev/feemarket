@@ -4,7 +4,6 @@ package simapp
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"io"
 	"os"
 	"path/filepath"
@@ -25,6 +24,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
