@@ -3,6 +3,7 @@ package ante
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
