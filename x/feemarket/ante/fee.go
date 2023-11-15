@@ -49,7 +49,10 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
-	var priority int64
+	var (
+		priority int64
+		tip      sdk.Coins
+	)
 
 	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
 	if err != nil {
@@ -60,13 +63,13 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 
 	fee := feeTx.GetFee()
 	if !simulate {
-		fee, priority, err = checkTxFees(ctx, minGasPricesDec, tx)
+		fee, tip, priority, err = checkTxFees(ctx, minGasPricesDec, tx)
 		if err != nil {
 			return ctx, err
 		}
 	}
 
-	if err := dfd.checkDeductFee(ctx, tx, fee); err != nil {
+	if err := dfd.checkDeductFeeAndTip(ctx, tx, fee, tip); err != nil {
 		return ctx, err
 	}
 
@@ -74,7 +77,7 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 	return next(newCtx, tx, simulate)
 }
 
-func (dfd FeeMarketDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coins) error {
+func (dfd FeeMarketDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx, fee, tip sdk.Coins) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
 		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -116,11 +119,21 @@ func (dfd FeeMarketDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee 
 		}
 	}
 
+	// deduct the tip
+	if !tip.IsZero() {
+		err := DeductTip(dfd.bankKeeper, ctx, deductFeesFromAcc, tip)
+		if err != nil {
+			return err
+		}
+	}
+
 	events := sdk.Events{
 		sdk.NewEvent(
 			sdk.EventTypeTx,
 			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
 			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, sdk.AccAddress(ctx.BlockHeader().ProposerAddress).String()),
 		),
 	}
 	ctx.EventManager().EmitEvents(events)
@@ -128,7 +141,22 @@ func (dfd FeeMarketDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee 
 	return nil
 }
 
-// DeductFees deducts fees from the given account.
+// DeductTip deducts tips from the given account.
+func DeductTip(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, tips sdk.Coins) error {
+	if !tips.IsValid() {
+		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", tips)
+	}
+
+	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
+	err := bankKeeper.SendCoins(ctx, acc.GetAddress(), proposer, tips)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+	}
+
+	return nil
+}
+
+// DeductFee deducts fees from the given account.
 func DeductFees(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, fees sdk.Coins) error {
 	if !fees.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)
@@ -144,13 +172,13 @@ func DeductFees(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, 
 
 // checkTxFees implements the logic for the fee market to check if a Tx has provided suffucient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (sdk.Coins, int64, error) {
+func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
-		return nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+		return nil, nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	feeCoins := feeTx.GetFee()
+	feeCoins = feeTx.GetFee()
 	gas := feeTx.GetGas()
 
 	// Ensure that the provided fees meet the minimum
@@ -167,14 +195,15 @@ func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (sdk.Coins, int6
 		}
 
 		if !feeCoins.IsAnyGTE(requiredFees) {
-			return nil, 0, errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "insufficient fees; got: %s required: %s", feeCoins, requiredFees)
+			return nil, nil, 0, errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "insufficient fees; got: %s required: %s", feeCoins, requiredFees)
 		}
 
-		feeCoins = requiredFees
+		tip = feeCoins.Sub(requiredFees...) // tip is whatever is left
+		feeCoins = requiredFees             //  set free coins to be ONLY the required amount
 	}
 
-	priority := getTxPriority(feeCoins, int64(gas))
-	return feeCoins, priority, nil
+	priority = getTxPriority(feeCoins, int64(gas))
+	return feeCoins, tip, priority, nil
 }
 
 // getTxPriority returns a naive tx priority based on the amount of the smallest denomination of the gas price

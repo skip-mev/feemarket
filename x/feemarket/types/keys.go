@@ -21,4 +21,7 @@ var (
 
 	// KeyState is the store key for the feemarket module's data.
 	KeyState = []byte{prefixState}
+
+	AttributeKeyTip      = "tip"
+	AttributeKeyTipPayer = "tip_payer"
 )
