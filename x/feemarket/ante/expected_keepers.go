@@ -3,6 +3,7 @@ package ante
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // AccountKeeper defines the contract needed for AccountKeeper related APIs.
@@ -19,9 +20,14 @@ type FeegrantKeeper interface {
 	UseGrantedFees(ctx sdk.Context, granter, grantee sdk.AccAddress, fee sdk.Coins, msgs []sdk.Msg) error
 }
 
-// BankKeeper defines the contract needed for supply related APIs (noalias)
+// BankKeeper defines the contract needed for supply related APIs.
 type BankKeeper interface {
 	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
 	SendCoins(ctx sdk.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+}
+
+// FeeMarketKeeper defines the expected feemarket keeper.
+type FeeMarketKeeper interface {
+	GetState(ctx sdk.Context) (feemarkettypes.State, error)
 }

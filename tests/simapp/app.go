@@ -142,7 +142,7 @@ type SimApp struct {
 	GroupKeeper           groupkeeper.Keeper
 	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
-	FeeMarketKeeper       feemarketkeeper.Keeper
+	FeeMarketKeeper       *feemarketkeeper.Keeper
 
 	// simulation manager
 	sm            *module.SimulationManager
@@ -272,7 +272,8 @@ func NewSimApp(
 		SignModeHandler: app.txConfig.SignModeHandler(),
 	}
 	options := feemarketante.HandlerOptions{
-		BaseOptions: handlerOptions,
+		BaseOptions:     handlerOptions,
+		FeeMarketKeeper: app.FeeMarketKeeper,
 	}
 	anteHandler, err := feemarketante.NewAnteHandler(options)
 	if err != nil {
