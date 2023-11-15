@@ -443,11 +443,8 @@ func TestState_GetNetUtilization(t *testing.T) {
 	t.Run("state with 4 entries in window with different updates", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.Window = make([]uint64, 4)
-
-		params := types.DefaultAIMDParams()
-		params.Window = 4
-		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
+		state.TargetBlockUtilization = 100
+		state.MaxBlockUtilization = 200
 
 		state.Window[0] = 100
 		state.Window[1] = 200
@@ -462,11 +459,8 @@ func TestState_GetNetUtilization(t *testing.T) {
 	t.Run("state with 4 entries in window with monotonically increasing updates", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.Window = make([]uint64, 4)
-
-		params := types.DefaultAIMDParams()
-		params.Window = 4
-		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
+		state.TargetBlockUtilization = 100
+		state.MaxBlockUtilization = 200
 
 		state.Window[0] = 0
 		state.Window[1] = 25
