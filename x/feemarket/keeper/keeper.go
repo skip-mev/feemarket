@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -12,6 +14,7 @@ import (
 type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
+	ak       types.AccountKeeper
 
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
@@ -22,11 +25,22 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
+	authKeeper types.AccountKeeper,
 	authority string,
 ) *Keeper {
+	// ensure governance module account is set
+	if addr := authKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
+	}
+
+	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
+		panic(fmt.Sprintf("invalid authority address: %s", authority))
+	}
+
 	k := &Keeper{
 		cdc,
 		storeKey,
+		authKeeper,
 		authority,
 	}
 

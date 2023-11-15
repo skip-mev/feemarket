@@ -5,6 +5,9 @@ const (
 	ModuleName = "feemarket"
 	// StoreKey is the store key string for the feemarket module.
 	StoreKey = ModuleName
+
+	// FeeCollectorName the root string for the fee market fee collector account address.
+	FeeCollectorName = "feemarket-fee-collector"
 )
 
 const (

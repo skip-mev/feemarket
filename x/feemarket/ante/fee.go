@@ -55,7 +55,6 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 	}
 
 	minGasPricesDec := sdk.NewDecCoinsFromCoins(minGasPrices...)
-	ctx = ctx.WithMinGasPrices(minGasPricesDec)
 
 	fee := feeTx.GetFee()
 	if !simulate {
@@ -69,7 +68,7 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, err
 	}
 
-	newCtx := ctx.WithPriority(priority)
+	newCtx := ctx.WithPriority(priority).WithMinGasPrices(minGasPricesDec)
 	return next(newCtx, tx, simulate)
 }
 
