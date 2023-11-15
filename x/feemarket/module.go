@@ -94,11 +94,6 @@ func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 	}
 }
 
-// BeginBlock returns a beginblocker for the x/feemarket module.
-func (am AppModule) BeginBlock(ctx sdk.Context) ([]abci.ValidatorUpdate, error) {
-	return am.k.BeginBlock(ctx)
-}
-
 // EndBlock returns an endblocker for the x/feemarket module.
 func (am AppModule) EndBlock(ctx sdk.Context, req abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return am.k.EndBlock(ctx, req)
