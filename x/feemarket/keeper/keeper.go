@@ -43,6 +43,35 @@ func (k *Keeper) GetAuthority() string {
 	return k.authority
 }
 
+// GetState returns the feemarket module's state.
+func (k *Keeper) GetState(ctx sdk.Context) (types.State, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	key := types.KeyState
+	bz := store.Get(key)
+
+	state := types.State{}
+	if err := state.Unmarshal(bz); err != nil {
+		return types.State{}, err
+	}
+
+	return state, nil
+}
+
+// SetState sets the feemarket module's state.
+func (k *Keeper) SetState(ctx sdk.Context, state types.State) error {
+	store := ctx.KVStore(k.storeKey)
+
+	bz, err := state.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(types.KeyState, bz)
+
+	return nil
+}
+
 // GetParams returns the feemarket module's parameters.
 func (k *Keeper) GetParams(ctx sdk.Context) (types.Params, error) {
 	store := ctx.KVStore(k.storeKey)

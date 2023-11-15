@@ -53,3 +53,36 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
 }
+
+func (s *KeeperTestSuite) TestState() {
+	s.Run("get state with no state set", func() {
+		gotState, err := s.feemarketKeeper.GetState(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(types.State{}, gotState)
+	})
+
+	s.Run("set and get default eip1559 state", func() {
+		state := types.DefaultState()
+
+		err := s.feemarketKeeper.SetState(s.ctx, state)
+		s.Require().NoError(err)
+
+		gotState, err := s.feemarketKeeper.GetState(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().EqualValues(state, gotState)
+	})
+
+	s.Run("set and get aimd eip1559 state", func() {
+		state := types.DefaultAIMDState()
+
+		err := s.feemarketKeeper.SetState(s.ctx, state)
+		s.Require().NoError(err)
+
+		gotState, err := s.feemarketKeeper.GetState(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(state, gotState)
+	})
+}
