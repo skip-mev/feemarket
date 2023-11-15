@@ -1,11 +1,389 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 func (s *KeeperTestSuite) TestUpdateFeeMarket() {
-	// TODO: add tests.
+	s.Run("empty block with default eip1559 with min base fee", func() {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("empty block with default eip1559 with preset base fee", func() {
+		state := types.DefaultState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to decrease by 1/8th.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("0.875")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("empty block default eip1559 with preset base fee that should default to min", func() {
+		// Set the base fee to just below the expected threshold decrease of 1/8th. This means it
+		// should default to the minimum base fee.
+		state := types.DefaultState()
+		factor := math.LegacyMustNewDecFromStr("0.125")
+		increase := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.NewInt(1))
+
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to decrease by 1/8th.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("target block with default eip1559 at min base fee", func() {
+		state := types.DefaultState()
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		err := state.Update(state.TargetBlockUtilization)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to remain the same.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("target block with default eip1559 at preset base fee", func() {
+		state := types.DefaultState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		err := state.Update(state.TargetBlockUtilization)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to remain the same.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(state.BaseFee, fee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("max block with default eip1559 at min base fee", func() {
+		state := types.DefaultState()
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		err := state.Update(state.MaxBlockUtilization)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to increase by 1/8th.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("1.125")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("max block with default eip1559 at preset base fee", func() {
+		state := types.DefaultState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		err := state.Update(state.MaxBlockUtilization)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to increase by 1/8th.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("1.125")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("in-between min and target block with default eip1559 at min base fee", func() {
+		state := types.DefaultState()
+		state.MaxBlockUtilization = 100
+		state.TargetBlockUtilization = 50
+		err := state.Update(25)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		params.MaxBlockUtilization = 100
+		params.TargetBlockUtilization = 50
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to remain the same since it is at min base fee.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("in-between min and target block with default eip1559 at preset base fee", func() {
+		state := types.DefaultState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.MaxBlockUtilization = 100
+		state.TargetBlockUtilization = 50
+		err := state.Update(25)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		params.MaxBlockUtilization = 100
+		params.TargetBlockUtilization = 50
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to decrease by 1/8th * 1/2.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("0.9375")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("in-between target and max block with default eip1559 at min base fee", func() {
+		state := types.DefaultState()
+		state.MaxBlockUtilization = 100
+		state.TargetBlockUtilization = 50
+		err := state.Update(75)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		params.MaxBlockUtilization = 100
+		params.TargetBlockUtilization = 50
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to increase by 1/8th * 1/2.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("1.0625")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("in-between target and max block with default eip1559 at preset base fee", func() {
+		state := types.DefaultState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.MaxBlockUtilization = 100
+		state.TargetBlockUtilization = 50
+		err := state.Update(75)
+		s.Require().NoError(err)
+
+		params := types.DefaultParams()
+		params.MaxBlockUtilization = 100
+		params.TargetBlockUtilization = 50
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to increase by 1/8th * 1/2.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		factor := math.LegacyMustNewDecFromStr("1.0625")
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("empty blocks with aimd eip1559 with min base fee", func() {
+		state := types.DefaultAIMDState()
+		params := types.DefaultAIMDParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		expectedLR := state.LearningRate.Add(params.Alpha)
+		s.Require().Equal(expectedLR, lr)
+	})
+
+	s.Run("empty blocks with aimd eip1559 with preset base fee", func() {
+		state := types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		params := types.DefaultAIMDParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to decrease by 1/8th and the learning rate to
+		// increase by alpha.
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		expectedLR := state.LearningRate.Add(params.Alpha)
+		s.Require().Equal(expectedLR, lr)
+
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		factor := math.LegacyOneDec().Add(math.LegacyMustNewDecFromStr("-1.0").Mul(lr))
+		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		s.Require().Equal(fee, expectedFee)
+	})
+
+	s.Run("empty blocks aimd eip1559 with preset base fee that should default to min", func() {
+		params := types.DefaultAIMDParams()
+
+		state := types.DefaultAIMDState()
+		lr := math.LegacyMustNewDecFromStr("0.125")
+		increase := state.BaseFee.ToLegacyDec().Mul(lr).TruncateInt()
+
+		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.NewInt(1))
+		state.LearningRate = lr
+
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		expectedLR := state.LearningRate.Add(params.Alpha)
+		s.Require().Equal(expectedLR, lr)
+
+		// We expect the base fee to decrease by 1/8th and the learning rate to
+		// increase by alpha.
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(fee, params.MinBaseFee)
+	})
+
+	s.Run("target block with aimd eip1559 at min base fee + LR", func() {
+		state := types.DefaultAIMDState()
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = state.TargetBlockUtilization
+		}
+
+		params := types.DefaultAIMDParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to remain the same and the learning rate to
+		// remain at minimum.
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(params.MinLearningRate, lr)
+
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(state.BaseFee, fee)
+	})
+
+	s.Run("target block with aimd eip1559 at preset base fee + LR", func() {
+		state := types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
+		// Reaching the target block size means that we expect this to not
+		// increase.
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = state.TargetBlockUtilization
+		}
+
+		params := types.DefaultAIMDParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+
+		// We expect the base fee to decrease by 1/8th and the learning rate to
+		// decrease by lr * beta.
+		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		expectedLR := state.LearningRate.Mul(params.Beta)
+		s.Require().Equal(expectedLR, lr)
+
+		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(state.BaseFee, fee)
+	})
 }
 
 func (s *KeeperTestSuite) TestGetBaseFee() {
@@ -45,5 +423,12 @@ func (s *KeeperTestSuite) TestGetLearningRate() {
 		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(lr, gs.State.LearningRate)
+	})
+}
+
+func (s *KeeperTestSuite) setGenesisState(params types.Params, state types.State) {
+	gs := types.NewGenesisState(params, state)
+	s.NotPanics(func() {
+		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
 	})
 }

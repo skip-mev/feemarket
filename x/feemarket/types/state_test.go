@@ -202,6 +202,26 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		expectedBaseFee := math.NewInt(1150)
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
+
+	t.Run("never goes below min base fee with default eip1599", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		// Empty block
+		newBaseFee := state.UpdateBaseFee(params.Delta)
+		expectedBaseFee := params.MinBaseFee
+		require.True(t, expectedBaseFee.Equal(newBaseFee))
+	})
+
+	t.Run("never goes below min base fee with default aimd eip1599", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		params := types.DefaultAIMDParams()
+
+		// Empty blocks
+		newBaseFee := state.UpdateBaseFee(params.Delta)
+		expectedBaseFee := params.MinBaseFee
+		require.True(t, expectedBaseFee.Equal(newBaseFee))
+	})
 }
 
 func TestState_UpdateLearningRate(t *testing.T) {
