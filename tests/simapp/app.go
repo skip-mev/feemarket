@@ -4,6 +4,7 @@ package simapp
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"io"
 	"os"
 	"path/filepath"
@@ -65,6 +66,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
+
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 )
 
 var (
@@ -251,6 +254,26 @@ func NewSimApp(
 	// baseAppOptions = append(baseAppOptions, prepareOpt)
 
 	app.App = appBuilder.Build(logger, db, traceStore, baseAppOptions...)
+
+	// ---------------------------------------------------------------------------- //
+	// ------------------------- Begin Custom Code -------------------------------- //
+	// ---------------------------------------------------------------------------- //
+
+	handlerOptions := ante.HandlerOptions{
+		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
+		FeegrantKeeper:  app.FeeGrantKeeper,
+		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+		SignModeHandler: app.txConfig.SignModeHandler(),
+	}
+	options := feemarketante.HandlerOptions{
+		BaseOptions: handlerOptions,
+	}
+	anteHandler, err := feemarketante.NewAnteHandler(options)
+	if err != nil {
+		panic(err)
+	}
+	app.App.SetAnteHandler(anteHandler)
 
 	/****  Module Options ****/
 
