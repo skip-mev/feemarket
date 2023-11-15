@@ -31,5 +31,5 @@ type BankKeeper interface {
 // FeeMarketKeeper defines the expected feemarket keeper.
 type FeeMarketKeeper interface {
 	GetState(ctx sdk.Context) (feemarkettypes.State, error)
-	GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error)
+	GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
 }

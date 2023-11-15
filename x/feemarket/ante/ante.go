@@ -42,7 +42,6 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 			options.BaseOptions.BankKeeper,
 			options.BaseOptions.FeegrantKeeper,
 			options.FeeMarketKeeper,
-			TxFeeChecker(options.BaseOptions.TxFeeChecker),
 		),
 		authante.NewSetPubKeyDecorator(options.BaseOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		authante.NewValidateSigCountDecorator(options.BaseOptions.AccountKeeper),
