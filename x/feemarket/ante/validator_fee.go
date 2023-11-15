@@ -10,9 +10,9 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// checkTxFeeWithValidatorMinGasPrices implements the default fee logic, where the minimum price per
-// unit of gas is fixed and set by each validator, can the tx priority is computed from the gas price.
-func checkTxFeeWithValidatorMinGasPrices(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
+// checkTxFees implements the logic for the fee market to check if a Tx has provided suffucient
+// fees given the current state of the fee market. Returns an error if insufficient fees.
+func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -21,11 +21,11 @@ func checkTxFeeWithValidatorMinGasPrices(ctx sdk.Context, tx sdk.Tx) (sdk.Coins,
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas()
 
-	// Ensure that the provided fees meet a minimum threshold for the validator,
+	// Ensure that the provided fees meet the minimum
 	// if this is a CheckTx. This is only for local mempool purposes, and thus
 	// is only ran on check tx.
 	if ctx.IsCheckTx() {
-		minGasPrices := ctx.MinGasPrices()
+		minGasPrices := fees
 		if !minGasPrices.IsZero() {
 			requiredFees := make(sdk.Coins, len(minGasPrices))
 

@@ -23,20 +23,14 @@ type FeeMarketDecorator struct {
 	bankKeeper      BankKeeper
 	feegrantKeeper  FeegrantKeeper
 	feemarketKeeper FeeMarketKeeper
-	txFeeChecker    TxFeeChecker
 }
 
-func NewFeeMarketDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper, tfc TxFeeChecker) FeeMarketDecorator {
-	if tfc == nil {
-		tfc = checkTxFeeWithValidatorMinGasPrices
-	}
-
+func NewFeeMarketDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper) FeeMarketDecorator {
 	return FeeMarketDecorator{
 		accountKeeper:   ak,
 		bankKeeper:      bk,
 		feegrantKeeper:  fk,
 		feemarketKeeper: fmk,
-		txFeeChecker:    tfc,
 	}
 }
 
@@ -50,26 +44,31 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
-	// TODO refactor with new logic
-
 	var (
 		priority int64
 		err      error
 	)
 
+	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
+	}
+
+	ctx = ctx.WithMinGasPrices(minGasPrice)
+
 	fee := feeTx.GetFee()
 	if !simulate {
-		fee, priority, err = dfd.txFeeChecker(ctx, tx)
+		fee, priority, err = checkTxFees(ctx, minGasPrice, tx)
 		if err != nil {
 			return ctx, err
 		}
 	}
+
 	if err := dfd.checkDeductFee(ctx, tx, fee); err != nil {
 		return ctx, err
 	}
 
 	newCtx := ctx.WithPriority(priority)
-
 	return next(newCtx, tx, simulate)
 }
 
