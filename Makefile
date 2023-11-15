@@ -11,6 +11,21 @@ HTTPS_GIT := https://github.com/skip-mev/feemarket.git
 DOCKER := $(shell which docker)
 
 ###############################################################################
+##                                Workspaces                                 ##
+###############################################################################
+
+use-main:
+	@go work edit -use .
+	@go work edit -dropuse ./tests/integration
+
+use-integration:
+	@go work edit -dropuse .
+	@go work edit -use ./tests/integration
+
+tidy:
+	@go mod tidy
+
+###############################################################################
 ###                                Test App                                 ###
 ###############################################################################
 
@@ -90,11 +105,11 @@ build-and-start-app: build-test-app
 ##                                  Docker                                   ##
 ###############################################################################
 
-docker-build:
+docker-build: use-main
 	@echo "Building E2E Docker image..."
 	@DOCKER_BUILDKIT=1 docker build -t skip-mev/feemarket-e2e -f contrib/images/feemarket.e2e.Dockerfile .
 
-docker-build-integration:
+docker-build-integration: use-main
 	@echo "Building integration-test Docker image..."
 	@DOCKER_BUILDKIT=1 docker build -t feemarket-integration -f contrib/images/feemarket.integration.Dockerfile .
 
@@ -102,7 +117,7 @@ docker-build-integration:
 ###                                  Tests                                  ###
 ###############################################################################
 
-TEST_INTEGRATION_DEPS = docker-build-integration
+TEST_INTEGRATION_DEPS = docker-build-integration use-integration
 TEST_INTEGRATION_TAGS = integration
 
 test-integration: $(TEST_INTEGRATION_DEPS)
@@ -151,11 +166,11 @@ proto-update-deps:
 ###                                Linting                                  ###
 ###############################################################################
 
-lint:
+lint: use-main
 	@echo "--> Running linter"
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab
 
-lint-fix:
+lint-fix: use-main
 	@echo "--> Running linter"
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --out-format=tab --issues-exit-code=0
 
@@ -169,9 +184,7 @@ lint-markdown:
 ###                                Formatting                               ###
 ###############################################################################
 
-format:
-
-format:
+format: use-main
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run mvdan.cc/gofumpt -w .
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run github.com/client9/misspell/cmd/misspell -w
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/skip-mev/feemarket
