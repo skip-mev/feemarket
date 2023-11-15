@@ -83,6 +83,7 @@ var (
 
 	// module account permissions
 	moduleAccPerms = []*authmodulev1.ModuleAccountPermission{
+		{Account: feemarkettypes.FeeCollectorName, Permissions: []string{authtypes.Burner}}, // allow fee market to burn
 		{Account: authtypes.FeeCollectorName},
 		{Account: distrtypes.ModuleName},
 		{Account: feemarkettypes.ModuleName},
@@ -99,6 +100,7 @@ var (
 		minttypes.ModuleName,
 		stakingtypes.BondedPoolName,
 		stakingtypes.NotBondedPoolName,
+		feemarkettypes.FeeCollectorName,
 		// We allow the following module accounts to receive funds:
 		// govtypes.ModuleName
 	}
