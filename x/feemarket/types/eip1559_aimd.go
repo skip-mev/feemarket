@@ -80,7 +80,13 @@ func DefaultAIMDParams() Params {
 // block utilization and dynamically adjusts the learning rate based on the
 // utilization within the window.
 func DefaultAIMDState() State {
-	return NewState(DefaultAIMDWindow, DefaultAIMDMinBaseFee, DefaultAIMDMinLearningRate)
+	return NewState(
+		DefaultAIMDWindow,
+		DefaultAIMDTargetBlockSize,
+		DefaultAIMDMaxBlockSize,
+		DefaultAIMDMinBaseFee,
+		DefaultAIMDMinLearningRate,
+	)
 }
 
 // DefaultAIMDGenesisState returns a default genesis state that implements
