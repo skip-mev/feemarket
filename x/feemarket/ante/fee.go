@@ -17,22 +17,24 @@ type TxFeeChecker func(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error)
 // Call next AnteHandler if fees successfully deducted.
 // CONTRACT: Tx must implement FeeTx interface to use DeductFeeDecorator
 type DeductFeeDecorator struct {
-	accountKeeper  AccountKeeper
-	bankKeeper     types.BankKeeper
-	feegrantKeeper FeegrantKeeper
-	txFeeChecker   TxFeeChecker
+	accountKeeper   AccountKeeper
+	bankKeeper      types.BankKeeper
+	feegrantKeeper  FeegrantKeeper
+	feemarketKeeper FeeMarketKeeper
+	txFeeChecker    TxFeeChecker
 }
 
-func NewDeductFeeDecorator(ak AccountKeeper, bk types.BankKeeper, fk FeegrantKeeper, tfc TxFeeChecker) DeductFeeDecorator {
+func NewDeductFeeDecorator(ak AccountKeeper, bk types.BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper, tfc TxFeeChecker) DeductFeeDecorator {
 	if tfc == nil {
 		tfc = checkTxFeeWithValidatorMinGasPrices
 	}
 
 	return DeductFeeDecorator{
-		accountKeeper:  ak,
-		bankKeeper:     bk,
-		feegrantKeeper: fk,
-		txFeeChecker:   tfc,
+		accountKeeper:   ak,
+		bankKeeper:      bk,
+		feegrantKeeper:  fk,
+		feemarketKeeper: fmk,
+		txFeeChecker:    tfc,
 	}
 }
 

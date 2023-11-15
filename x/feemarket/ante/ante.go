@@ -37,7 +37,13 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewTxTimeoutHeightDecorator(),
 		authante.NewValidateMemoDecorator(options.BaseOptions.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.BaseOptions.AccountKeeper),
-		NewDeductFeeDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.BankKeeper, options.BaseOptions.FeegrantKeeper, TxFeeChecker(options.BaseOptions.TxFeeChecker)),
+		NewDeductFeeDecorator(
+			options.BaseOptions.AccountKeeper,
+			options.BaseOptions.BankKeeper,
+			options.BaseOptions.FeegrantKeeper,
+			options.FeeMarketKeeper,
+			TxFeeChecker(options.BaseOptions.TxFeeChecker),
+		),
 		authante.NewSetPubKeyDecorator(options.BaseOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		authante.NewValidateSigCountDecorator(options.BaseOptions.AccountKeeper),
 		authante.NewSigGasConsumeDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.SigGasConsumer),
