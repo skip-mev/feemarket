@@ -37,7 +37,7 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewTxTimeoutHeightDecorator(),
 		authante.NewValidateMemoDecorator(options.BaseOptions.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.BaseOptions.AccountKeeper),
-		NewDeductFeeDecorator(
+		NewFeeMarketDecorator(
 			options.BaseOptions.AccountKeeper,
 			options.BaseOptions.BankKeeper,
 			options.BaseOptions.FeegrantKeeper,

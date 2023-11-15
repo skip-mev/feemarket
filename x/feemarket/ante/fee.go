@@ -18,7 +18,7 @@ type TxFeeChecker func(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error)
 // If the fee payer does not have the funds to pay for the fees, return an InsufficientFunds error.
 // Call next AnteHandler if fees successfully deducted.
 // CONTRACT: Tx must implement FeeTx interface to use DeductFeeDecorator
-type DeductFeeDecorator struct {
+type FeeMarketDecorator struct {
 	accountKeeper   AccountKeeper
 	bankKeeper      BankKeeper
 	feegrantKeeper  FeegrantKeeper
@@ -26,12 +26,12 @@ type DeductFeeDecorator struct {
 	txFeeChecker    TxFeeChecker
 }
 
-func NewDeductFeeDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper, tfc TxFeeChecker) DeductFeeDecorator {
+func NewFeeMarketDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper, tfc TxFeeChecker) FeeMarketDecorator {
 	if tfc == nil {
 		tfc = checkTxFeeWithValidatorMinGasPrices
 	}
 
-	return DeductFeeDecorator{
+	return FeeMarketDecorator{
 		accountKeeper:   ak,
 		bankKeeper:      bk,
 		feegrantKeeper:  fk,
@@ -40,7 +40,7 @@ func NewDeductFeeDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, f
 	}
 }
 
-func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
+func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -73,7 +73,7 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 	return next(newCtx, tx, simulate)
 }
 
-func (dfd DeductFeeDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coins) error {
+func (dfd FeeMarketDecorator) checkDeductFee(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coins) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
 		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
