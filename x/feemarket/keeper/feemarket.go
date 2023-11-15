@@ -1,36 +1,16 @@
 package keeper
 
 import (
-	"encoding/json"
-
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// ------------------- Fee Market Updates ------------------- //
-
-// Init initializes the fee market (in InitGenesis).
-func (k *Keeper) Init(_ sdk.Context) error {
-	// TODO initialize fee market state with params
-
-	return nil
-}
-
-// Export exports the fee market (in ExportGenesis).
-func (k *Keeper) Export(_ sdk.Context) (json.RawMessage, error) {
-	// TODO export state from fee market state
-
-	return nil, nil
-}
-
-// BeginBlocker allows the fee market to be updated
-// after every block. This will be added to the BeginBlock chain.
-func (k *Keeper) BeginBlocker(_ sdk.Context) error {
-	return nil
-}
-
-// EndBlocker allows the fee market to be updated
-// after every block. This will be added to the EndBlock chain.
-func (k *Keeper) EndBlocker(ctx sdk.Context) error {
+// UpdateFeeMarket updates the base fee and learning rate based on the
+// AIMD learning rate adjustment algorithm. Note that if the fee market
+// is disabled, this function will return without updating the fee market.
+// This is executed in EndBlock which allows the next block's base fee to
+// be readily available for wallets to estimate gas prices.
+func (k *Keeper) UpdateFeeMarket(ctx sdk.Context) error {
 	params, err := k.GetParams(ctx)
 	if err != nil {
 		return err
@@ -70,4 +50,24 @@ func (k *Keeper) EndBlocker(ctx sdk.Context) error {
 	// Increment the height of the state and set the new state.
 	state.IncrementHeight()
 	return k.SetState(ctx, state)
+}
+
+// GetBaseFee returns the base fee from the fee market state.
+func (k *Keeper) GetBaseFee(ctx sdk.Context) (math.Int, error) {
+	state, err := k.GetState(ctx)
+	if err != nil {
+		return math.Int{}, err
+	}
+
+	return state.BaseFee, nil
+}
+
+// GetLearningRate returns the learning rate from the fee market state.
+func (k *Keeper) GetLearningRate(ctx sdk.Context) (math.LegacyDec, error) {
+	state, err := k.GetState(ctx)
+	if err != nil {
+		return math.LegacyDec{}, err
+	}
+
+	return state.LearningRate, nil
 }
