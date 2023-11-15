@@ -67,7 +67,9 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 
+	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 )
 
 var (
@@ -103,6 +105,7 @@ var (
 		vesting.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
+		feemarket.AppModuleBasic{},
 	)
 )
 
@@ -139,6 +142,7 @@ type SimApp struct {
 	GroupKeeper           groupkeeper.Keeper
 	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
+	FeeMarketKeeper       feemarketkeeper.Keeper
 
 	// simulation manager
 	sm            *module.SimulationManager
@@ -223,6 +227,7 @@ func NewSimApp(
 		&app.GroupKeeper,
 		&app.NFTKeeper,
 		&app.ConsensusParamsKeeper,
+		&app.FeeMarketKeeper,
 	); err != nil {
 		panic(err)
 	}
