@@ -48,6 +48,8 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, sdkerrors.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
+	// TODO refactor with new logic
+
 	var (
 		priority int64
 		err      error
