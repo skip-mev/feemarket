@@ -14,24 +14,24 @@ var (
 	// DefaultAIMDAlpha is the default alpha value for the learning
 	// rate calculation. This value determines how much we want to additively
 	// increase the learning rate when the target block size is exceeded.
-	DefaultAIMDAlpha math.LegacyDec = math.LegacyMustNewDecFromStr("0.025")
+	DefaultAIMDAlpha = math.LegacyMustNewDecFromStr("0.025")
 
 	// DefaultAIMDBeta is the default beta value for the learning rate
 	// calculation. This value determines how much we want to multiplicatively
 	// decrease the learning rate when the target utilization is not met.
-	DefaultAIMDBeta math.LegacyDec = math.LegacyMustNewDecFromStr("0.95")
+	DefaultAIMDBeta = math.LegacyMustNewDecFromStr("0.95")
 
 	// DefaultAIMDTheta is the default threshold for determining whether
 	// to increase or decrease the learning rate. In this case, we increase
 	// the learning rate if the block utilization within the window is greater
 	// than 0.75 or less than 0.25. Otherwise, we multiplicatively decrease
 	// the learning rate.
-	DefaultAIMDTheta math.LegacyDec = math.LegacyMustNewDecFromStr("0.25")
+	DefaultAIMDTheta = math.LegacyMustNewDecFromStr("0.25")
 
 	// DefaultAIMDDelta is the default delta value for how much we additively
 	// increase or decrease the base fee when the net block utilization within
 	// the window is not equal to the target utilization.
-	DefaultAIMDDelta math.LegacyDec = math.LegacyMustNewDecFromStr("0.0")
+	DefaultAIMDDelta = math.LegacyMustNewDecFromStr("0.0")
 
 	// DefaultAIMDTargetBlockSize is the default target block utilization. This
 	// is the default on Ethereum. This denominated in units of gas consumed in
@@ -46,13 +46,16 @@ var (
 	// DefaultAIMDMinBaseFee is the default minimum base fee. This is the
 	// default on Ethereum. Note that ethereum is denominated in 1e18 wei.
 	// Cosmos chains will likely want to change this to 1e6.
-	DefaultAIMDMinBaseFee math.Int = math.NewInt(1_000_000_000)
+	DefaultAIMDMinBaseFee = math.NewInt(1_000_000_000)
 
 	// DefaultAIMDMinLearningRate is the default minimum learning rate.
-	DefaultAIMDMinLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.01")
+	DefaultAIMDMinLearningRate = math.LegacyMustNewDecFromStr("0.01")
 
 	// DefaultAIMDMaxLearningRate is the default maximum learning rate.
-	DefaultAIMDMaxLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.50")
+	DefaultAIMDMaxLearningRate = math.LegacyMustNewDecFromStr("0.50")
+
+	// DefaultAIMDFeeDenom is the Cosmos SDK default bond denom.
+	DefaultAIMDFeeDenom = DefaultFeeDenom
 )
 
 // DefaultAIMDParams returns a default set of parameters that implements
@@ -71,6 +74,7 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDMaxLearningRate,
+		DefaultAIMDFeeDenom,
 		true,
 	)
 }

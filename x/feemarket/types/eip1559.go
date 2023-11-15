@@ -1,6 +1,9 @@
 package types
 
-import "cosmossdk.io/math"
+import (
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // Note: We use the same default values as Ethereum for the EIP-1559
 // fee market implementation. These parameters do not implement the
@@ -13,16 +16,16 @@ var (
 	DefaultWindow uint64 = 1
 
 	// DefaultAlpha is not used in the base EIP-1559 implementation.
-	DefaultAlpha math.LegacyDec = math.LegacyMustNewDecFromStr("0.0")
+	DefaultAlpha = math.LegacyMustNewDecFromStr("0.0")
 
 	// DefaultBeta is not used in the base EIP-1559 implementation.
-	DefaultBeta math.LegacyDec = math.LegacyMustNewDecFromStr("1.0")
+	DefaultBeta = math.LegacyMustNewDecFromStr("1.0")
 
 	// DefaultTheta is not used in the base EIP-1559 implementation.
-	DefaultTheta math.LegacyDec = math.LegacyMustNewDecFromStr("0.0")
+	DefaultTheta = math.LegacyMustNewDecFromStr("0.0")
 
 	// DefaultDelta is not used in the base EIP-1559 implementation.
-	DefaultDelta math.LegacyDec = math.LegacyMustNewDecFromStr("0.0")
+	DefaultDelta = math.LegacyMustNewDecFromStr("0.0")
 
 	// DefaultTargetBlockSize is the default target block utilization. This is the default
 	// on Ethereum. This denominated in units of gas consumed in a block.
@@ -35,13 +38,16 @@ var (
 	// DefaultMinBaseFee is the default minimum base fee. This is the default
 	// on Ethereum. Note that Ethereum is denominated in 1e18 wei. Cosmos chains will
 	// likely want to change this to 1e6.
-	DefaultMinBaseFee math.Int = math.NewInt(1_000_000_000)
+	DefaultMinBaseFee = math.NewInt(1_000_000_000)
 
 	// DefaultMinLearningRate is not used in the base EIP-1559 implementation.
-	DefaultMinLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.125")
+	DefaultMinLearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 	// DefaultMaxLearningRate is not used in the base EIP-1559 implementation.
-	DefaultMaxLearningRate math.LegacyDec = math.LegacyMustNewDecFromStr("0.125")
+	DefaultMaxLearningRate = math.LegacyMustNewDecFromStr("0.125")
+
+	// DefaultFeeDenom is the Cosmos SDK default bond denom.
+	DefaultFeeDenom = sdk.DefaultBondDenom
 )
 
 // DefaultParams returns a default set of parameters that implements
@@ -59,6 +65,7 @@ func DefaultParams() Params {
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 		DefaultMaxLearningRate,
+		DefaultFeeDenom,
 		true,
 	)
 }

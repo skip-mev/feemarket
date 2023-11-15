@@ -5,12 +5,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// BeginBlock returns a beginblocker for the x/feemarket module.
-func (k *Keeper) BeginBlock(ctx sdk.Context) ([]abci.ValidatorUpdate, error) {
-	return []abci.ValidatorUpdate{}, nil
-}
-
-// EndBlock returns an endblocker for the x/feemarket module.
+// EndBlock returns an endblocker for the x/feemarket module. The endblocker
+// is responsible for updating the state of the fee market based on the
+// AIMD learning rate adjustment algorithm.
 func (k *Keeper) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	if err := k.UpdateFeeMarket(ctx); err != nil {
+		panic(err)
+	}
+
 	return []abci.ValidatorUpdate{}
 }

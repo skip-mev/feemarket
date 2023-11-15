@@ -19,6 +19,7 @@ func NewParams(
 	minBaseFee math.Int,
 	minLearingRate math.LegacyDec,
 	maxLearningRate math.LegacyDec,
+	feeDenom string,
 	enabled bool,
 ) Params {
 	return Params{
@@ -32,6 +33,7 @@ func NewParams(
 		TargetBlockUtilization: targetBlockSize,
 		MaxBlockUtilization:    maxBlockSize,
 		Window:                 window,
+		FeeDenom:               feeDenom,
 		Enabled:                enabled,
 	}
 }
@@ -84,6 +86,10 @@ func (p *Params) ValidateBasic() error {
 
 	if p.MinLearningRate.GT(p.MaxLearningRate) {
 		return fmt.Errorf("min learning rate cannot be greater than max learning rate")
+	}
+
+	if p.FeeDenom == "" {
+		return fmt.Errorf("fee denom must be set")
 	}
 
 	return nil
