@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -28,21 +29,22 @@ type EncodingConfig struct {
 }
 
 func CreateTestEncodingConfig() EncodingConfig {
-	cdc := codec.NewLegacyAmino()
+	amino := codec.NewLegacyAmino()
 	interfaceRegistry := types.NewInterfaceRegistry()
 
 	banktypes.RegisterInterfaces(interfaceRegistry)
+	authtypes.RegisterInterfaces(interfaceRegistry)
 	cryptocodec.RegisterInterfaces(interfaceRegistry)
 	feemarkettypes.RegisterInterfaces(interfaceRegistry)
 	stakingtypes.RegisterInterfaces(interfaceRegistry)
 
-	codec := codec.NewProtoCodec(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
-		Codec:             codec,
-		TxConfig:          tx.NewTxConfig(codec, tx.DefaultSignModes),
-		Amino:             cdc,
+		Codec:             cdc,
+		TxConfig:          tx.NewTxConfig(cdc, tx.DefaultSignModes),
+		Amino:             amino,
 	}
 }
 
