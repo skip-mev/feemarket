@@ -53,11 +53,11 @@ message State {
   // Index is the index of the current block in the block utilization window.
   uint64 index = 5;
 
-  // MaxBlockUtilization is the maximum utilization of a given block. This is denominated
-  // in the number of gas units consumed per block.
+  // MaxBlockUtilization is the maximum utilization of a given block. This is
+  // denominated in the number of gas units consumed per block.
   uint64 max_block_utilization = 6;
 
-  // TargetBlockUtilization is the target utilization of a given block. This is denominated
-  // in the number of gas units consumed per block.
+  // TargetBlockUtilization is the target utilization of a given block. This is
+  // denominated in the number of gas units consumed per block.
   uint64 target_block_utilization = 7;
 }

@@ -100,11 +100,11 @@ type State struct {
 	Window []uint64 `protobuf:"varint,4,rep,packed,name=window,proto3" json:"window,omitempty"`
 	// Index is the index of the current block in the block utilization window.
 	Index uint64 `protobuf:"varint,5,opt,name=index,proto3" json:"index,omitempty"`
-	// MaxBlockUtilization is the maximum utilization of a given block. This is denominated
-	// in the number of gas units consumed per block.
+	// MaxBlockUtilization is the maximum utilization of a given block. This is
+	// denominated in the number of gas units consumed per block.
 	MaxBlockUtilization uint64 `protobuf:"varint,6,opt,name=max_block_utilization,json=maxBlockUtilization,proto3" json:"max_block_utilization,omitempty"`
-	// TargetBlockUtilization is the target utilization of a given block. This is denominated
-	// in the number of gas units consumed per block.
+	// TargetBlockUtilization is the target utilization of a given block. This is
+	// denominated in the number of gas units consumed per block.
 	TargetBlockUtilization uint64 `protobuf:"varint,7,opt,name=target_block_utilization,json=targetBlockUtilization,proto3" json:"target_block_utilization,omitempty"`
 }
 
