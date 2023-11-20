@@ -24,6 +24,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
@@ -257,6 +258,26 @@ func NewSimApp(
 	// baseAppOptions = append(baseAppOptions, prepareOpt)
 
 	app.App = appBuilder.Build(logger, db, traceStore, baseAppOptions...)
+
+	// ---------------------------------------------------------------------------- //
+	// ------------------------- Begin Custom Code -------------------------------- //
+	// ---------------------------------------------------------------------------- //
+
+	handlerOptions := ante.HandlerOptions{
+		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
+		FeegrantKeeper:  app.FeeGrantKeeper,
+		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+		SignModeHandler: app.txConfig.SignModeHandler(),
+	}
+	options := HandlerOptions{
+		BaseOptions: handlerOptions,
+	}
+	anteHandler, err := NewAnteHandler(options)
+	if err != nil {
+		panic(err)
+	}
+	app.App.SetAnteHandler(anteHandler)
 
 	/****  Module Options ****/
 
