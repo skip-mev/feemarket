@@ -172,7 +172,7 @@ func DeductFees(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, 
 
 // checkTxFees implements the logic for the fee market to check if a Tx has provided suffucient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
+func checkTxFees(_ sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return nil, nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
