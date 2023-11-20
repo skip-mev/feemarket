@@ -1,4 +1,4 @@
-package ante
+package simapp
 
 import (
 	errorsmod "cosmossdk.io/errors"
@@ -6,12 +6,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 )
 
 // HandlerOptions are the options required for constructing an SDK AnteHandler with the fee market injected.
 type HandlerOptions struct {
 	BaseOptions     authante.HandlerOptions
-	FeeMarketKeeper FeeMarketKeeper
+	FeeMarketKeeper feemarketante.FeeMarketKeeper
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -37,14 +39,13 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewTxTimeoutHeightDecorator(),
 		authante.NewValidateMemoDecorator(options.BaseOptions.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.BaseOptions.AccountKeeper),
-		NewDeductFeeDecorator(
+		feemarketante.NewDeductFeeDecorator(
 			options.BaseOptions.AccountKeeper,
 			options.BaseOptions.BankKeeper,
 			options.BaseOptions.FeegrantKeeper,
 			options.FeeMarketKeeper,
-			TxFeeChecker(options.BaseOptions.TxFeeChecker),
-		),
-		authante.NewSetPubKeyDecorator(options.BaseOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
+			feemarketante.TxFeeChecker(options.BaseOptions.TxFeeChecker),
+		), authante.NewSetPubKeyDecorator(options.BaseOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		authante.NewValidateSigCountDecorator(options.BaseOptions.AccountKeeper),
 		authante.NewSigGasConsumeDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.SigGasConsumer),
 		authante.NewSigVerificationDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.SignModeHandler),
