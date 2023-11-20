@@ -77,7 +77,10 @@ message Params {
   // over a moving window of blocks.
   uint64 window = 10;
 
+  // FeeDenom is the denom that will be used for all fee payments.
+  string fee_denom = 11;
+
   // Enabled is a boolean that determines whether the EIP1559 fee market is
   // enabled.
-  bool enabled = 11;
+  bool enabled = 12;
 }
