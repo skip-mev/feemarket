@@ -26,11 +26,11 @@ type TxFeeChecker func(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error)
 type FeeMarketDecorator struct {
 	accountKeeper   AccountKeeper
 	bankKeeper      BankKeeper
-	feegrantKeeper  FeegrantKeeper
+	feegrantKeeper  FeeGrantKeeper
 	feemarketKeeper FeeMarketKeeper
 }
 
-func NewFeeMarketDecorator(ak AccountKeeper, bk BankKeeper, fk FeegrantKeeper, fmk FeeMarketKeeper) FeeMarketDecorator {
+func NewFeeMarketDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper) FeeMarketDecorator {
 	return FeeMarketDecorator{
 		accountKeeper:   ak,
 		bankKeeper:      bk,
