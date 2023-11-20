@@ -1,3 +1,7 @@
 package ante_test
 
-// TODO add test
+import "testing"
+
+func DeductCoins(t *testing.T) {
+
+}

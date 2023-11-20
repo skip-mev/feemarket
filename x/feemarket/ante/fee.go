@@ -113,7 +113,7 @@ func (dfd FeeMarketDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx
 
 	// deduct the fees
 	if !fee.IsZero() {
-		err := DeductFees(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
+		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (dfd FeeMarketDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx
 
 	// deduct the tip
 	if !tip.IsZero() {
-		err := DeductTip(dfd.bankKeeper, ctx, deductFeesFromAcc, tip)
+		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, tip)
 		if err != nil {
 			return err
 		}
@@ -141,28 +141,13 @@ func (dfd FeeMarketDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx
 	return nil
 }
 
-// DeductTip deducts tips from the given account.
-func DeductTip(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, tips sdk.Coins) error {
-	if !tips.IsValid() {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", tips)
+// DeductCoins deducts coins from the given account.  Coins are sent to the feemarket module account.
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins) error {
+	if !coins.IsValid() {
+		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
 	}
 
-	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	err := bankKeeper.SendCoins(ctx, acc.GetAddress(), proposer, tips)
-	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
-	}
-
-	return nil
-}
-
-// DeductFee deducts fees from the given account.
-func DeductFees(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, fees sdk.Coins) error {
-	if !fees.IsValid() {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)
-	}
-
-	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), feemarkettypes.FeeCollectorName, fees)
+	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), feemarkettypes.FeeCollectorName, coins)
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
 	}
