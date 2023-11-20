@@ -59,11 +59,11 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
-	minGasPricesDec := sdk.NewDecCoinsFromCoins(minGasPrices...)
+	minGasPricesDecCoins := sdk.NewDecCoinsFromCoins(minGasPrices...)
 
 	fee := feeTx.GetFee()
 	if !simulate {
-		fee, tip, priority, err = checkTxFees(ctx, minGasPricesDec, tx)
+		fee, tip, priority, err = checkTxFees(ctx, minGasPricesDecCoins, tx)
 		if err != nil {
 			return ctx, err
 		}
@@ -73,7 +73,7 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, err
 	}
 
-	newCtx := ctx.WithPriority(priority).WithMinGasPrices(minGasPricesDec)
+	newCtx := ctx.WithPriority(priority).WithMinGasPrices(minGasPricesDecCoins)
 	return next(newCtx, tx, simulate)
 }
 
