@@ -111,6 +111,9 @@ func (s *AnteTestSuite) SetupTest() {
 	err = s.feemarketKeeper.SetParams(s.ctx, types.DefaultParams())
 	s.Require().NoError(err)
 
+	s.bankKeeper = mocks.NewBankKeeper(s.T())
+	s.feeGrantKeeper = mocks.NewFeeGrantKeeper(s.T())
+
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
 }
@@ -123,23 +126,44 @@ func (s *AnteTestSuite) TestDeductCoins() {
 	accs := s.CreateTestAccounts(1)
 
 	tests := []struct {
-		name    string
-		acc     TestAccount
-		coins   sdk.Coins
-		wantErr bool
+		name        string
+		acc         TestAccount
+		coins       sdk.Coins
+		wantErr     bool
+		invalidCoin bool
 	}{
 		{
-			name: "valid no coins",
-			acc:  accs[0],
+			name:    "valid",
+			acc:     accs[0],
+			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			wantErr: false,
+		},
+		{
+			name:    "valid no coins",
+			acc:     accs[0],
+			coins:   sdk.NewCoins(),
+			wantErr: false,
+		},
+		{
+			name:        "invalid coins",
+			acc:         accs[0],
+			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
+			wantErr:     true,
+			invalidCoin: true,
 		},
 	}
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			s.bankKeeper.On("SendCoinsFromAccountToModule", s.ctx, tc.acc.acc.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil)
+			if !tc.invalidCoin {
+				s.bankKeeper.On("SendCoinsFromAccountToModule", s.ctx, tc.acc.acc.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
+			}
 
 			if err := ante.DeductCoins(s.bankKeeper, s.ctx, tc.acc.acc, tc.coins); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
+}
+
+func (s *AnteTestSuite) TestAnteHandle() {
 }
