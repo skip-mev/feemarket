@@ -86,21 +86,22 @@ func (m *GenesisState) GetState() State {
 // the current base fee, learning rate, and block utilization within the
 // specified AIMD window.
 type State struct {
-	// BaseFee is the current base fee. This is denominated in the fee per gas unit.
+	// BaseFee is the current base fee. This is denominated in the fee per gas
+	// unit.
 	BaseFee cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=base_fee,json=baseFee,proto3,customtype=cosmossdk.io/math.Int" json:"base_fee"`
 	// LearningRate is the current learning rate.
 	LearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=learning_rate,json=learningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"learning_rate"`
-	// Window contains a list of the last blocks' utilization values. This is used to
-	// calculate the next base fee. This stores the number of units of gas consumed
-	// per block.
+	// Window contains a list of the last blocks' utilization values. This is used
+	// to calculate the next base fee. This stores the number of units of gas
+	// consumed per block.
 	Window []uint64 `protobuf:"varint,3,rep,packed,name=window,proto3" json:"window,omitempty"`
 	// Index is the index of the current block in the block utilization window.
 	Index uint64 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`
-	// MaxBlockUtilization is the maximum utilization of a given block. This is denominated
-	// in the number of gas units consumed per block.
+	// MaxBlockUtilization is the maximum utilization of a given block. This is
+	// denominated in the number of gas units consumed per block.
 	MaxBlockUtilization uint64 `protobuf:"varint,5,opt,name=max_block_utilization,json=maxBlockUtilization,proto3" json:"max_block_utilization,omitempty"`
-	// TargetBlockUtilization is the target utilization of a given block. This is denominated
-	// in the number of gas units consumed per block.
+	// TargetBlockUtilization is the target utilization of a given block. This is
+	// denominated in the number of gas units consumed per block.
 	TargetBlockUtilization uint64 `protobuf:"varint,6,opt,name=target_block_utilization,json=targetBlockUtilization,proto3" json:"target_block_utilization,omitempty"`
 }
 
