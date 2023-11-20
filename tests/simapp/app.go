@@ -68,7 +68,6 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 
 	"github.com/skip-mev/feemarket/x/feemarket"
-	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 )
 
@@ -271,10 +270,10 @@ func NewSimApp(
 		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 		SignModeHandler: app.txConfig.SignModeHandler(),
 	}
-	options := feemarketante.HandlerOptions{
+	options := HandlerOptions{
 		BaseOptions: handlerOptions,
 	}
-	anteHandler, err := feemarketante.NewAnteHandler(options)
+	anteHandler, err := NewAnteHandler(options)
 	if err != nil {
 		panic(err)
 	}

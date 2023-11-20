@@ -1,4 +1,4 @@
-package ante
+package simapp
 
 import (
 	errorsmod "cosmossdk.io/errors"
