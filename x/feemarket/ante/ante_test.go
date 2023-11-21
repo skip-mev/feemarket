@@ -33,18 +33,12 @@ type AnteTestSuite struct {
 	txBuilder   client.TxBuilder
 
 	accountKeeper    authkeeper.AccountKeeper
+	feemarketKeeper  *keeper.Keeper
 	bankKeeper       *mocks.BankKeeper
 	feeGrantKeeper   *mocks.FeeGrantKeeper
-	feemarketKeeper  *keeper.Keeper
 	encCfg           testutils.EncodingConfig
 	key              *storetypes.KVStoreKey
 	authorityAccount sdk.AccAddress
-
-	// Message server variables
-	msgServer types.MsgServer
-
-	// Query server variables
-	queryServer types.QueryServer
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -89,14 +83,8 @@ func SetupTestSuite(t *testing.T, isCheckTx bool) *AnteTestSuite {
 	require.NoError(t, err)
 
 	maccPerms := map[string][]string{
-		"fee_collector":          nil,
-		types.ModuleName:         nil,
-		types.FeeCollectorName:   {"burner"},
-		"mint":                   {"minter"},
-		"bonded_tokens_pool":     {"burner", "staking"},
-		"not_bonded_tokens_pool": {"burner", "staking"},
-		"multiPerm":              {"burner", "minter", "staking"},
-		"random":                 {"random"},
+		types.ModuleName:       nil,
+		types.FeeCollectorName: {"burner"},
 	}
 
 	s.authorityAccount = authtypes.NewModuleAddress("gov")
@@ -120,34 +108,22 @@ func SetupTestSuite(t *testing.T, isCheckTx bool) *AnteTestSuite {
 	s.bankKeeper = mocks.NewBankKeeper(t)
 	s.feeGrantKeeper = mocks.NewFeeGrantKeeper(t)
 
-	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
-	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
-
 	s.clientCtx = client.Context{}.WithTxConfig(s.encCfg.TxConfig)
 	s.txBuilder = s.clientCtx.TxConfig.NewTxBuilder()
 
+	// create basic antehandler with the feemarket decorator
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
-		//	authante.NewExtensionOptionsDecorator(nil),
-		//	authante.NewValidateBasicDecorator(),
-		//	authante.NewTxTimeoutHeightDecorator(),
-		//	authante.NewValidateMemoDecorator(s.accountKeeper),
-		//	authante.NewConsumeGasForTxSizeDecorator(s.accountKeeper),
 		feemarketante.NewFeeMarketDecorator( // fee market replaces fee deduct decorator
 			s.accountKeeper,
 			s.bankKeeper,
 			s.feeGrantKeeper,
 			s.feemarketKeeper,
 		),
-		//		authante.NewSetPubKeyDecorator(s.accountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
-		//		authante.NewValidateSigCountDecorator(s.accountKeeper),
 		authante.NewSigGasConsumeDecorator(s.accountKeeper, authante.DefaultSigVerificationGasConsumer),
-		//		authante.NewSigVerificationDecorator(s.accountKeeper, s.clientCtx.TxConfig.SignModeHandler()),
-		//		authante.NewIncrementSequenceDecorator(s.accountKeeper),
 	}
 
 	s.anteHandler = sdk.ChainAnteDecorators(anteDecorators...)
-
 	return s
 }
 
