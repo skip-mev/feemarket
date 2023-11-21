@@ -25,7 +25,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -230,6 +229,25 @@ func (s *TestSuite) BroadcastTxsWithCallback(
 	s.Require().NoError(eg.Wait())
 
 	return rawTxs
+}
+
+// QueryFeeMarketParams queries the x/feemarket module's params
+func QueryFeeMarketParams(t *testing.T, chain ibc.Chain) feemarkettypes.Params {
+	// cast chain to cosmos-chain
+	cosmosChain, ok := chain.(*cosmos.CosmosChain)
+	require.True(t, ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	require.True(t, len(nodes) > 0)
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
+	require.NoError(t, err)
+
+	// unmarshal params
+	var params feemarkettypes.Params
+	err = json.Unmarshal(resp, &params)
+	require.NoError(t, err)
+	return params
 }
 
 // QueryValidators queries for all the network's validators

@@ -41,7 +41,7 @@ type AnteTestSuite struct {
 	authorityAccount sdk.AccAddress
 }
 
-// TestAccount represents an account used in the tests in x/auth/ante.
+// TestAccount represents an account used in the tests in x/feemarket/ante.
 type TestAccount struct {
 	acc  authtypes.AccountI
 	priv cryptotypes.PrivKey

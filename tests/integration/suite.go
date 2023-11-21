@@ -2,11 +2,11 @@ package integration
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/suite"
@@ -92,4 +92,12 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+}
+
+func (s *TestSuite) TestQueryParams() {
+	// query params
+	params := QueryFeeMarketParams(s.T(), s.chain)
+
+	// expect validate to pass
+	require.NoError(s.T(), params.Validate())
 }
