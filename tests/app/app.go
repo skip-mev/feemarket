@@ -1,6 +1,6 @@
 //go:build !app_v1
 
-package simapp
+package app
 
 import (
 	"encoding/json"
@@ -154,7 +154,7 @@ func init() {
 		panic(err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".simapp")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".app")
 }
 
 // NewSimApp returns a reference to an initialized SimApp.
