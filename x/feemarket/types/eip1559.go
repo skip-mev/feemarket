@@ -81,10 +81,3 @@ func DefaultState() State {
 		DefaultMinLearningRate,
 	)
 }
-
-// DefaultGenesisState returns a default genesis state that implements
-// the EIP-1559 fee market implementation without the AIMD learning
-// rate adjustment algorithm.
-func DefaultGenesisState() *GenesisState {
-	return NewGenesisState(DefaultParams(), DefaultState())
-}

@@ -6,6 +6,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
+// NewDefaultGenesisState returns a default genesis state that implements
+// the EIP-1559 fee market implementation without the AIMD learning
+// rate adjustment algorithm.
+func NewDefaultGenesisState() *GenesisState {
+	return &GenesisState{
+		Params: DefaultParams(),
+		State:  DefaultState(),
+	}
+}
+
 // NewGenesisState returns a new genesis state for the module.
 func NewGenesisState(
 	params Params,

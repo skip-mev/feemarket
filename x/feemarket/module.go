@@ -81,11 +81,11 @@ func (amb AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	k keeper.Keeper
+	k *keeper.Keeper
 }
 
 // NewAppModule returns an application module for the x/feemarket module.
-func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
+func NewAppModule(cdc codec.Codec, k *keeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{
 			cdc: cdc,
@@ -117,7 +117,7 @@ func (am AppModule) RegisterServices(cfc module.Configurator) {
 // DefaultGenesis returns default genesis state as raw bytes for the feemarket
 // module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesisState())
+	return cdc.MustMarshalJSON(types.NewDefaultGenesisState())
 }
 
 // ValidateGenesis performs genesis state validation for the feemarket module.
@@ -167,7 +167,7 @@ type Inputs struct {
 type Outputs struct {
 	depinject.Out
 
-	Keeper keeper.Keeper
+	Keeper *keeper.Keeper
 	Module appmodule.AppModule
 }
 
@@ -192,7 +192,7 @@ func ProvideModule(in Inputs) Outputs {
 		authority.String(),
 	)
 
-	m := NewAppModule(in.Cdc, *Keeper)
+	m := NewAppModule(in.Cdc, Keeper)
 
-	return Outputs{Keeper: *Keeper, Module: m}
+	return Outputs{Keeper: Keeper, Module: m}
 }

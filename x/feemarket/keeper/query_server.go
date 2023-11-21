@@ -12,11 +12,11 @@ var _ types.QueryServer = (*QueryServer)(nil)
 
 // QueryServer defines the gRPC server for the x/feemarket module.
 type QueryServer struct {
-	k Keeper
+	k *Keeper
 }
 
 // NewQueryServer creates a new instance of the x/feemarket QueryServer type.
-func NewQueryServer(keeper Keeper) types.QueryServer {
+func NewQueryServer(keeper *Keeper) types.QueryServer {
 	return &QueryServer{k: keeper}
 }
 

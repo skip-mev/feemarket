@@ -64,7 +64,7 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 
 	fee := feeTx.GetFee()
 	if !simulate {
-		fee, tip, priority, err = checkTxFees(minGasPricesDecCoins, tx)
+		fee, tip, priority, err = checkTxFees(ctx, minGasPricesDecCoins, tx)
 		if err != nil {
 			return ctx, err
 		}
@@ -158,7 +158,7 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI,
 
 // checkTxFees implements the logic for the fee market to check if a Tx has provided suffucient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func checkTxFees(fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
+func checkTxFees(ctx sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return nil, nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -169,7 +169,9 @@ func checkTxFees(fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coin
 
 	// Ensure that the provided fees meet the minimum
 	minGasPrices := fees
-	if !minGasPrices.IsZero() {
+
+	// skip if the fee is nothing or if block height is 0 (genesis deliverTx)
+	if !minGasPrices.IsZero() && ctx.BlockHeight() > 0 {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
 
 		// Determine the required fees by multiplying each required minimum gas
