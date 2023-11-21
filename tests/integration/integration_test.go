@@ -53,7 +53,7 @@ var (
 			Name:                "feemarket",
 			Denom:               denom,
 			ChainID:             "chain-id-0",
-			Bin:                 "cmd",
+			Bin:                 "feemarketd",
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
