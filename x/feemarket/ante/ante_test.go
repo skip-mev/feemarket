@@ -65,14 +65,14 @@ func (s *AnteTestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 }
 
 // SetupTest setups a new test, with new app, context, and anteHandler.
-func SetupTestSuite(t *testing.T, isCheckTx bool) *AnteTestSuite {
+func SetupTestSuite(t *testing.T) *AnteTestSuite {
 	s := &AnteTestSuite{}
 
 	s.encCfg = testutils.CreateTestEncodingConfig()
 	s.key = storetypes.NewKVStoreKey(types.StoreKey)
 	tkey := storetypes.NewTransientStoreKey("transient_test_feemarket")
 	testCtx := testutil.DefaultContextWithDB(t, s.key, tkey)
-	s.ctx = testCtx.Ctx.WithIsCheckTx(isCheckTx).WithBlockHeight(1)
+	s.ctx = testCtx.Ctx.WithIsCheckTx(false).WithBlockHeight(1)
 	cms, db := testCtx.CMS, testCtx.DB
 
 	authKey := storetypes.NewKVStoreKey(authtypes.StoreKey)

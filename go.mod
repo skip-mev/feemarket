@@ -6,6 +6,7 @@ require (
 	cosmossdk.io/api v0.7.2
 	cosmossdk.io/core v0.11.0
 	cosmossdk.io/depinject v1.0.0-alpha.4
+	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/log v1.2.1
 	cosmossdk.io/math v1.1.3-rc.1
 	github.com/client9/misspell v0.3.4
@@ -35,7 +36,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.4 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
-	cosmossdk.io/errors v1.0.0 // indirect
 	cosmossdk.io/tools/rosetta v0.2.1 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/4meepo/tagalign v1.3.3 // indirect

@@ -21,6 +21,7 @@ type TxFeeChecker func(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error)
 // FeeMarketDecorator deducts fees from the fee payer based off of the current state of the feemarket.
 // The fee payer is the fee granter (if specified) or first signer of the tx.
 // If the fee payer does not have the funds to pay for the fees, return an InsufficientFunds error.
+// If there is an excess between the given fee and the on-chain base fee is given as a tip.
 // Call next AnteHandler if fees successfully deducted.
 // CONTRACT: Tx must implement FeeTx interface to use DeductFeeDecorator
 type FeeMarketDecorator struct {
@@ -63,7 +64,7 @@ func (dfd FeeMarketDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 
 	fee := feeTx.GetFee()
 	if !simulate {
-		fee, tip, priority, err = checkTxFees(ctx, minGasPricesDecCoins, tx)
+		fee, tip, priority, err = checkTxFees(minGasPricesDecCoins, tx)
 		if err != nil {
 			return ctx, err
 		}
@@ -157,7 +158,7 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI,
 
 // checkTxFees implements the logic for the fee market to check if a Tx has provided suffucient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func checkTxFees(_ sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
+func checkTxFees(fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coins, tip sdk.Coins, priority int64, err error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return nil, nil, 0, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -194,7 +195,7 @@ func checkTxFees(_ sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coin
 // getTxPriority returns a naive tx priority based on the amount of the smallest denomination of the gas price
 // provided in a transaction.
 // NOTE: This implementation should be used with a great consideration as it opens potential attack vectors
-// where txs with multiple coins could not be prioritize as expected.
+// where txs with multiple coins could not be prioritized as expected.
 func getTxPriority(fee sdk.Coins, gas int64) int64 {
 	var priority int64
 	for _, c := range fee {

@@ -40,7 +40,7 @@ func TestDeductCoins(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := SetupTestSuite(t, false)
+			s := SetupTestSuite(t)
 			acc := s.CreateTestAccounts(1)[0]
 			if !tc.invalidCoin {
 				s.bankKeeper.On("SendCoinsFromAccountToModule", s.ctx, acc.acc.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
@@ -111,7 +111,7 @@ func TestAnteHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := SetupTestSuite(t, false)
+			s := SetupTestSuite(t)
 			s.txBuilder = s.clientCtx.TxConfig.NewTxBuilder()
 			args := tc.malleate(s)
 
