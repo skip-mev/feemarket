@@ -54,7 +54,7 @@ func TestDeductCoins(t *testing.T) {
 }
 
 func TestAnteHandle(t *testing.T) {
-	// Same data for every test cases
+	// Same data for every test case
 	gasLimit := NewTestGasLimit()
 	validFeeAmount := types.DefaultMinBaseFee.MulRaw(int64(gasLimit))
 	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount))
@@ -64,10 +64,12 @@ func TestAnteHandle(t *testing.T) {
 			"signer has no funds",
 			func(suite *AnteTestSuite) TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
-				suite.bankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].acc.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
+				suite.bankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].acc.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 
 				return TestCaseArgs{
-					msgs: []sdk.Msg{testdata.NewTestMsg(accs[0].acc.GetAddress())},
+					msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].acc.GetAddress())},
+					gasLimit:  gasLimit,
+					feeAmount: validFee,
 				}
 			},
 			false,
@@ -75,13 +77,30 @@ func TestAnteHandle(t *testing.T) {
 			sdkerrors.ErrInsufficientFunds,
 		},
 		{
+			"0 gas given should fail",
+			func(suite *AnteTestSuite) TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return TestCaseArgs{
+					msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].acc.GetAddress())},
+					gasLimit:  0,
+					feeAmount: validFee,
+				}
+			},
+			false,
+			false,
+			sdkerrors.ErrInvalidGasLimit,
+		},
+		{
 			"signer has enough funds, should pass",
 			func(suite *AnteTestSuite) TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
-				suite.bankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].acc.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				suite.bankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].acc.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
 
 				return TestCaseArgs{
-					msgs: []sdk.Msg{testdata.NewTestMsg(accs[0].acc.GetAddress())},
+					msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].acc.GetAddress())},
+					gasLimit:  gasLimit,
+					feeAmount: validFee,
 				}
 			},
 			false,
@@ -95,8 +114,6 @@ func TestAnteHandle(t *testing.T) {
 			s := SetupTestSuite(t, false)
 			s.txBuilder = s.clientCtx.TxConfig.NewTxBuilder()
 			args := tc.malleate(s)
-			args.feeAmount = validFee
-			args.gasLimit = gasLimit
 
 			s.RunTestCase(t, tc, args)
 		})

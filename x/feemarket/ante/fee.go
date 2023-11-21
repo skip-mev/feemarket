@@ -184,7 +184,7 @@ func checkTxFees(_ sdk.Context, fees sdk.DecCoins, tx sdk.Tx) (feeCoins sdk.Coin
 		}
 
 		tip = feeCoins.Sub(requiredFees...) // tip is whatever is left
-		feeCoins = requiredFees             //  set free coins to be ONLY the required amount
+		feeCoins = requiredFees             //  set fee coins to be ONLY the required amount
 	}
 
 	priority = getTxPriority(feeCoins, int64(gas))
