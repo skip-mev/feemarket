@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/suite"
@@ -99,5 +100,5 @@ func (s *TestSuite) TestQueryParams() {
 	params := QueryFeeMarketParams(s.T(), s.chain)
 
 	// expect validate to pass
-	require.NoError(s.T(), params.Validate())
+	require.NoError(s.T(), params.ValidateBasic())
 }

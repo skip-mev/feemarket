@@ -1,6 +1,6 @@
 //go:build !app_v1
 
-package simapp
+package app
 
 import (
 	"encoding/json"
@@ -154,11 +154,11 @@ func init() {
 		panic(err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".simapp")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".app")
 }
 
-// NewSimApp returns a reference to an initialized SimApp.
-func NewSimApp(
+// NewApp returns a reference to an initialized SimApp.
+func NewApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -238,13 +238,13 @@ func NewSimApp(
 	//
 	// Example:
 	//
-	// app.App = appBuilder.Build(...)
+	// app.NewApp = appBuilder.Build(...)
 	// nonceMempool := mempool.NewSenderNonceMempool()
-	// abciPropHandler := NewDefaultProposalHandler(nonceMempool, app.App.BaseApp)
+	// abciPropHandler := NewDefaultProposalHandler(nonceMempool, app.NewApp.BaseApp)
 	//
-	// app.App.BaseApp.SetMempool(nonceMempool)
-	// app.App.BaseApp.SetPrepareProposal(abciPropHandler.PrepareProposalHandler())
-	// app.App.BaseApp.SetProcessProposal(abciPropHandler.ProcessProposalHandler())
+	// app.NewApp.BaseApp.SetMempool(nonceMempool)
+	// app.NewApp.BaseApp.SetPrepareProposal(abciPropHandler.PrepareProposalHandler())
+	// app.NewApp.BaseApp.SetProcessProposal(abciPropHandler.ProcessProposalHandler())
 	//
 	// Alternatively, you can construct BaseApp options, append those to
 	// baseAppOptions and pass them to the appBuilder.
@@ -302,7 +302,7 @@ func NewSimApp(
 	//
 	// app.SetInitChainer(func(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	// 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap())
-	// 	return app.App.InitChainer(ctx, req)
+	// 	return app.NewApp.InitChainer(ctx, req)
 	// })
 
 	if err := app.Load(loadLatest); err != nil {
@@ -312,7 +312,7 @@ func NewSimApp(
 	return app
 }
 
-// Name returns the name of the App
+// Name returns the name of the NewApp
 func (app *SimApp) Name() string { return app.BaseApp.Name() }
 
 // LoadHeight loads a particular height

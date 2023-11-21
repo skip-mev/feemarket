@@ -1,4 +1,4 @@
-package testappd
+package cmd
 
 import (
 	"errors"
@@ -27,13 +27,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/skip-mev/feemarket/tests/simapp"
-	"github.com/skip-mev/feemarket/tests/simapp/params"
+	"github.com/skip-mev/feemarket/tests/app"
+	"github.com/skip-mev/feemarket/tests/app/params"
 )
 
 func NewRootCmd() *cobra.Command {
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
-	simApp := simapp.NewSimApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(simapp.DefaultNodeHome))
+	simApp := app.NewApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(app.DefaultNodeHome))
 	encodingConfig := params.EncodingConfig{
 		InterfaceRegistry: simApp.InterfaceRegistry(),
 		Codec:             simApp.AppCodec(),
@@ -48,11 +48,11 @@ func NewRootCmd() *cobra.Command {
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
-		WithHomeDir(simapp.DefaultNodeHome).
+		WithHomeDir(app.DefaultNodeHome).
 		WithViper("")
 
 	rootCmd := &cobra.Command{
-		Use:   "testappd",
+		Use:   "cmd",
 		Short: "Skip FeeMarket simulation application",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
@@ -159,13 +159,13 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 	cfg.Seal()
 
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(simapp.ModuleBasics, simapp.DefaultNodeHome),
+		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		debug.Cmd(),
 		config.Cmd(),
 		pruning.PruningCmd(newApp),
 	)
 
-	server.AddCommands(rootCmd, simapp.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
@@ -173,7 +173,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		genesisCommand(encodingConfig),
 		queryCommand(),
 		txCommand(),
-		keys.Commands(simapp.DefaultNodeHome),
+		keys.Commands(app.DefaultNodeHome),
 	)
 }
 
@@ -182,7 +182,7 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 }
 
 func genesisCommand(encodingConfig params.EncodingConfig, cmds ...*cobra.Command) *cobra.Command {
-	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, simapp.ModuleBasics, simapp.DefaultNodeHome)
+	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
 
 	for _, subCmd := range cmds {
 		cmd.AddCommand(subCmd)
@@ -209,7 +209,7 @@ func queryCommand() *cobra.Command {
 		authcmd.QueryTxCmd(),
 	)
 
-	simapp.ModuleBasics.AddQueryCommands(cmd)
+	app.ModuleBasics.AddQueryCommands(cmd)
 
 	return cmd
 }
@@ -235,7 +235,7 @@ func txCommand() *cobra.Command {
 		authcmd.GetAuxToFeeCommand(),
 	)
 
-	simapp.ModuleBasics.AddTxCommands(cmd)
+	app.ModuleBasics.AddTxCommands(cmd)
 
 	return cmd
 }
@@ -248,7 +248,7 @@ func newApp(
 ) servertypes.Application {
 	baseAppOpts := server.DefaultBaseappOptions(appOpts)
 
-	return simapp.NewSimApp(
+	return app.NewApp(
 		logger,
 		db,
 		traceStore,
@@ -268,7 +268,7 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var testApp *simapp.SimApp
+	var testApp *app.SimApp
 
 	// this check is necessary as we use the flag in x/upgrade.
 	// we can exit more gracefully by checking the flag here.
@@ -287,13 +287,13 @@ func appExport(
 	appOpts = viperAppOpts
 
 	if height != -1 {
-		testApp = simapp.NewSimApp(logger, db, traceStore, false, appOpts)
+		testApp = app.NewApp(logger, db, traceStore, false, appOpts)
 
 		if err := testApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		testApp = simapp.NewSimApp(logger, db, traceStore, true, appOpts)
+		testApp = app.NewApp(logger, db, traceStore, true, appOpts)
 	}
 
 	return testApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
