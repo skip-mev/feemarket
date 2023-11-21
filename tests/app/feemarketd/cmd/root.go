@@ -33,7 +33,7 @@ import (
 
 func NewRootCmd() *cobra.Command {
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
-	simApp := app.NewApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(app.DefaultNodeHome))
+	simApp := app.New(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(app.DefaultNodeHome))
 	encodingConfig := params.EncodingConfig{
 		InterfaceRegistry: simApp.InterfaceRegistry(),
 		Codec:             simApp.AppCodec(),
@@ -248,7 +248,7 @@ func newApp(
 ) servertypes.Application {
 	baseAppOpts := server.DefaultBaseappOptions(appOpts)
 
-	return app.NewApp(
+	return app.New(
 		logger,
 		db,
 		traceStore,
@@ -268,7 +268,7 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var testApp *app.SimApp
+	var testApp *app.TestApp
 
 	// this check is necessary as we use the flag in x/upgrade.
 	// we can exit more gracefully by checking the flag here.
@@ -287,13 +287,13 @@ func appExport(
 	appOpts = viperAppOpts
 
 	if height != -1 {
-		testApp = app.NewApp(logger, db, traceStore, false, appOpts)
+		testApp = app.New(logger, db, traceStore, false, appOpts)
 
 		if err := testApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		testApp = app.NewApp(logger, db, traceStore, true, appOpts)
+		testApp = app.New(logger, db, traceStore, true, appOpts)
 	}
 
 	return testApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)

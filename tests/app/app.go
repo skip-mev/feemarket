@@ -1,9 +1,8 @@
-//go:build !app_v1
-
 package app
 
+//nolint:revive
 import (
-	"encoding/json"
+	_ "embed"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,6 +21,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
@@ -32,8 +32,6 @@ import (
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/cosmos/cosmos-sdk/x/capability"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	consensus "github.com/cosmos/cosmos-sdk/x/consensus"
 	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -53,7 +51,6 @@ import (
 	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
-	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
@@ -67,11 +64,17 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 
-	"github.com/skip-mev/feemarket/x/feemarket"
+	feemarketmodule "github.com/skip-mev/feemarket/x/feemarket"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 )
 
+const (
+	ChainID = "chain-id-0"
+)
+
 var (
+	BondDenom = sdk.DefaultBondDenom
+
 	// DefaultNodeHome default home directories for the application daemon
 	DefaultNodeHome string
 
@@ -82,7 +85,6 @@ var (
 		auth.AppModuleBasic{},
 		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
 		bank.AppModuleBasic{},
-		capability.AppModuleBasic{},
 		staking.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
@@ -104,20 +106,19 @@ var (
 		vesting.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
-		feemarket.AppModuleBasic{},
+		feegrantmodule.AppModuleBasic{},
+		feemarketmodule.AppModuleBasic{},
 	)
 )
 
 var (
-	_ runtime.AppI            = (*SimApp)(nil)
-	_ servertypes.Application = (*SimApp)(nil)
+	_ runtime.AppI            = (*TestApp)(nil)
+	_ servertypes.Application = (*TestApp)(nil)
 )
 
-// SimApp extends an ABCI application, but with most of its parameters exported.
-// They are exported for convenience in creating helper functions, as object
-// capabilities aren't needed for testing.
-type SimApp struct {
+type TestApp struct {
 	*runtime.App
+
 	legacyAmino       *codec.LegacyAmino
 	appCodec          codec.Codec
 	txConfig          client.TxConfig
@@ -126,7 +127,6 @@ type SimApp struct {
 	// keepers
 	AccountKeeper         authkeeper.AccountKeeper
 	BankKeeper            bankkeeper.Keeper
-	CapabilityKeeper      *capabilitykeeper.Keeper
 	StakingKeeper         *stakingkeeper.Keeper
 	SlashingKeeper        slashingkeeper.Keeper
 	MintKeeper            mintkeeper.Keeper
@@ -137,15 +137,10 @@ type SimApp struct {
 	ParamsKeeper          paramskeeper.Keeper
 	AuthzKeeper           authzkeeper.Keeper
 	EvidenceKeeper        evidencekeeper.Keeper
-	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
-	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
+	FeeGrantKeeper        feegrantkeeper.Keeper
 	FeeMarketKeeper       *feemarketkeeper.Keeper
-
-	// simulation manager
-	sm            *module.SimulationManager
-	ModuleManager *module.Manager
 }
 
 func init() {
@@ -154,20 +149,19 @@ func init() {
 		panic(err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".app")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".testapp")
 }
 
-// NewApp returns a reference to an initialized SimApp.
-func NewApp(
+func New(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	loadLatest bool,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
-) *SimApp {
+) *TestApp {
 	var (
-		app        = &SimApp{}
+		app        = &TestApp{}
 		appBuilder *runtime.AppBuilder
 
 		// merge the AppConfig and other configuration in one config
@@ -211,7 +205,6 @@ func NewApp(
 		&app.interfaceRegistry,
 		&app.AccountKeeper,
 		&app.BankKeeper,
-		&app.CapabilityKeeper,
 		&app.StakingKeeper,
 		&app.SlashingKeeper,
 		&app.MintKeeper,
@@ -224,7 +217,6 @@ func NewApp(
 		&app.EvidenceKeeper,
 		&app.FeeGrantKeeper,
 		&app.GroupKeeper,
-		&app.NFTKeeper,
 		&app.ConsensusParamsKeeper,
 		&app.FeeMarketKeeper,
 	); err != nil {
@@ -259,10 +251,8 @@ func NewApp(
 
 	app.App = appBuilder.Build(logger, db, traceStore, baseAppOptions...)
 
-	// ---------------------------------------------------------------------------- //
-	// ------------------------- Begin Custom Code -------------------------------- //
-	// ---------------------------------------------------------------------------- //
-
+	// Create a global ante handler that will be called on each transaction when
+	// proposals are being built and verified.
 	handlerOptions := ante.HandlerOptions{
 		BankKeeper:      app.BankKeeper,
 		FeegrantKeeper:  app.FeeGrantKeeper,
@@ -279,20 +269,22 @@ func NewApp(
 	if err != nil {
 		panic(err)
 	}
+
 	app.App.SetAnteHandler(anteHandler)
+
+	// ---------------------------------------------------------------------------- //
+	// ------------------------- End Custom Code ---------------------------------- //
+	// ---------------------------------------------------------------------------- //
 
 	/****  Module Options ****/
 
 	app.ModuleManager.RegisterInvariants(app.CrisisKeeper)
 
-	// create the simulation manager and define the order of the modules for deterministic simulations
-	//
-	// NOTE: this is not required apps that don't use the simulator for fuzz testing
-	// transactions
-	overrideModules := map[string]module.AppModuleSimulation{}
-	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
+	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
+	// app.RegisterUpgradeHandlers()
 
-	app.sm.RegisterStoreDecoders()
+	// add test gRPC service for testing gRPC queries in isolation
+	// testdata_pulsar.RegisterQueryServer(app.GRPCQueryRouter(), testdata_pulsar.QueryImpl{})
 
 	// A custom InitChainer can be set if extra pre-init-genesis logic is required.
 	// By default, when using app wiring enabled module, this is not required.
@@ -312,19 +304,21 @@ func NewApp(
 	return app
 }
 
-// Name returns the name of the NewApp
-func (app *SimApp) Name() string { return app.BaseApp.Name() }
-
-// LoadHeight loads a particular height
-func (app *SimApp) LoadHeight(height int64) error {
-	return app.LoadVersion(height)
+// ChainID gets chainID from private fields of BaseApp
+// Should be removed once SDK 0.50.x will be adopted
+func (app *TestApp) ChainID() string {
+	field := reflect.ValueOf(app.BaseApp).Elem().FieldByName("chainID")
+	return field.String()
 }
+
+// Name returns the name of the App
+func (app *TestApp) Name() string { return app.BaseApp.Name() }
 
 // LegacyAmino returns SimApp's amino codec.
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *SimApp) LegacyAmino() *codec.LegacyAmino {
+func (app *TestApp) LegacyAmino() *codec.LegacyAmino {
 	return app.legacyAmino
 }
 
@@ -332,49 +326,24 @@ func (app *SimApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *SimApp) AppCodec() codec.Codec {
+func (app *TestApp) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
-// TxConfig returns SimApp's TxConfig
-func (app *SimApp) TxConfig() client.TxConfig {
-	return app.txConfig
-}
-
-// DefaultGenesis returns a default genesis from the registered AppModuleBasic's.
-func (app *SimApp) DefaultGenesis() map[string]json.RawMessage {
-	return ModuleBasics.DefaultGenesis(app.appCodec)
-}
-
-// GetSubspace returns a param subspace for a given module name.
-//
-// NOTE: This is solely to be used for testing purposes.
-func (app *SimApp) GetSubspace(moduleName string) paramstypes.Subspace {
-	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
-	return subspace
-}
-
-// SimulationManager implements the SimulationApp interface
-func (app *SimApp) SimulationManager() *module.SimulationManager {
-	return app.sm
-}
-
-// ChainID gets chainID from private fields of BaseApp
-// Should be removed once SDK 0.50.x will be adopted
-func (app *SimApp) ChainID() string {
-	field := reflect.ValueOf(app.BaseApp).Elem().FieldByName("chainID")
-	return field.String()
-}
-
 // InterfaceRegistry returns SimApp's InterfaceRegistry
-func (app *SimApp) InterfaceRegistry() codectypes.InterfaceRegistry {
+func (app *TestApp) InterfaceRegistry() codectypes.InterfaceRegistry {
 	return app.interfaceRegistry
+}
+
+// TxConfig returns SimApp's TxConfig
+func (app *TestApp) TxConfig() client.TxConfig {
+	return app.txConfig
 }
 
 // GetKey returns the KVStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *SimApp) GetKey(storeKey string) *storetypes.KVStoreKey {
+func (app *TestApp) GetKey(storeKey string) *storetypes.KVStoreKey {
 	sk := app.UnsafeFindStoreKey(storeKey)
 	kvStoreKey, ok := sk.(*storetypes.KVStoreKey)
 	if !ok {
@@ -383,9 +352,22 @@ func (app *SimApp) GetKey(storeKey string) *storetypes.KVStoreKey {
 	return kvStoreKey
 }
 
+// GetSubspace returns a param subspace for a given module name.
+//
+// NOTE: This is solely to be used for testing purposes.
+func (app *TestApp) GetSubspace(moduleName string) paramstypes.Subspace {
+	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
+	return subspace
+}
+
+// SimulationManager implements the SimulationApp interface
+func (app *TestApp) SimulationManager() *module.SimulationManager {
+	return nil
+}
+
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
-func (app *SimApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+func (app *TestApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	app.App.RegisterAPIRoutes(apiSvr, apiConfig)
 	// register swagger API in app.go so that other applications can override easily
 	if err := server.RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router, apiConfig.Swagger); err != nil {

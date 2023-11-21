@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	"github.com/strangelove-ventures/interchaintest/v7"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -53,7 +53,7 @@ var (
 			Name:                "feemarket",
 			Denom:               denom,
 			ChainID:             "chain-id-0",
-			Bin:                 "cmd",
+			Bin:                 "feemarketd",
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
