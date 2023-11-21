@@ -264,7 +264,6 @@ func NewSimApp(
 	// ---------------------------------------------------------------------------- //
 
 	handlerOptions := ante.HandlerOptions{
-		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
 		FeegrantKeeper:  app.FeeGrantKeeper,
 		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
@@ -273,6 +272,7 @@ func NewSimApp(
 
 	options := HandlerOptions{
 		BaseOptions:     handlerOptions,
+		AccountKeeper:   app.AccountKeeper,
 		FeeMarketKeeper: app.FeeMarketKeeper,
 	}
 	anteHandler, err := NewAnteHandler(options)

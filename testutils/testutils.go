@@ -1,8 +1,9 @@
 package testutils
 
 import (
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"math/rand"
+
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"

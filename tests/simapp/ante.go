@@ -13,6 +13,7 @@ import (
 // HandlerOptions are the options required for constructing an SDK AnteHandler with the fee market injected.
 type HandlerOptions struct {
 	BaseOptions     authante.HandlerOptions
+	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper feemarketante.FeeMarketKeeper
 }
 
@@ -20,7 +21,7 @@ type HandlerOptions struct {
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
 func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
-	if options.BaseOptions.AccountKeeper == nil {
+	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
 	}
 
@@ -37,19 +38,19 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewExtensionOptionsDecorator(options.BaseOptions.ExtensionOptionChecker),
 		authante.NewValidateBasicDecorator(),
 		authante.NewTxTimeoutHeightDecorator(),
-		authante.NewValidateMemoDecorator(options.BaseOptions.AccountKeeper),
-		authante.NewConsumeGasForTxSizeDecorator(options.BaseOptions.AccountKeeper),
+		authante.NewValidateMemoDecorator(options.AccountKeeper),
+		authante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
 		feemarketante.NewFeeMarketDecorator( // fee market replaces fee deduct decorator
-			options.BaseOptions.AccountKeeper,
+			options.AccountKeeper,
 			options.BaseOptions.BankKeeper,
 			options.BaseOptions.FeegrantKeeper,
 			options.FeeMarketKeeper,
 		),
-		authante.NewSetPubKeyDecorator(options.BaseOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
-		authante.NewValidateSigCountDecorator(options.BaseOptions.AccountKeeper),
-		authante.NewSigGasConsumeDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.SigGasConsumer),
-		authante.NewSigVerificationDecorator(options.BaseOptions.AccountKeeper, options.BaseOptions.SignModeHandler),
-		authante.NewIncrementSequenceDecorator(options.BaseOptions.AccountKeeper),
+		authante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
+		authante.NewValidateSigCountDecorator(options.AccountKeeper),
+		authante.NewSigGasConsumeDecorator(options.AccountKeeper, options.BaseOptions.SigGasConsumer),
+		authante.NewSigVerificationDecorator(options.AccountKeeper, options.BaseOptions.SignModeHandler),
+		authante.NewIncrementSequenceDecorator(options.AccountKeeper),
 	}
 
 	return sdk.ChainAnteDecorators(anteDecorators...), nil
