@@ -281,7 +281,12 @@ func NewSimApp(
 	}
 	app.App.SetAnteHandler(anteHandler)
 
-	postHandlerOptions := PostHandlerOptions{}
+	postHandlerOptions := PostHandlerOptions{
+		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
+		FeeGrantKeeper:  app.FeeGrantKeeper,
+		FeeMarketKeeper: app.FeeMarketKeeper,
+	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
 	if err != nil {
 		panic(err)
