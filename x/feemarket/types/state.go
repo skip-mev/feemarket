@@ -8,7 +8,8 @@ import (
 
 // NewState instantiates a new fee market state instance. This is utilized
 // to implement both the base EIP-1559 fee market implementation and the
-// AIMD EIP-1559 fee market implementation.
+// AIMD EIP-1559 fee market implementation. Note that on init, you initialize
+// both the minimum and current base fee to the same value.
 func NewState(
 	window,
 	target, max uint64,
@@ -18,6 +19,7 @@ func NewState(
 	return State{
 		Window:                 make([]uint64, window),
 		BaseFee:                baseFee,
+		MinBaseFee:             baseFee,
 		LearningRate:           learningRate,
 		Index:                  0,
 		TargetBlockUtilization: target,
@@ -65,6 +67,12 @@ func (s *State) UpdateBaseFee(delta math.LegacyDec) math.Int {
 
 	// Update the base fee.
 	fee := (math.LegacyNewDecFromInt(s.BaseFee).Mul(learningRateAdjustment)).Add(net).TruncateInt()
+
+	// Ensure the base fee is greater than the minimum base fee.
+	if fee.LT(s.MinBaseFee) {
+		fee = s.MinBaseFee
+	}
+
 	s.BaseFee = fee
 	return s.BaseFee
 }
