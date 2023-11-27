@@ -36,10 +36,10 @@ func FuzzDefaultFeeMarket(f *testing.F) {
 		if blockGasUsed > state.MaxBlockUtilization {
 			require.Error(t, err)
 			return
-		} else {
-			require.NoError(t, err)
-			require.Equal(t, blockGasUsed, state.Window[state.Index])
 		}
+
+		require.NoError(t, err)
+		require.Equal(t, blockGasUsed, state.Window[state.Index])
 
 		// Ensure the learning rate is always the default learning rate.
 		lr := state.UpdateLearningRate(
@@ -90,10 +90,10 @@ func FuzzAIMDFeeMarket(f *testing.F) {
 		if blockGasUsed > state.MaxBlockUtilization {
 			require.Error(t, err)
 			return
-		} else {
-			require.NoError(t, err)
-			require.Equal(t, blockGasUsed, state.Window[state.Index])
 		}
+
+		require.NoError(t, err)
+		require.Equal(t, blockGasUsed, state.Window[state.Index])
 
 		oldFee := state.BaseFee
 		newFee := state.UpdateBaseFee(params.Delta)
