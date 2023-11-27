@@ -279,7 +279,6 @@ func NewSimApp(
 	if err != nil {
 		panic(err)
 	}
-	app.App.SetAnteHandler(anteHandler)
 
 	postHandlerOptions := PostHandlerOptions{
 		AccountKeeper:   app.AccountKeeper,
@@ -292,6 +291,8 @@ func NewSimApp(
 		panic(err)
 	}
 
+	// set ante and post handlers
+	app.App.SetAnteHandler(anteHandler)
 	app.App.SetPostHandler(postHandler)
 
 	/****  Module Options ****/
