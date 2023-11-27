@@ -6,13 +6,14 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"io"
 	"os"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -233,21 +234,24 @@ func (s *TestSuite) BroadcastTxsWithCallback(
 	return rawTxs
 }
 
-func QueryParams(t *testing.T, chain ibc.Chain) types.Params {
+func (s *TestSuite) QueryParams() types.Params {
 	// cast chain to cosmos-chain
-	cosmosChain, ok := chain.(*cosmos.CosmosChain)
-	require.True(t, ok)
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
 	// get nodes
 	nodes := cosmosChain.Nodes()
-	require.True(t, len(nodes) > 0)
+	s.Require().True(len(nodes) > 0)
+
 	// make params query to first node
 	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
-	require.NoError(t, err)
+	s.Require().NoError(err)
+
+	cdc := s.chain.Config().EncodingConfig.Codec
 
 	// unmarshal params
 	var params types.Params
-	err = json.Unmarshal(resp, &params)
-	require.NoError(t, err)
+	err = cdc.UnmarshalJSON(resp, &params)
+	s.Require().NoError(err)
 	return params
 }
 

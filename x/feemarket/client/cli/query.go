@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
@@ -46,7 +47,7 @@ func GetParamsCmd() *cobra.Command {
 				return err
 			}
 
-			return clientCtx.PrintProto(resp)
+			return clientCtx.PrintProto(&resp.Params)
 		},
 	}
 

@@ -30,7 +30,12 @@ var (
 	noHostMount    = false
 	gasAdjustment  = 2.0
 
-	genesisKV []cosmos.GenesisKV
+	genesisKV = []cosmos.GenesisKV{
+		{
+			Key:   "app_state.feemarket.params",
+			Value: feemarkettypes.DefaultParams(),
+		},
+	}
 
 	consensusParams = ictestutil.Toml{
 		"timeout_commit": "3500ms",
@@ -57,7 +62,7 @@ var (
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("0%s", denom),
+			GasPrices:           fmt.Sprintf("20%s", denom),
 			TrustingPeriod:      "48h",
 			NoHostMount:         noHostMount,
 			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),

@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -36,6 +37,8 @@ type TestSuite struct {
 
 	// broadcaster is the RPC interface to the ITS network
 	bc *cosmos.Broadcaster
+
+	cdc codec.Codec
 }
 
 func NewIntegrationTestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
@@ -80,6 +83,8 @@ func (s *TestSuite) SetupSuite() {
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
 	s.setupBroadcaster()
+
+	s.cdc = s.chain.Config().EncodingConfig.Codec
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -97,7 +102,7 @@ func (s *TestSuite) SetupSubTest() {
 
 func (s *TestSuite) TestQueryParams() {
 	// query params
-	params := QueryParams(s.T(), s.chain)
+	params := s.QueryParams()
 
 	// expect validate to pass
 	require.NoError(s.T(), params.ValidateBasic(), params)
