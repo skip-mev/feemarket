@@ -16,9 +16,9 @@ import (
 // FeeMarketDeductDecorator deducts fees from the fee payer based off of the current state of the feemarket.
 // The fee payer is the fee granter (if specified) or first signer of the tx.
 // If the fee payer does not have the funds to pay for the fees, return an InsufficientFunds error.
-// If there is an excess between the given fee and the on-chain base fee is given as a tip.
+// If there is an excess between the given fee and the on-chain min base fee is given as a tip.
 // Call next AnteHandler if fees successfully deducted.
-// CONTRACT: Tx must implement FeeTx interface to use DeductFeeDecorator
+// CONTRACT: Tx must implement FeeTx interface
 type FeeMarketDeductDecorator struct {
 	accountKeeper   AccountKeeper
 	bankKeeper      BankKeeper
