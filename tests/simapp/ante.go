@@ -44,12 +44,9 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewTxTimeoutHeightDecorator(),
 		authante.NewValidateMemoDecorator(options.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-		feemarketante.NewFeeMarketDecorator( // fee market replaces fee deduct decorator
-			options.AccountKeeper,
-			options.BaseOptions.BankKeeper,
-			options.BaseOptions.FeegrantKeeper,
+		feemarketante.NewFeeMarketCheckDecorator( // fee market check replaces fee deduct decorator
 			options.FeeMarketKeeper,
-		),
+		), // fees are deducted in the fee market deduct post handler
 		authante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		authante.NewValidateSigCountDecorator(options.AccountKeeper),
 		authante.NewSigGasConsumeDecorator(options.AccountKeeper, options.BaseOptions.SigGasConsumer),

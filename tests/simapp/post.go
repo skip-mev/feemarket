@@ -5,17 +5,18 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
+	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 )
 
-// PostHandlerOptions are the options required for constructing a default SDK PostHandler.
+// PostHandlerOptions are the options required for constructing a FeeMarket PostHandler.
 type PostHandlerOptions struct {
-	AccountKeeper   feemarketante.AccountKeeper
-	BankKeeper      feemarketante.BankKeeper
-	FeeMarketKeeper feemarketante.FeeMarketKeeper
+	AccountKeeper   feemarketpost.AccountKeeper
+	BankKeeper      feemarketpost.BankKeeper
+	FeeMarketKeeper feemarketpost.FeeMarketKeeper
+	FeeGrantKeeper  feemarketpost.FeeGrantKeeper
 }
 
-// NewPostHandler returns an empty PostHandler chain.
+// NewPostHandler returns a PostHandler chain with the fee deduct decorator.
 func NewPostHandler(options PostHandlerOptions) (sdk.PostHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for post builder")
@@ -29,7 +30,18 @@ func NewPostHandler(options PostHandlerOptions) (sdk.PostHandler, error) {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feemarket keeper is required for post builder")
 	}
 
-	var postDecorators []sdk.PostDecorator
+	if options.FeeGrantKeeper == nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feegrant keeper is required for post builder")
+	}
+
+	postDecorators := []sdk.PostDecorator{
+		feemarketpost.NewFeeMarketDeductDecorator(
+			options.AccountKeeper,
+			options.BankKeeper,
+			options.FeeGrantKeeper,
+			options.FeeMarketKeeper,
+		),
+	}
 
 	return sdk.ChainPostDecorators(postDecorators...), nil
 }
