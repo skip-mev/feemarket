@@ -21,8 +21,8 @@ func TestAnteHandle(t *testing.T) {
 
 	testCases := []antesuite.TestCase{
 		{
-			"0 gas given should fail",
-			func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+			Name: "0 gas given should fail",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
@@ -31,15 +31,15 @@ func TestAnteHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			true,
-			false,
-			false,
-			false,
-			sdkerrors.ErrInvalidGasLimit,
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInvalidGasLimit,
 		},
 		{
-			"signer has enough funds, should pass",
-			func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+			Name: "signer has enough funds, should pass",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -47,11 +47,11 @@ func TestAnteHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			true,
-			false,
-			false,
-			true,
-			nil,
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
 		},
 	}
 

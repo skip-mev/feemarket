@@ -62,8 +62,8 @@ func TestPostHandle(t *testing.T) {
 
 	testCases := []antesuite.TestCase{
 		{
-			"signer has no funds",
-			func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+			Name: "signer has no funds",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
 
@@ -73,15 +73,15 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			true,
-			true,
-			false,
-			false,
-			sdkerrors.ErrInsufficientFunds,
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
 		},
 		{
-			"0 gas given should fail",
-			func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+			Name: "0 gas given should fail",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
@@ -90,15 +90,15 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			true,
-			true,
-			false,
-			false,
-			sdkerrors.ErrInvalidGasLimit,
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInvalidGasLimit,
 		},
 		{
-			"signer has enough funds, should pass",
-			func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+			Name: "signer has enough funds, should pass",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
 
@@ -108,11 +108,11 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			true,
-			true,
-			false,
-			true,
-			nil,
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
 		},
 	}
 
