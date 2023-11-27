@@ -4,6 +4,7 @@ package simapp
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	"io"
 	"os"
 	"path/filepath"
@@ -280,6 +281,14 @@ func NewSimApp(
 		panic(err)
 	}
 	app.App.SetAnteHandler(anteHandler)
+
+	postHandlerOptions := posthandler.HandlerOptions{}
+	postHandler, err := posthandler.NewPostHandler(postHandlerOptions)
+	if err != nil {
+		panic(err)
+	}
+
+	app.App.SetPostHandler(postHandler)
 
 	/****  Module Options ****/
 
