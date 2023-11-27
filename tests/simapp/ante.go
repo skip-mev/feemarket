@@ -10,8 +10,8 @@ import (
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 )
 
-// HandlerOptions are the options required for constructing an SDK AnteHandler with the fee market injected.
-type HandlerOptions struct {
+// AnteHandlerOptions are the options required for constructing an SDK AnteHandler with the fee market injected.
+type AnteHandlerOptions struct {
 	BaseOptions     authante.HandlerOptions
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper feemarketante.FeeMarketKeeper
@@ -20,7 +20,7 @@ type HandlerOptions struct {
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
+func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
 	}

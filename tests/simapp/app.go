@@ -263,19 +263,19 @@ func NewSimApp(
 	// ------------------------- Begin Custom Code -------------------------------- //
 	// ---------------------------------------------------------------------------- //
 
-	handlerOptions := ante.HandlerOptions{
+	anteHandlerOptions := ante.HandlerOptions{
 		BankKeeper:      app.BankKeeper,
 		FeegrantKeeper:  app.FeeGrantKeeper,
 		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 		SignModeHandler: app.txConfig.SignModeHandler(),
 	}
 
-	options := HandlerOptions{
-		BaseOptions:     handlerOptions,
+	anteOptions := AnteHandlerOptions{
+		BaseOptions:     anteHandlerOptions,
 		AccountKeeper:   app.AccountKeeper,
 		FeeMarketKeeper: app.FeeMarketKeeper,
 	}
-	anteHandler, err := NewAnteHandler(options)
+	anteHandler, err := NewAnteHandler(anteOptions)
 	if err != nil {
 		panic(err)
 	}
