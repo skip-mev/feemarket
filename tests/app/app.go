@@ -149,7 +149,7 @@ func init() {
 		panic(err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".testapp")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".feemarket")
 }
 
 func New(

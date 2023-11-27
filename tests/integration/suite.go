@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -92,4 +93,12 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+}
+
+func (s *TestSuite) TestQueryParams() {
+	// query params
+	params := QueryParams(s.T(), s.chain)
+
+	// expect validate to pass
+	require.NoError(s.T(), params.ValidateBasic(), params)
 }

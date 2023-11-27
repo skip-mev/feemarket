@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"io"
 	"os"
 	"path"
@@ -230,6 +231,24 @@ func (s *TestSuite) BroadcastTxsWithCallback(
 	s.Require().NoError(eg.Wait())
 
 	return rawTxs
+}
+
+func QueryParams(t *testing.T, chain ibc.Chain) types.Params {
+	// cast chain to cosmos-chain
+	cosmosChain, ok := chain.(*cosmos.CosmosChain)
+	require.True(t, ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	require.True(t, len(nodes) > 0)
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
+	require.NoError(t, err)
+
+	// unmarshal params
+	var params types.Params
+	err = json.Unmarshal(resp, &params)
+	require.NoError(t, err)
+	return params
 }
 
 // QueryValidators queries for all the network's validators
