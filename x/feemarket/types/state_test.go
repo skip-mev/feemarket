@@ -119,6 +119,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("empty block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 
 		params := types.DefaultParams()
 
@@ -130,6 +131,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("target block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 
 		params := types.DefaultParams()
 
@@ -143,6 +145,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("full block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 
 		params := types.DefaultParams()
 
@@ -156,6 +159,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("empty block with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		params := types.DefaultAIMDParams()
@@ -170,6 +174,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("target block with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		params := types.DefaultAIMDParams()
@@ -188,6 +193,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("full blocks with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.BaseFee = math.NewInt(1000)
+		state.MinBaseFee = math.NewInt(125)
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		params := types.DefaultAIMDParams()
@@ -200,6 +206,26 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		newBaseFee := state.UpdateBaseFee(params.Delta)
 
 		expectedBaseFee := math.NewInt(1150)
+		require.True(t, expectedBaseFee.Equal(newBaseFee))
+	})
+
+	t.Run("never goes below min base fee with default eip1599", func(t *testing.T) {
+		state := types.DefaultState()
+		params := types.DefaultParams()
+
+		// Empty block
+		newBaseFee := state.UpdateBaseFee(params.Delta)
+		expectedBaseFee := params.MinBaseFee
+		require.True(t, expectedBaseFee.Equal(newBaseFee))
+	})
+
+	t.Run("never goes below min base fee with default aimd eip1599", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		params := types.DefaultAIMDParams()
+
+		// Empty blocks
+		newBaseFee := state.UpdateBaseFee(params.Delta)
+		expectedBaseFee := params.MinBaseFee
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 }
