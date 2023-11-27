@@ -35,6 +35,9 @@ func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKee
 	}
 }
 
+// PostHandle deducts the fee from the fee payer based on the min base fee and the gas consumed in the gasmeter.
+// If there is a difference between the provided fee and the min-base fee, the difference is paid as a tip.
+// Fees are sent to the x/feemarket fee-collector address.
 func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success bool, next sdk.PostHandler) (sdk.Context, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
@@ -62,14 +65,16 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		}
 	}
 
-	if err := dfd.checkDeductFeeAndTip(ctx, tx, fee, tip); err != nil {
+	if err := dfd.DeductFeeAndTip(ctx, tx, fee, tip); err != nil {
 		return ctx, err
 	}
 
 	return next(ctx, tx, simulate, success)
 }
 
-func (dfd FeeMarketDeductDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx, fee, tip sdk.Coins) error {
+// DeductFeeAndTip deducts the provided fee and tip from the fee payer.
+// If the tx uses a feegranter, the fee granter address will pay the fee instead of the tx signer.
+func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx, fee, tip sdk.Coins) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
 		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -103,17 +108,9 @@ func (dfd FeeMarketDeductDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx 
 		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
-	// deduct the fees
-	if !fee.IsZero() {
-		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
-		if err != nil {
-			return err
-		}
-	}
-
-	// deduct the tip
-	if !tip.IsZero() {
-		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, tip)
+	// deduct the fees and tip
+	if !fee.Add(tip...).IsZero() {
+		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee.Add(tip...))
 		if err != nil {
 			return err
 		}
@@ -125,7 +122,7 @@ func (dfd FeeMarketDeductDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx 
 			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
 			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
-			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, sdk.AccAddress(ctx.BlockHeader().ProposerAddress).String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
 		),
 	}
 	ctx.EventManager().EmitEvents(events)
@@ -133,7 +130,7 @@ func (dfd FeeMarketDeductDecorator) checkDeductFeeAndTip(ctx sdk.Context, sdkTx 
 	return nil
 }
 
-// DeductCoins deducts coins from the given account.  Coins are sent to the feemarket module account.
+// DeductCoins deducts coins from the given account.  Coins are sent to the feemarket fee collector account.
 func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins) error {
 	if !coins.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)

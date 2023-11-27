@@ -30,10 +30,6 @@ func NewPostHandler(options PostHandlerOptions) (sdk.PostHandler, error) {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feemarket keeper is required for post builder")
 	}
 
-	if options.FeeGrantKeeper == nil {
-		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feegrant keeper is required for post builder")
-	}
-
 	postDecorators := []sdk.PostDecorator{
 		feemarketpost.NewFeeMarketDeductDecorator(
 			options.AccountKeeper,
