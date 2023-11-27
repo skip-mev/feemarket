@@ -13,8 +13,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/skip-mev/feemarket/x/feemarket/types"
-
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -36,6 +34,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type KeyringOverride struct {
@@ -246,11 +246,9 @@ func (s *TestSuite) QueryParams() types.Params {
 	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
 	s.Require().NoError(err)
 
-	cdc := s.chain.Config().EncodingConfig.Codec
-
 	// unmarshal params
 	var params types.Params
-	err = cdc.UnmarshalJSON(resp, &params)
+	err = s.cdc.UnmarshalJSON(resp, &params)
 	s.Require().NoError(err)
 	return params
 }
