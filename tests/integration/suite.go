@@ -75,10 +75,15 @@ func (s *TestSuite) SetupSuite() {
 	ctx := context.Background()
 	s.ic = BuildInterchain(s.T(), ctx, s.chain)
 
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
 	// get the users
-	s.user1 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
-	s.user2 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
-	s.user3 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")

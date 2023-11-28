@@ -6,7 +6,9 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path"
 	"strings"
@@ -46,8 +48,8 @@ type KeyringOverride struct {
 // ChainBuilderFromChainSpec creates an interchaintest chain builder factory given a ChainSpec
 // and returns the associated chain
 func ChainBuilderFromChainSpec(t *testing.T, spec *interchaintest.ChainSpec) ibc.Chain {
-	// require that NumFullNodes == NumValidators == 4
-	require.Equal(t, *spec.NumValidators, 1)
+	// require that NumFullNodes == NumValidators == 3
+	require.Equal(t, *spec.NumValidators, 3)
 
 	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{spec})
 
@@ -446,4 +448,93 @@ func (s *TestSuite) keyringDirFromNode() string {
 	}
 
 	return localDir
+}
+
+// GetAndFundTestUserWithMnemonic restores a user using the given mnemonic
+// and funds it with the native chain denom.
+// The caller should wait for some blocks to complete before the funds will be accessible.
+func (s *TestSuite) GetAndFundTestUserWithMnemonic(
+	ctx context.Context,
+	keyNamePrefix, mnemonic string,
+	amount int64,
+	chain *cosmos.CosmosChain,
+) (ibc.Wallet, error) {
+	chainCfg := chain.Config()
+	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, RandLowerCaseLetterString(3))
+	user, err := chain.BuildWallet(ctx, keyName, mnemonic)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
+	}
+
+	err = chain.SendFunds(ctx, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
+		Address: user.FormattedAddress(),
+		Amount:  math.NewInt(amount),
+		Denom:   chainCfg.Denom,
+	})
+
+	_, err = s.ExecTx(
+		ctx,
+		chain,
+		interchaintest.FaucetAccountKeyName,
+		"bank",
+		"send",
+		interchaintest.FaucetAccountKeyName,
+		user.FormattedAddress(),
+		fmt.Sprintf("%d%s", amount, chainCfg.Denom),
+		"--fees",
+		fmt.Sprintf("%d%s", 200000000000, chainCfg.Denom),
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get funds from faucet: %w", err)
+	}
+	return user, nil
+}
+
+// GetAndFundTestUsers generates and funds chain users with the native chain denom.
+// The caller should wait for some blocks to complete before the funds will be accessible.
+func (s *TestSuite) GetAndFundTestUsers(
+	ctx context.Context,
+	keyNamePrefix string,
+	amount int64,
+	chains ...*cosmos.CosmosChain,
+) []ibc.Wallet {
+	users := make([]ibc.Wallet, len(chains))
+	var eg errgroup.Group
+	for i, chain := range chains {
+		i := i
+		chain := chain
+		eg.Go(func() error {
+			user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
+			if err != nil {
+				return err
+			}
+			users[i] = user
+			return nil
+		})
+	}
+	s.Require().NoError(eg.Wait())
+
+	// TODO(nix 05-17-2022): Map with generics once using go 1.18
+	chainHeights := make([]testutil.ChainHeighter, len(chains))
+	for i := range chains {
+		chainHeights[i] = chains[i]
+	}
+	return users
+}
+
+func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
+	node := chain.FullNodes[0]
+	return node.ExecTx(ctx, keyName, command...)
+}
+
+var chars = []byte("abcdefghijklmnopqrstuvwxyz")
+
+// RandLowerCaseLetterString returns a lowercase letter string of given length
+func RandLowerCaseLetterString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
 }

@@ -17,8 +17,8 @@ import (
 
 var (
 	// config params
-	numValidators = 1
-	numFullNodes  = 0
+	numValidators = 3
+	numFullNodes  = 1
 	denom         = "stake"
 
 	image = ibc.DockerImage{
@@ -28,7 +28,7 @@ var (
 	}
 	encodingConfig = MakeEncodingConfig()
 	noHostMount    = false
-	gasAdjustment  = 2.0
+	gasAdjustment  = 10.0
 
 	genesisKV = []cosmos.GenesisKV{
 		{
@@ -62,7 +62,7 @@ var (
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("20%s", denom),
+			GasPrices:           fmt.Sprintf("200%s", denom),
 			TrustingPeriod:      "48h",
 			NoHostMount:         noHostMount,
 			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),
