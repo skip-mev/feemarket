@@ -65,6 +65,20 @@ func (_m *FeeMarketKeeper) GetState(ctx types.Context) (feemarkettypes.State, er
 	return r0, r1
 }
 
+// SetState provides a mock function with given fields: ctx, state
+func (_m *FeeMarketKeeper) SetState(ctx types.Context, state feemarkettypes.State) error {
+	ret := _m.Called(ctx, state)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(types.Context, feemarkettypes.State) error); ok {
+		r0 = rf(ctx, state)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewFeeMarketKeeper creates a new instance of FeeMarketKeeper. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFeeMarketKeeper(t interface {
