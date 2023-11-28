@@ -33,8 +33,14 @@ func TestDeductCoins(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:        "invalid coins",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
+			name:        "invalid coins negative amount",
+			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
+			wantErr:     true,
+			invalidCoin: true,
+		},
+		{
+			name:        "invalid coins invalid denom",
+			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
