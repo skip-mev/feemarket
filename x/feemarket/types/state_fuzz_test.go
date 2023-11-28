@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 func FuzzDefaultFeeMarket(f *testing.F) {

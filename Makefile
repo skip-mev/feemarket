@@ -34,8 +34,8 @@ whitespace += $(whitespace)
 comma := ,
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=testapp \
-		  -X github.com/cosmos/cosmos-sdk/version.AppName=testappd \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=feemarket \
+		  -X github.com/cosmos/cosmos-sdk/version.AppName=feemarketd \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
@@ -80,7 +80,7 @@ BUILD_TARGETS := build-test-app
 build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
-	cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+	cd $(CURDIR)/tests/app && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
 $(BUILD_DIR)/:
 	mkdir -p $(BUILD_DIR)/
@@ -90,13 +90,13 @@ $(BUILD_DIR)/:
 # other addresses using "genesis add-genesis-account address 10000000000000000000000000stake".
 # This will allow users to bootstrap their wallet with a balance.
 build-and-start-app: build-test-app
-	./build/testappd init validator1 --chain-id chain-id-0
-	./build/testappd keys add validator1
-	./build/testappd genesis add-genesis-account validator1 10000000000000000000000000stake
-	./build/testappd genesis add-genesis-account cosmos1see0htr47uapjvcvh0hu6385rp8lw3em24hysg 10000000000000000000000000stake
-	./build/testappd genesis gentx validator1 1000000000stake --chain-id chain-id-0
-	./build/testappd genesis collect-gentxs
-	./build/testappd start --api.enable true --api.enabled-unsafe-cors true --log_level info
+	./build/feemarketd init validator1 --chain-id chain-id-0
+	./build/feemarketd keys add validator1
+	./build/feemarketd genesis add-genesis-account validator1 10000000000000000000000000stake
+	./build/feemarketd genesis add-genesis-account cosmos1see0htr47uapjvcvh0hu6385rp8lw3em24hysg 10000000000000000000000000stake
+	./build/feemarketd genesis gentx validator1 1000000000stake --chain-id chain-id-0
+	./build/feemarketd genesis collect-gentxs
+	./build/feemarketd start --api.enable true --api.enabled-unsafe-cors true --log_level info
 
 .PHONY: build-test-app build-and-start-app
 
