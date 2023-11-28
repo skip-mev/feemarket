@@ -34,6 +34,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type KeyringOverride struct {
@@ -230,6 +232,25 @@ func (s *TestSuite) BroadcastTxsWithCallback(
 	s.Require().NoError(eg.Wait())
 
 	return rawTxs
+}
+
+func (s *TestSuite) QueryParams() types.Params {
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
+	s.Require().NoError(err)
+
+	// unmarshal params
+	var params types.Params
+	err = s.cdc.UnmarshalJSON(resp, &params)
+	s.Require().NoError(err)
+	return params
 }
 
 // QueryValidators queries for all the network's validators

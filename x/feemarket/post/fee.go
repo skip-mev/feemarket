@@ -39,6 +39,11 @@ func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKee
 // If there is a difference between the provided fee and the min-base fee, the difference is paid as a tip.
 // Fees are sent to the x/feemarket fee-collector address.
 func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success bool, next sdk.PostHandler) (sdk.Context, error) {
+	// GenTx consume no fee
+	if ctx.BlockHeight() == 0 {
+		return next(ctx, tx, simulate, success)
+	}
+
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
