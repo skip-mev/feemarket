@@ -23,3 +23,6 @@ go.work*
 
 # editor
 .idea/
+
+# coverage report
+cover.html
