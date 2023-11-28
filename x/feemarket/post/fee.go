@@ -80,7 +80,11 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
-	state.Window[state.Index] += gas
+	err = state.Update(gas)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
+	}
+
 	err = dfd.feemarketKeeper.SetState(ctx, state)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to set fee market state")
