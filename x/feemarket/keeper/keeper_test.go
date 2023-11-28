@@ -12,11 +12,13 @@ import (
 	"github.com/skip-mev/feemarket/testutils"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/skip-mev/feemarket/x/feemarket/types/mocks"
 )
 
 type KeeperTestSuite struct {
 	suite.Suite
 
+	accountKeeper    *mocks.AccountKeeper
 	feemarketKeeper  *keeper.Keeper
 	encCfg           testutils.EncodingConfig
 	ctx              sdk.Context
@@ -41,9 +43,13 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.ctx = testCtx.Ctx
 
 	s.authorityAccount = []byte("authority")
+	s.accountKeeper = mocks.NewAccountKeeper(s.T())
+	s.accountKeeper.On("GetModuleAddress", "feemarket-fee-collector").Return(sdk.AccAddress("feemarket-fee-collector"))
+
 	s.feemarketKeeper = keeper.NewKeeper(
 		s.encCfg.Codec,
 		s.key,
+		s.accountKeeper,
 		s.authorityAccount.String(),
 	)
 

@@ -158,9 +158,10 @@ func init() {
 type Inputs struct {
 	depinject.In
 
-	Config *modulev1.Module
-	Cdc    codec.Codec
-	Key    *store.KVStoreKey
+	Config        *modulev1.Module
+	Cdc           codec.Codec
+	Key           *store.KVStoreKey
+	AccountKeeper types.AccountKeeper
 }
 
 type Outputs struct {
@@ -187,6 +188,7 @@ func ProvideModule(in Inputs) Outputs {
 	Keeper := keeper.NewKeeper(
 		in.Cdc,
 		in.Key,
+		in.AccountKeeper,
 		authority.String(),
 	)
 

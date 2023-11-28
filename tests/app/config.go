@@ -57,15 +57,16 @@ var (
 	// so that other modules that want to create or claim capabilities afterwards in InitChain
 	// can do so safely.
 	genesisModuleOrder = []string{
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, feemarkettypes.ModuleName,
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName,
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
 		feegrant.ModuleName, group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName,
-		vestingtypes.ModuleName, consensustypes.ModuleName, feemarkettypes.ModuleName,
+		vestingtypes.ModuleName, consensustypes.ModuleName,
 	}
 
 	// module account permissions
 	moduleAccPerms = []*authmodulev1.ModuleAccountPermission{
+		{Account: feemarkettypes.FeeCollectorName, Permissions: []string{authtypes.Burner}}, // allow fee market to burn
 		{Account: authtypes.FeeCollectorName},
 		{Account: distrtypes.ModuleName},
 		{Account: minttypes.ModuleName, Permissions: []string{authtypes.Minter}},
@@ -82,6 +83,7 @@ var (
 		minttypes.ModuleName,
 		stakingtypes.BondedPoolName,
 		stakingtypes.NotBondedPoolName,
+		feemarkettypes.FeeCollectorName,
 		// We allow the following module accounts to receive funds:
 		// govtypes.ModuleName
 	}
@@ -101,6 +103,7 @@ var (
 					BeginBlockers: []string{
 						upgradetypes.ModuleName,
 						capabilitytypes.ModuleName,
+						feemarkettypes.ModuleName,
 						minttypes.ModuleName,
 						distrtypes.ModuleName,
 						slashingtypes.ModuleName,
@@ -116,12 +119,12 @@ var (
 						group.ModuleName,
 						paramstypes.ModuleName,
 						vestingtypes.ModuleName,
-						feemarkettypes.ModuleName,
 						consensustypes.ModuleName,
 					},
 					EndBlockers: []string{
 						crisistypes.ModuleName,
 						govtypes.ModuleName,
+						feemarkettypes.ModuleName,
 						stakingtypes.ModuleName,
 						capabilitytypes.ModuleName,
 						authtypes.ModuleName,
@@ -138,7 +141,6 @@ var (
 						consensustypes.ModuleName,
 						upgradetypes.ModuleName,
 						vestingtypes.ModuleName,
-						feemarkettypes.ModuleName,
 					},
 					OverrideStoreKeys: []*runtimev1alpha1.StoreKeyConfig{
 						{

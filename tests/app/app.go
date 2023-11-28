@@ -32,7 +32,7 @@ import (
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	consensus "github.com/cosmos/cosmos-sdk/x/consensus"
+	"github.com/cosmos/cosmos-sdk/x/consensus"
 	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
@@ -253,7 +253,7 @@ func New(
 
 	// Create a global ante handler that will be called on each transaction when
 	// proposals are being built and verified.
-	handlerOptions := ante.HandlerOptions{
+	anteHandlerOptions := ante.HandlerOptions{
 		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
 		FeegrantKeeper:  app.FeeGrantKeeper,
@@ -261,12 +261,30 @@ func New(
 		SignModeHandler: app.txConfig.SignModeHandler(),
 	}
 
-	anteHandler, err := ante.NewAnteHandler(handlerOptions)
+	anteOptions := AnteHandlerOptions{
+		BaseOptions:     anteHandlerOptions,
+		AccountKeeper:   app.AccountKeeper,
+		FeeMarketKeeper: &app.FeeMarketKeeper,
+	}
+	anteHandler, err := NewAnteHandler(anteOptions)
 	if err != nil {
 		panic(err)
 	}
 
+	postHandlerOptions := PostHandlerOptions{
+		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
+		FeeGrantKeeper:  app.FeeGrantKeeper,
+		FeeMarketKeeper: &app.FeeMarketKeeper,
+	}
+	postHandler, err := NewPostHandler(postHandlerOptions)
+	if err != nil {
+		panic(err)
+	}
+
+	// set ante and post handlers
 	app.App.SetAnteHandler(anteHandler)
+	app.App.SetPostHandler(postHandler)
 
 	// ---------------------------------------------------------------------------- //
 	// ------------------------- End Custom Code ---------------------------------- //

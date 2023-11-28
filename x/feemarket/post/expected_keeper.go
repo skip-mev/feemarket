@@ -1,4 +1,4 @@
-package ante
+package post
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -41,5 +41,6 @@ type BankKeeper interface {
 //go:generate mockery --name FeeMarketKeeper --filename mock_feemarket_keeper.go
 type FeeMarketKeeper interface {
 	GetState(ctx sdk.Context) (feemarkettypes.State, error)
+	SetState(ctx sdk.Context, state feemarkettypes.State) error
 	GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
 }
