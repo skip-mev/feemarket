@@ -93,7 +93,7 @@ func TestSendTip(t *testing.T) {
 			}
 
 			if err := post.SendTip(s.BankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
-				s.Errorf(err, "SendCoins() error = %v, wantErr %v", err, tc.wantErr)
+				s.Errorf(err, "SendTip() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
@@ -146,7 +146,7 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
-				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Twice()
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
