@@ -60,6 +60,45 @@ func TestDeductCoins(t *testing.T) {
 	}
 }
 
+func TestSendTip(t *testing.T) {
+	tests := []struct {
+		name        string
+		coins       sdk.Coins
+		wantErr     bool
+		invalidCoin bool
+	}{
+		{
+			name:    "valid",
+			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			wantErr: false,
+		},
+		{
+			name:    "valid no coins",
+			coins:   sdk.NewCoins(),
+			wantErr: false,
+		},
+		{
+			name:        "invalid coins",
+			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
+			wantErr:     true,
+			invalidCoin: true,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
+			s := antesuite.SetupTestSuite(t)
+			accs := s.CreateTestAccounts(2)
+			if !tc.invalidCoin {
+				s.BankKeeper.On("SendCoins", s.Ctx, mock.Anything, mock.Anything, tc.coins).Return(nil).Once()
+			}
+
+			if err := post.SendTip(s.BankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
+				s.Errorf(err, "SendCoins() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
@@ -107,6 +146,7 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
 				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Twice()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},

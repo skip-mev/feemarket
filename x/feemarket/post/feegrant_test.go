@@ -1,12 +1,12 @@
 package post_test
 
 import (
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/stretchr/testify/mock"
 	"math/rand"
 	"testing"
 	"time"
 
-	"github.com/cometbft/cometbft/crypto"
 	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -34,49 +34,28 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 		err      error
 		malleate func(*antesuite.TestSuite) (signer antesuite.TestAccount, feeAcc sdk.AccAddress)
 	}{
-		"paying with low funds": {
+		"paying with insufficient fee": {
 			fee:   50,
 			valid: false,
-			err:   sdkerrors.ErrInsufficientFunds,
+			err:   sdkerrors.ErrInsufficientFee,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(1)
-				// 2 calls are needed because we run the ante twice
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), authtypes.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Times(2)
 				return accs[0], nil
 			},
 		},
 		"paying with good funds": {
-			fee:   50,
+			fee:   24497000000,
 			valid: true,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(1)
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), authtypes.FeeCollectorName, mock.Anything).Return(nil).Times(2)
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+
 				return accs[0], nil
 			},
 		},
 		"paying with no account": {
-			fee:   1,
-			valid: false,
-			err:   sdkerrors.ErrUnknownAddress,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				// Do not register the account
-				priv, _, addr := testdata.KeyTestPubAddr()
-				return antesuite.TestAccount{
-					Account: authtypes.NewBaseAccountWithAddress(addr),
-					Priv:    priv,
-				}, nil
-			},
-		},
-		"no fee with real account": {
-			fee:   0,
-			valid: true,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(1)
-				return accs[0], nil
-			},
-		},
-		"no fee with no account": {
-			fee:   0,
+			fee:   24497000000,
 			valid: false,
 			err:   sdkerrors.ErrUnknownAddress,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
@@ -92,50 +71,51 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			// note: the original test said "valid fee grant with no account".
 			// this is impossible given that feegrant.GrantAllowance calls
 			// SetAccount for the grantee.
-			fee:   50,
+			fee:   36630000000,
 			valid: true,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Times(2)
-				suite.BankKeeper.EXPECT().SendCoinsFromAccountToModule(mock.Anything, accs[1].Account.GetAddress(), authtypes.FeeCollectorName, mock.Anything).Return(nil).Times(2)
+				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
 		"no fee grant": {
-			fee:   2,
+			fee:   36630000000,
 			valid: false,
 			err:   sdkerrors.ErrNotFound,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.EXPECT().
-					UseGrantedFees(mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
+				suite.FeeGrantKeeper.On(
+					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
 					Return(sdkerrors.ErrNotFound.Wrap("fee-grant not found")).
-					Times(2)
+					Once()
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
 		"allowance smaller than requested fee": {
-			fee:   50,
+			fee:   36630000000,
 			valid: false,
 			err:   feegrant.ErrFeeLimitExceeded,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.EXPECT().
-					UseGrantedFees(mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
+				suite.FeeGrantKeeper.On(
+					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
 					Return(feegrant.ErrFeeLimitExceeded.Wrap("basic allowance")).
-					Times(2)
+					Once()
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
 		"granter cannot cover allowed fee grant": {
-			fee:   50,
+			fee:   36630000000,
 			valid: false,
 			err:   sdkerrors.ErrInsufficientFunds,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.EXPECT().UseGrantedFees(mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Times(2)
-				suite.BankKeeper.EXPECT().SendCoinsFromAccountToModule(mock.Anything, accs[1].Account.GetAddress(), authtypes.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Times(2)
+				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
@@ -150,12 +130,9 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			dfd := feemarketpost.NewFeeMarketDeductDecorator(suite.AccountKeeper, suite.BankKeeper, suite.FeeGrantKeeper, suite.FeemarketKeeper)
 			feePostHandler := sdk.ChainPostDecorators(dfd)
 
-			// this tests the whole stack
-			postHandlerStack := suite.PostHandler
-
 			signer, feeAcc := stc.malleate(suite)
 
-			fee := sdk.NewCoins(sdk.NewInt64Coin("atom", tc.fee))
+			fee := sdk.NewCoins(sdk.NewInt64Coin("stake", tc.fee))
 			msgs := []sdk.Msg{testdata.NewTestMsg(signer.Account.GetAddress())}
 
 			acc := suite.AccountKeeper.GetAccount(suite.Ctx, signer.Account.GetAddress())
@@ -164,7 +141,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 				accNums, seqs = []uint64{acc.GetAccountNumber()}, []uint64{acc.GetSequence()}
 			}
 
-			var defaultGenTxGas uint64 = 10000000
+			var defaultGenTxGas uint64 = 10
 			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, suite.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
 			_, err = feePostHandler(suite.Ctx, tx, false, true) // tests only feegrant post
@@ -173,20 +150,8 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			} else {
 				require.ErrorIs(t, err, tc.err)
 			}
-
-			_, err = postHandlerStack(suite.Ctx, tx, false, true) // tests while stack
-			if tc.valid {
-				require.NoError(t, err)
-			} else {
-				require.ErrorIs(t, err, tc.err)
-			}
 		})
 	}
-}
-
-// don't consume any gas
-func SigGasNoConsumer(meter sdk.GasMeter, sig []byte, pubkey crypto.PubKey, params authtypes.Params) error {
-	return nil
 }
 
 func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,

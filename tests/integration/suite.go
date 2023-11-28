@@ -3,6 +3,8 @@ package integration
 import (
 	"context"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,6 +37,8 @@ type TestSuite struct {
 
 	// broadcaster is the RPC interface to the ITS network
 	bc *cosmos.Broadcaster
+
+	cdc codec.Codec
 }
 
 func NewIntegrationTestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
@@ -71,14 +75,21 @@ func (s *TestSuite) SetupSuite() {
 	ctx := context.Background()
 	s.ic = BuildInterchain(s.T(), ctx, s.chain)
 
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
 	// get the users
-	s.user1 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
-	s.user2 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
-	s.user3 = interchaintest.GetAndFundTestUsers(s.T(), ctx, s.T().Name(), initBalance, s.chain)[0]
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
 	s.setupBroadcaster()
+
+	s.cdc = s.chain.Config().EncodingConfig.Codec
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -92,4 +103,12 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+}
+
+func (s *TestSuite) TestQueryParams() {
+	// query params
+	params := s.QueryParams()
+
+	// expect validate to pass
+	require.NoError(s.T(), params.ValidateBasic(), params)
 }

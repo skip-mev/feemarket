@@ -27,13 +27,18 @@ func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper) FeeMarketCheckDecorator {
 
 // AnteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
 func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
+	// GenTx consume no fee
+	if ctx.BlockHeight() == 0 {
+		return next(ctx, tx, simulate)
+	}
+
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
 	if !simulate && ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
-		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
+		return ctx, sdkerrors.ErrInvalidGasLimit.Wrapf("must provide positive gas")
 	}
 
 	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
@@ -45,7 +50,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	gas := feeTx.GetGas() // use provided gas limit
 
 	if !simulate {
-		fee, _, err = CheckTxFees(minGasPrices, tx, gas)
+		fee, _, err = CheckTxFees(minGasPrices, feeTx, gas)
 		if err != nil {
 			return ctx, err
 		}
@@ -56,14 +61,9 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	return next(newCtx, tx, simulate)
 }
 
-// CheckTxFees implements the logic for the fee market to check if a Tx has provided suffucient
+// CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFees(minFees sdk.Coins, tx sdk.Tx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
-	feeTx, ok := tx.(sdk.FeeTx)
-	if !ok {
-		return nil, nil, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
-	}
-
+func CheckTxFees(minFees sdk.Coins, feeTx sdk.FeeTx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
 	feesDec := sdk.NewDecCoinsFromCoins(minFees...)
 
 	feeCoins = feeTx.GetFee()
@@ -82,7 +82,7 @@ func CheckTxFees(minFees sdk.Coins, tx sdk.Tx, gas uint64) (feeCoins sdk.Coins, 
 		}
 
 		if !feeCoins.IsAnyGTE(requiredFees) {
-			return nil, nil, errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "insufficient fees; got: %s required: %s", feeCoins, requiredFees)
+			return nil, nil, sdkerrors.ErrInsufficientFee.Wrapf("got: %s required: %s", feeCoins, requiredFees)
 		}
 
 		tip = feeCoins.Sub(minFees...) // tip is the difference between feeCoins and the min fees

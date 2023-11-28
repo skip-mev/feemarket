@@ -39,6 +39,11 @@ func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKee
 // If there is a difference between the provided fee and the min-base fee, the difference is paid as a tip.
 // Fees are sent to the x/feemarket fee-collector address.
 func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success bool, next sdk.PostHandler) (sdk.Context, error) {
+	// GenTx consume no fee
+	if ctx.BlockHeight() == 0 {
+		return next(ctx, tx, simulate, success)
+	}
+
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -59,7 +64,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
 
 	if !simulate {
-		fee, tip, err = ante.CheckTxFees(minGasPrices, tx, gas)
+		fee, tip, err = ante.CheckTxFees(minGasPrices, feeTx, gas)
 		if err != nil {
 			return ctx, err
 		}
@@ -67,6 +72,22 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 	if err := dfd.DeductFeeAndTip(ctx, tx, fee, tip); err != nil {
 		return ctx, err
+	}
+
+	// update fee market state
+	state, err := dfd.feemarketKeeper.GetState(ctx)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
+	}
+
+	err = state.Update(gas)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
+	}
+
+	err = dfd.feemarketKeeper.SetState(ctx, state)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to set fee market state")
 	}
 
 	return next(ctx, tx, simulate, success)
@@ -109,8 +130,15 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	}
 
 	// deduct the fees and tip
-	if !fee.Add(tip...).IsZero() {
-		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee.Add(tip...))
+	if !fee.IsZero() {
+		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !tip.IsZero() {
+		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), ctx.BlockHeader().ProposerAddress, tip)
 		if err != nil {
 			return err
 		}
@@ -137,6 +165,20 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI,
 	}
 
 	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), feemarkettypes.FeeCollectorName, coins)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+	}
+
+	return nil
+}
+
+// SendTip sends a tip to the current block proposer.
+func SendTip(bankKeeper BankKeeper, ctx sdk.Context, acc, proposer sdk.AccAddress, coins sdk.Coins) error {
+	if !coins.IsValid() {
+		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
+	}
+
+	err := bankKeeper.SendCoins(ctx, acc, proposer, coins)
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
 	}

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	"github.com/strangelove-ventures/interchaintest/v7"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -17,8 +17,8 @@ import (
 
 var (
 	// config params
-	numValidators = 1
-	numFullNodes  = 0
+	numValidators = 3
+	numFullNodes  = 1
 	denom         = "stake"
 
 	image = ibc.DockerImage{
@@ -28,9 +28,14 @@ var (
 	}
 	encodingConfig = MakeEncodingConfig()
 	noHostMount    = false
-	gasAdjustment  = 2.0
+	gasAdjustment  = 10.0
 
-	genesisKV []cosmos.GenesisKV
+	genesisKV = []cosmos.GenesisKV{
+		{
+			Key:   "app_state.feemarket.params",
+			Value: feemarkettypes.DefaultParams(),
+		},
+	}
 
 	consensusParams = ictestutil.Toml{
 		"timeout_commit": "3500ms",
@@ -53,11 +58,11 @@ var (
 			Name:                "feemarket",
 			Denom:               denom,
 			ChainID:             "chain-id-0",
-			Bin:                 "testappd",
+			Bin:                 "feemarketd",
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("0%s", denom),
+			GasPrices:           fmt.Sprintf("200%s", denom),
 			TrustingPeriod:      "48h",
 			NoHostMount:         noHostMount,
 			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),
