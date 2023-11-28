@@ -56,7 +56,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	return next(newCtx, tx, simulate)
 }
 
-// CheckTxFees implements the logic for the fee market to check if a Tx has provided suffucient
+// CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
 func CheckTxFees(minFees sdk.Coins, tx sdk.Tx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
 	feeTx, ok := tx.(sdk.FeeTx)
