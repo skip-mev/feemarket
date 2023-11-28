@@ -1,11 +1,13 @@
 package post_test
 
 import (
-	"github.com/skip-mev/feemarket/x/feemarket/types"
-	"github.com/stretchr/testify/mock"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"github.com/stretchr/testify/require"
 

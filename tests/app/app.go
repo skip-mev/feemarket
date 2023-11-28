@@ -139,16 +139,8 @@ type TestApp struct {
 	EvidenceKeeper        evidencekeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
-<<<<<<< HEAD:tests/simapp/app.go
-	FeeMarketKeeper       *feemarketkeeper.Keeper
-
-	// simulation manager
-	sm            *module.SimulationManager
-	ModuleManager *module.Manager
-=======
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	FeeMarketKeeper       feemarketkeeper.Keeper
->>>>>>> main:tests/app/app.go
 }
 
 func init() {
@@ -259,18 +251,10 @@ func New(
 
 	app.App = appBuilder.Build(logger, db, traceStore, baseAppOptions...)
 
-<<<<<<< HEAD:tests/simapp/app.go
-	// ---------------------------------------------------------------------------- //
-	// ------------------------- Begin Custom Code -------------------------------- //
-	// ---------------------------------------------------------------------------- //
-
-	anteHandlerOptions := ante.HandlerOptions{
-=======
 	// Create a global ante handler that will be called on each transaction when
 	// proposals are being built and verified.
 	anteHandlerOptions := ante.HandlerOptions{
 		AccountKeeper:   app.AccountKeeper,
->>>>>>> main:tests/app/app.go
 		BankKeeper:      app.BankKeeper,
 		FeegrantKeeper:  app.FeeGrantKeeper,
 		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
@@ -280,11 +264,7 @@ func New(
 	anteOptions := AnteHandlerOptions{
 		BaseOptions:     anteHandlerOptions,
 		AccountKeeper:   app.AccountKeeper,
-<<<<<<< HEAD:tests/simapp/app.go
-		FeeMarketKeeper: app.FeeMarketKeeper,
-=======
 		FeeMarketKeeper: &app.FeeMarketKeeper,
->>>>>>> main:tests/app/app.go
 	}
 	anteHandler, err := NewAnteHandler(anteOptions)
 	if err != nil {
@@ -295,11 +275,7 @@ func New(
 		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
 		FeeGrantKeeper:  app.FeeGrantKeeper,
-<<<<<<< HEAD:tests/simapp/app.go
-		FeeMarketKeeper: app.FeeMarketKeeper,
-=======
 		FeeMarketKeeper: &app.FeeMarketKeeper,
->>>>>>> main:tests/app/app.go
 	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
 	if err != nil {
@@ -309,13 +285,10 @@ func New(
 	// set ante and post handlers
 	app.App.SetAnteHandler(anteHandler)
 	app.App.SetPostHandler(postHandler)
-<<<<<<< HEAD:tests/simapp/app.go
-=======
 
 	// ---------------------------------------------------------------------------- //
 	// ------------------------- End Custom Code ---------------------------------- //
 	// ---------------------------------------------------------------------------- //
->>>>>>> main:tests/app/app.go
 
 	/****  Module Options ****/
 
