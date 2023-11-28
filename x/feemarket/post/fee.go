@@ -109,7 +109,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	}
 
 	// deduct the fees and tip
-	if totalFee := fee.Add(tip...); !total.IsZero() {
+	if totalFee := fee.Add(tip...); !totalFee.IsZero() {
 		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, totalFee)
 		if err != nil {
 			return err
