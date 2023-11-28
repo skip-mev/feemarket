@@ -59,7 +59,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
 
 	if !simulate {
-		fee, tip, err = ante.CheckTxFees(minGasPrices, tx, gas)
+		fee, tip, err = ante.CheckTxFees(minGasPrices, feeTx, gas)
 		if err != nil {
 			return ctx, err
 		}

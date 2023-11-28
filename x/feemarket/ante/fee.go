@@ -45,7 +45,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	gas := feeTx.GetGas() // use provided gas limit
 
 	if !simulate {
-		fee, _, err = CheckTxFees(minGasPrices, tx, gas)
+		fee, _, err = CheckTxFees(minGasPrices, feeTx, gas)
 		if err != nil {
 			return ctx, err
 		}
@@ -58,12 +58,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 // CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFees(minFees sdk.Coins, tx sdk.Tx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
-	feeTx, ok := tx.(sdk.FeeTx)
-	if !ok {
-		return nil, nil, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
-	}
-
+func CheckTxFees(minFees sdk.Coins, feeTx sdk.FeeTx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
 	feesDec := sdk.NewDecCoinsFromCoins(minFees...)
 
 	feeCoins = feeTx.GetFee()
