@@ -135,7 +135,7 @@ func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coi
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	s.Require().NoError(err)
 
-	s.Require().NoError(tx.Sign(txf, user.KeyName(), txBuilder, true))
+	s.Require().NoError(tx.Sign(txf, cc.GetFromName(), txBuilder, true))
 
 	// encode and return
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())

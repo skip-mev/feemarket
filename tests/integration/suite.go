@@ -2,15 +2,16 @@ package integration
 
 import (
 	"context"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"strings"
 )
 
 const (
@@ -89,6 +90,10 @@ func (s *TestSuite) SetupSuite() {
 	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+
+	// create the broadcaster
+	s.T().Log("creating broadcaster")
+	s.setupBroadcaster()
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -106,12 +111,14 @@ func (s *TestSuite) SetupSubTest() {
 	params := s.QueryParams()
 	state := s.QueryState()
 
-	s.T().Log("new test case at block height ", height+1)
-	s.T().Log("params", params)
-	s.T().Log("state", state)
+	s.T().Log("new test case at block height", height+1)
+	s.T().Log("params:", params.String())
+	s.T().Log("state:", state.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
+	s.SetupSubTest()
+
 	// query params
 	params := s.QueryParams()
 
@@ -120,9 +127,39 @@ func (s *TestSuite) TestQueryParams() {
 }
 
 func (s *TestSuite) TestQueryState() {
+	s.SetupSubTest()
+
 	// query params
 	state := s.QueryState()
 
 	// expect validate to pass
 	require.NoError(s.T(), state.ValidateBasic(), state)
+}
+
+func (s *TestSuite) TestSendTxUpdating() {
+	s.SetupSubTest()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "accounts")
+	s.Require().NoError(err)
+
+	// unmarshal params
+	var accs authtypes.QueryAccountsResponse
+	err = s.cdc.UnmarshalJSON(resp, &accs)
+	s.Require().NoError(err)
+
+	s.T().Log(string(resp))
+
+	for _, acc := range accs.Accounts {
+		if strings.Contains(string(acc.Value), s.user1.FormattedAddress()) {
+			s.T().Log(string(acc.Value), s.user1.FormattedAddress())
+		}
+	}
 }
