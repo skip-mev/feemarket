@@ -90,7 +90,6 @@ func (s *TestSuite) SetupSuite() {
 	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -104,7 +103,6 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
-
 }
 
 func (s *TestSuite) TestQueryParams() {

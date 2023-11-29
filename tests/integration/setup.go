@@ -71,7 +71,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	ic.AddChain(chain)
 
 	// create docker network
-	client, networkID := interchaintest.DockerSetup(t)
+	dockerClient, networkID := interchaintest.DockerSetup(t)
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
@@ -79,7 +79,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	// build the interchain
 	err := ic.Build(ctx, nil, interchaintest.InterchainBuildOptions{
 		SkipPathCreation: true,
-		Client:           client,
+		Client:           dockerClient,
 		NetworkID:        networkID,
 		TestName:         t.Name(),
 	})
@@ -89,7 +89,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 }
 
 // SendCoins creates a bank SendCoins message and broadcasts the transaction with commit.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, sender, reciever cosmos.User, amt, fees sdk.Coins) (*coretypes.ResultBroadcastTxCommit, error) {
+func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, sender, receiver cosmos.User, amt, fees sdk.Coins) (*coretypes.ResultBroadcastTxCommit, error) {
 	msg := &banktypes.MsgSend{
 		FromAddress: sender.FormattedAddress(),
 		ToAddress:   reciever.FormattedAddress(),
@@ -120,10 +120,10 @@ func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coi
 	txf = txf.WithSimulateAndExecute(true)
 
 	// get gas for tx
-	txf.WithGas(25000000)
+	txf = txf.WithGas(25000000)
 
 	// set gas prices to 0 so that fees are used
-	txf.WithGasPrices("")
+	txf = txf.WithGasPrices("")
 
 	// update sequence number
 	txf = txf.WithSequence(txf.Sequence())
@@ -135,7 +135,7 @@ func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coi
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	s.Require().NoError(err)
 
-	s.Require().NoError(tx.Sign(txf, cc.GetFromName(), txBuilder, true))
+	s.Require().NoError(tx.Sign(txf, user.KeyName(), txBuilder, true))
 
 	// encode and return
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
@@ -430,7 +430,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	}
 
 	facuetWallet := cosmos.NewWallet(
-		"",
+		interchaintest.FaucetAccountKeyName,
 		addrBz,
 		interchaintest.FaucetAccountKeyName,
 		chainCfg,
