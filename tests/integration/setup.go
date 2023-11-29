@@ -515,7 +515,6 @@ func (s *TestSuite) GetAndFundTestUsers(
 	}
 	s.Require().NoError(eg.Wait())
 
-	// TODO(nix 05-17-2022): Map with generics once using go 1.18
 	chainHeights := make([]testutil.ChainHeighter, len(chains))
 	for i := range chains {
 		chainHeights[i] = chains[i]
@@ -528,10 +527,10 @@ func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyNa
 	return node.ExecTx(ctx, keyName, command...)
 }
 
-var chars = []byte("abcdefghijklmnopqrstuvwxyz")
-
 // RandLowerCaseLetterString returns a lowercase letter string of given length
 func RandLowerCaseLetterString(length int) string {
+	chars := []byte("abcdefghijklmnopqrstuvwxyz")
+
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = chars[rand.Intn(len(chars))]
