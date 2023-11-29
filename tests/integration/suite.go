@@ -80,16 +80,17 @@ func (s *TestSuite) SetupSuite() {
 		panic("unable to assert ibc.Chain as CosmosChain")
 	}
 
-	// get the users
-	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
 	s.setupBroadcaster()
 
 	s.cdc = s.chain.Config().EncodingConfig.Codec
+
+	// get the users
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -103,6 +104,7 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+
 }
 
 func (s *TestSuite) TestQueryParams() {
@@ -111,4 +113,12 @@ func (s *TestSuite) TestQueryParams() {
 
 	// expect validate to pass
 	require.NoError(s.T(), params.ValidateBasic(), params)
+}
+
+func (s *TestSuite) TestQueryState() {
+	// query params
+	state := s.QueryState()
+
+	// expect validate to pass
+	require.NoError(s.T(), state.ValidateBasic(), state)
 }

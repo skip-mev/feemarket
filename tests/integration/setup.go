@@ -15,17 +15,17 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -88,8 +88,23 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	return ic
 }
 
+// SendCoins creates a bank SendCoins message and broadcasts the transaction with commit.
+func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, sender, reciever cosmos.User, amt, fees sdk.Coins) (*coretypes.ResultBroadcastTxCommit, error) {
+	msg := &banktypes.MsgSend{
+		FromAddress: sender.FormattedAddress(),
+		ToAddress:   reciever.FormattedAddress(),
+		Amount:      amt,
+	}
+
+	txbz := s.CreateTx(ctx, sender, fees, msg)
+
+	// get an rpc endpoint for the chain
+	nodeClient := chain.FullNodes[0].Client
+	return nodeClient.BroadcastTxCommit(context.Background(), txbz)
+}
+
 // CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
-func (s *TestSuite) CreateTx(ctx context.Context, chain *cosmos.CosmosChain, user cosmos.User, seqIncrement, height uint64, GasPrice int64, msgs ...sdk.Msg) []byte {
+func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coins, msgs ...sdk.Msg) []byte {
 	// create tx factory + Client Context
 	txf, err := s.bc.GetFactory(ctx, user)
 	s.Require().NoError(err)
@@ -102,17 +117,16 @@ func (s *TestSuite) CreateTx(ctx context.Context, chain *cosmos.CosmosChain, use
 	txf, err = txf.Prepare(cc)
 	s.Require().NoError(err)
 
-	// set timeout height
-	if height != 0 {
-		txf = txf.WithTimeoutHeight(height)
-	}
+	txf = txf.WithSimulateAndExecute(true)
 
 	// get gas for tx
 	txf.WithGas(25000000)
 
 	// update sequence number
-	txf = txf.WithSequence(txf.Sequence() + seqIncrement)
-	txf = txf.WithGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(chain.Config().Denom, math.NewInt(GasPrice))).String())
+	txf = txf.WithSequence(txf.Sequence())
+
+	// set fee
+	txf = txf.WithFees(fees.String())
 
 	// sign the tx
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
@@ -127,7 +141,7 @@ func (s *TestSuite) CreateTx(ctx context.Context, chain *cosmos.CosmosChain, use
 }
 
 // SimulateTx simulates the provided messages, and checks whether the provided failure condition is met
-func (s *TestSuite) SimulateTx(ctx context.Context, chain *cosmos.CosmosChain, user cosmos.User, height uint64, expectFail bool, msgs ...sdk.Msg) {
+func (s *TestSuite) SimulateTx(ctx context.Context, user cosmos.User, height uint64, expectFail bool, msgs ...sdk.Msg) {
 	// create tx factory + Client Context
 	txf, err := s.bc.GetFactory(ctx, user)
 	s.Require().NoError(err)
@@ -148,95 +162,9 @@ func (s *TestSuite) SimulateTx(ctx context.Context, chain *cosmos.CosmosChain, u
 	s.Require().Equal(err != nil, expectFail)
 }
 
-type Tx struct {
-	User               cosmos.User
-	Msgs               []sdk.Msg
-	GasPrice           int64
-	SequenceIncrement  uint64
-	Height             uint64
-	SkipInclusionCheck bool
-	ExpectFail         bool
-}
-
-// BroadcastTxs broadcasts the given messages for each user. This function returns the broadcasted txs. If a message
-// is not expected to be included in a block, set SkipInclusionCheck to true and the method
-// will not block on the tx's inclusion in a block, otherwise this method will block on the tx's inclusion
-func (s *TestSuite) BroadcastTxs(ctx context.Context, chain *cosmos.CosmosChain, txs []Tx) [][]byte {
-	return s.BroadcastTxsWithCallback(ctx, chain, txs, nil)
-}
-
-// BroadcastTxsWithCallback broadcasts the given messages for each user. This function returns the broadcasted txs. If a message
-// is not expected to be included in a block, set SkipInclusionCheck to true and the method
-// will not block on the tx's inclusion in a block, otherwise this method will block on the tx's inclusion. The callback
-// function is called for each tx that is included in a block.
-func (s *TestSuite) BroadcastTxsWithCallback(
-	ctx context.Context,
-	chain *cosmos.CosmosChain,
-	txs []Tx,
-	cb func(tx []byte, resp *rpctypes.ResultTx),
-) [][]byte {
-	rawTxs := make([][]byte, len(txs))
-
-	for i, msg := range txs {
-		rawTxs[i] = s.CreateTx(ctx, chain, msg.User, msg.SequenceIncrement, msg.Height, msg.GasPrice, msg.Msgs...)
-	}
-
-	// broadcast each tx
-	s.Require().True(len(chain.Nodes()) > 0)
-	client := chain.Nodes()[0].Client
-
-	statusResp, err := client.Status(context.Background())
-	s.Require().NoError(err)
-
-	s.T().Logf("broadcasting transactions at latest height of %d", statusResp.SyncInfo.LatestBlockHeight)
-
-	for i, tx := range rawTxs {
-		// broadcast tx
-		resp, err := client.BroadcastTxSync(ctx, tx)
-
-		// check execution was successful
-		if !txs[i].ExpectFail {
-			s.Require().Equal(resp.Code, uint32(0))
-		} else {
-			if resp != nil {
-				s.Require().NotEqual(resp.Code, uint32(0))
-			} else {
-				s.Require().Error(err)
-			}
-		}
-	}
-
-	// block on all txs being included in block
-	eg := errgroup.Group{}
-	for i, tx := range rawTxs {
-		// if we don't expect this tx to be included.. skip it
-		if txs[i].SkipInclusionCheck || txs[i].ExpectFail {
-			continue
-		}
-
-		tx := tx // pin
-		eg.Go(func() error {
-			return testutil.WaitForCondition(30*time.Second, 500*time.Millisecond, func() (bool, error) {
-				res, err := client.Tx(context.Background(), comettypes.Tx(tx).Hash(), false)
-				if err != nil || res.TxResult.Code != uint32(0) {
-					return false, nil
-				}
-
-				if cb != nil {
-					cb(tx, res)
-				}
-
-				return true, nil
-			})
-		})
-	}
-
-	s.Require().NoError(eg.Wait())
-
-	return rawTxs
-}
-
 func (s *TestSuite) QueryParams() types.Params {
+	s.T().Helper()
+
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
 	s.Require().True(ok)
@@ -255,6 +183,27 @@ func (s *TestSuite) QueryParams() types.Params {
 	return params
 }
 
+func (s *TestSuite) QueryState() types.State {
+	s.T().Helper()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "state")
+	s.Require().NoError(err)
+
+	// unmarshal state
+	var state types.State
+	err = s.cdc.UnmarshalJSON(resp, &state)
+	s.Require().NoError(err)
+	return state
+}
+
 // QueryValidators queries for all the network's validators
 func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress {
 	s.T().Helper()
@@ -265,10 +214,10 @@ func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress 
 	s.Require().NoError(err)
 	defer cc.Close()
 
-	client := stakingtypes.NewQueryClient(cc)
+	nodeClient := stakingtypes.NewQueryClient(cc)
 
 	// query validators
-	resp, err := client.Validators(context.Background(), &stakingtypes.QueryValidatorsRequest{})
+	resp, err := nodeClient.Validators(context.Background(), &stakingtypes.QueryValidatorsRequest{})
 	s.Require().NoError(err)
 
 	addrs := make([]sdk.ValAddress, len(resp.Validators))
@@ -335,6 +284,8 @@ func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.Res
 
 // WaitForHeight waits for the chain to reach the given height
 func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
+	s.T().Helper()
+
 	// wait for next height
 	err := testutil.WaitForCondition(30*time.Second, 100*time.Millisecond, func() (bool, error) {
 		pollHeight, err := chain.Height(context.Background())
@@ -348,6 +299,8 @@ func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
 
 // VerifyBlock takes a Block and verifies that it contains the given bid at the 0-th index, and the bundled txs immediately after
 func (s *TestSuite) VerifyBlock(block *rpctypes.ResultBlock, offset int, bidTxHash string, txs [][]byte) {
+	s.T().Helper()
+
 	// verify the block
 	if bidTxHash != "" {
 		s.Require().Equal(bidTxHash, TxHash(block.Block.Data.Txs[offset+1]))
@@ -363,6 +316,8 @@ func (s *TestSuite) VerifyBlock(block *rpctypes.ResultBlock, offset int, bidTxHa
 // VerifyBlockWithExpectedBlock takes in a list of raw tx bytes and compares each tx hash to the tx hashes in the block.
 // The expected block is the block that should be returned by the chain at the given height.
 func (s *TestSuite) VerifyBlockWithExpectedBlock(chain *cosmos.CosmosChain, height uint64, txs [][]byte) {
+	s.T().Helper()
+
 	block := s.Block(chain, int64(height))
 	blockTxs := block.Block.Data.Txs[1:]
 
@@ -466,25 +421,21 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
 	}
 
-	err = chain.SendFunds(ctx, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
-		Address: user.FormattedAddress(),
-		Amount:  math.NewInt(amount),
-		Denom:   chainCfg.Denom,
-	})
+	addrBz, err := chain.GetAddress(ctx, interchaintest.FaucetAccountKeyName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get faucet user address: %w", err)
+	}
 
-	_, err = s.ExecTx(
-		ctx,
-		chain,
+	facuetWallet := cosmos.NewWallet(
+		"",
+		addrBz,
 		interchaintest.FaucetAccountKeyName,
-		"bank",
-		"send",
-		interchaintest.FaucetAccountKeyName,
-		user.FormattedAddress(),
-		fmt.Sprintf("%d%s", amount, chainCfg.Denom),
-		"--fees",
-		fmt.Sprintf("%d%s", 200000000000, chainCfg.Denom),
+		chainCfg,
 	)
 
+	sendCoins := sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount)))
+	feeCoins := sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(200000000000)))
+	_, err = s.SendCoins(ctx, chain, facuetWallet, user, sendCoins, feeCoins)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get funds from faucet: %w", err)
 	}
