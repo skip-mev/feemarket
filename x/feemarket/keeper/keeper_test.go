@@ -56,6 +56,9 @@ func (s *KeeperTestSuite) SetupTest() {
 	err := s.feemarketKeeper.SetParams(s.ctx, types.DefaultParams())
 	s.Require().NoError(err)
 
+	err = s.feemarketKeeper.SetState(s.ctx, types.DefaultState())
+	s.Require().NoError(err)
+
 	s.msgServer = keeper.NewMsgServer(*s.feemarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feemarketKeeper)
 }

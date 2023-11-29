@@ -31,3 +31,15 @@ func (q QueryServer) Params(goCtx context.Context, _ *types.ParamsRequest) (*typ
 
 	return &types.ParamsResponse{Params: params}, nil
 }
+
+// State defines a method that returns the current feemarket state.
+func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types.StateResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	state, err := q.k.GetState(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.StateResponse{State: state}, nil
+}
