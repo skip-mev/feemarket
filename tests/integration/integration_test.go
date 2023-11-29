@@ -1,7 +1,6 @@
 package integration_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
@@ -62,7 +61,6 @@ var (
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("200%s", denom),
 			TrustingPeriod:      "48h",
 			NoHostMount:         noHostMount,
 			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),

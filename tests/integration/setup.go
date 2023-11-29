@@ -122,6 +122,9 @@ func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coi
 	// get gas for tx
 	txf.WithGas(25000000)
 
+	// set gas prices to 0 so that fees are used
+	txf.WithGasPrices("")
+
 	// update sequence number
 	txf = txf.WithSequence(txf.Sequence())
 
