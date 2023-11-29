@@ -33,8 +33,14 @@ func TestDeductCoins(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:        "invalid coins",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
+			name:        "invalid coins negative amount",
+			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
+			wantErr:     true,
+			invalidCoin: true,
+		},
+		{
+			name:        "invalid coins invalid denom",
+			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
@@ -87,7 +93,7 @@ func TestSendTip(t *testing.T) {
 			}
 
 			if err := post.SendTip(s.BankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
-				s.Errorf(err, "SendCoins() error = %v, wantErr %v", err, tc.wantErr)
+				s.Errorf(err, "SendTip() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}

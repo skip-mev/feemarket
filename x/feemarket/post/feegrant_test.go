@@ -1,0 +1,220 @@
+package post_test
+
+import (
+	"math/rand"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/mock"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/testutil/testdata"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/feegrant"
+
+	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
+	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+)
+
+func TestDeductFeesNoDelegation(t *testing.T) {
+	cases := map[string]struct {
+		fee      int64
+		valid    bool
+		err      error
+		malleate func(*antesuite.TestSuite) (signer antesuite.TestAccount, feeAcc sdk.AccAddress)
+	}{
+		"paying with insufficient fee": {
+			fee:   50,
+			valid: false,
+			err:   sdkerrors.ErrInsufficientFee,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(1)
+				return accs[0], nil
+			},
+		},
+		"paying with good funds": {
+			fee:   24497000000,
+			valid: true,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(1)
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+
+				return accs[0], nil
+			},
+		},
+		"paying with no account": {
+			fee:   24497000000,
+			valid: false,
+			err:   sdkerrors.ErrUnknownAddress,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				// Do not register the account
+				priv, _, addr := testdata.KeyTestPubAddr()
+				return antesuite.TestAccount{
+					Account: authtypes.NewBaseAccountWithAddress(addr),
+					Priv:    priv,
+				}, nil
+			},
+		},
+		"valid fee grant": {
+			// note: the original test said "valid fee grant with no account".
+			// this is impossible given that feegrant.GrantAllowance calls
+			// SetAccount for the grantee.
+			fee:   36630000000,
+			valid: true,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(2)
+				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+
+				return accs[0], accs[1].Account.GetAddress()
+			},
+		},
+		"no fee grant": {
+			fee:   36630000000,
+			valid: false,
+			err:   sdkerrors.ErrNotFound,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(2)
+				suite.FeeGrantKeeper.On(
+					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
+					Return(sdkerrors.ErrNotFound.Wrap("fee-grant not found")).
+					Once()
+				return accs[0], accs[1].Account.GetAddress()
+			},
+		},
+		"allowance smaller than requested fee": {
+			fee:   36630000000,
+			valid: false,
+			err:   feegrant.ErrFeeLimitExceeded,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(2)
+				suite.FeeGrantKeeper.On(
+					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
+					Return(feegrant.ErrFeeLimitExceeded.Wrap("basic allowance")).
+					Once()
+				return accs[0], accs[1].Account.GetAddress()
+			},
+		},
+		"granter cannot cover allowed fee grant": {
+			fee:   36630000000,
+			valid: false,
+			err:   sdkerrors.ErrInsufficientFunds,
+			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := suite.CreateTestAccounts(2)
+				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
+				return accs[0], accs[1].Account.GetAddress()
+			},
+		},
+	}
+
+	for name, stc := range cases {
+		tc := stc // to make scopelint happy
+		t.Run(name, func(t *testing.T) {
+			suite := antesuite.SetupTestSuite(t)
+			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(suite.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
+			// this just tests our handler
+			dfd := feemarketpost.NewFeeMarketDeductDecorator(suite.AccountKeeper, suite.BankKeeper, suite.FeeGrantKeeper, suite.FeemarketKeeper)
+			feePostHandler := sdk.ChainPostDecorators(dfd)
+
+			signer, feeAcc := stc.malleate(suite)
+
+			fee := sdk.NewCoins(sdk.NewInt64Coin("stake", tc.fee))
+			msgs := []sdk.Msg{testdata.NewTestMsg(signer.Account.GetAddress())}
+
+			acc := suite.AccountKeeper.GetAccount(suite.Ctx, signer.Account.GetAddress())
+			privs, accNums, seqs := []cryptotypes.PrivKey{signer.Priv}, []uint64{0}, []uint64{0}
+			if acc != nil {
+				accNums, seqs = []uint64{acc.GetAccountNumber()}, []uint64{acc.GetSequence()}
+			}
+
+			var defaultGenTxGas uint64 = 10
+			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, suite.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
+			require.NoError(t, err)
+			_, err = feePostHandler(suite.Ctx, tx, false, true) // tests only feegrant post
+			if tc.valid {
+				require.NoError(t, err)
+			} else {
+				require.ErrorIs(t, err, tc.err)
+			}
+		})
+	}
+}
+
+func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,
+	accSeqs []uint64, feeGranter sdk.AccAddress, priv ...cryptotypes.PrivKey,
+) (sdk.Tx, error) {
+	sigs := make([]signing.SignatureV2, len(priv))
+
+	// create a random length memo
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	memo := simulation.RandStringOfLength(r, simulation.RandIntBetween(r, 0, 100))
+
+	signMode := gen.SignModeHandler().DefaultMode()
+
+	// 1st round: set SignatureV2 with empty signatures, to set correct
+	// signer infos.
+	for i, p := range priv {
+		sigs[i] = signing.SignatureV2{
+			PubKey: p.PubKey(),
+			Data: &signing.SingleSignatureData{
+				SignMode: signMode,
+			},
+			Sequence: accSeqs[i],
+		}
+	}
+
+	tx := gen.NewTxBuilder()
+	err := tx.SetMsgs(msgs...)
+	if err != nil {
+		return nil, err
+	}
+	err = tx.SetSignatures(sigs...)
+	if err != nil {
+		return nil, err
+	}
+	tx.SetMemo(memo)
+	tx.SetFeeAmount(feeAmt)
+	tx.SetGasLimit(gas)
+	tx.SetFeeGranter(feeGranter)
+
+	// 2nd round: once all signer infos are set, every signer can sign.
+	for i, p := range priv {
+		signerData := authsign.SignerData{
+			ChainID:       chainID,
+			AccountNumber: accNums[i],
+			Sequence:      accSeqs[i],
+		}
+		signBytes, err := gen.SignModeHandler().GetSignBytes(signMode, signerData, tx.GetTx())
+		if err != nil {
+			panic(err)
+		}
+		sig, err := p.Sign(signBytes)
+		if err != nil {
+			panic(err)
+		}
+		sigs[i].Data.(*signing.SingleSignatureData).Signature = sig
+		err = tx.SetSignatures(sigs...)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return tx.GetTx(), nil
+}

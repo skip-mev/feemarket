@@ -9,6 +9,8 @@ BUILD_DIR ?= $(CURDIR)/build
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 HTTPS_GIT := https://github.com/skip-mev/feemarket.git
 DOCKER := $(shell which docker)
+COVER_FILE := coverage.txt
+COVER_HTML_FILE := cover.html
 
 ###############################################################################
 ##                                Workspaces                                 ##
@@ -126,6 +128,16 @@ test-integration: $(TEST_INTEGRATION_DEPS)
 
 test:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
+
+## test-cover: Run the unit tests and create a coverage html report
+test-cover:
+	@echo Running unit tests and creating coverage report...
+	@go test -mod=readonly -v -timeout 30m -coverprofile=$(COVER_FILE) -covermode=atomic $(shell go list ./... | grep -v tests/ | grep -v api/ | grep -v testutils/)
+	@sed -i '/.pb.go/d' $(COVER_FILE)
+	@sed -i '/.gw.go/d' $(COVER_FILE)
+	@go tool cover -html=$(COVER_FILE) -o $(COVER_HTML_FILE)
+	@rm $(COVER_FILE)
+
 
 .PHONY: test test-integration
 
