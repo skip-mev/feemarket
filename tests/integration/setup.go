@@ -92,7 +92,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, sender, receiver cosmos.User, amt, fees sdk.Coins) (*coretypes.ResultBroadcastTxCommit, error) {
 	msg := &banktypes.MsgSend{
 		FromAddress: sender.FormattedAddress(),
-		ToAddress:   reciever.FormattedAddress(),
+		ToAddress:   receiver.FormattedAddress(),
 		Amount:      amt,
 	}
 
