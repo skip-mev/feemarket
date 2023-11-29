@@ -51,3 +51,45 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 		s.Require().Equal(resp.Params, params)
 	})
 }
+
+func (s *KeeperTestSuite) TestStateRequest() {
+	s.Run("can get default state", func() {
+		req := &types.StateRequest{}
+		resp, err := s.queryServer.State(s.ctx, req)
+		s.Require().NoError(err)
+		s.Require().NotNil(resp)
+
+		s.Require().Equal(types.DefaultState(), resp.State)
+
+		state, err := s.feemarketKeeper.GetState(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(resp.State, state)
+	})
+
+	s.Run("can get updated params", func() {
+		state := types.State{
+			BaseFee:                math.OneInt(),
+			MinBaseFee:             math.OneInt(),
+			LearningRate:           math.LegacyOneDec(),
+			Window:                 []uint64{1},
+			Index:                  0,
+			MaxBlockUtilization:    10,
+			TargetBlockUtilization: 5,
+		}
+		err := s.feemarketKeeper.SetState(s.ctx, state)
+		s.Require().NoError(err)
+
+		req := &types.StateRequest{}
+		resp, err := s.queryServer.State(s.ctx, req)
+		s.Require().NoError(err)
+		s.Require().NotNil(resp)
+
+		s.Require().Equal(state, resp.State)
+
+		state, err = s.feemarketKeeper.GetState(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(resp.State, state)
+	})
+}
