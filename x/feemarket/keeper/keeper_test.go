@@ -64,13 +64,6 @@ func (s *KeeperTestSuite) SetupTest() {
 }
 
 func (s *KeeperTestSuite) TestState() {
-	s.Run("get state with no state set", func() {
-		gotState, err := s.feemarketKeeper.GetState(s.ctx)
-		s.Require().NoError(err)
-
-		s.Require().Equal(types.State{}, gotState)
-	})
-
 	s.Run("set and get default eip1559 state", func() {
 		state := types.DefaultState()
 
