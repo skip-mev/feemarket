@@ -7,14 +7,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"io"
 	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/strangelove-ventures/interchaintest/v7"
 
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
@@ -352,7 +354,7 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins) (string, error) {
+func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
 	resp, err := s.ExecTx(
 		ctx,
 		chain,
@@ -364,6 +366,8 @@ func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, ke
 		amt.String(),
 		"--fees",
 		fees.String(),
+		"--gas",
+		strconv.FormatInt(gas, 10),
 	)
 
 	return resp, err
@@ -392,12 +396,10 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		interchaintest.FaucetAccountKeyName,
 		user.FormattedAddress(),
 		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount))),
-		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(200000000000))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(1000000000000))),
+		1000000,
 	)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get funds from faucet: %w", err)
-	}
+	s.Require().NoError(err, "failed to get funds from faucet")
 	return user, nil
 }
 
@@ -434,7 +436,19 @@ func (s *TestSuite) GetAndFundTestUsers(
 
 func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
 	node := chain.FullNodes[0]
-	return node.ExecTx(ctx, keyName, command...)
+
+	resp, err := node.ExecTx(ctx, keyName, command...)
+	s.Require().NoError(err)
+
+	height, err := chain.Height(context.Background())
+	s.Require().NoError(err)
+	s.WaitForHeight(chain, height+1)
+
+	stdout, stderr, err := chain.FullNodes[0].ExecQuery(ctx, "tx", resp, "--type", "hash")
+	s.Require().NoError(err)
+	s.Require().Nil(stderr)
+
+	return string(stdout), nil
 }
 
 // RandLowerCaseLetterString returns a lowercase letter string of given length

@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	initBalance = 1000000000000
+	initBalance = 10000000000000
 )
 
 // TestSuite runs the feemarket integration test-suite against a given interchaintest specification
@@ -137,6 +138,8 @@ func (s *TestSuite) TestQueryState() {
 func (s *TestSuite) TestSendTxUpdating() {
 	s.SetupSubTest()
 
+	ctx := context.Background()
+
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
 	s.Require().True(ok)
@@ -144,15 +147,22 @@ func (s *TestSuite) TestSendTxUpdating() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
-	// make params query to first node
-	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "account", s.user1.FormattedAddress())
-	s.Require().NoError(err)
+	state := s.QueryState()
+	params := s.QueryParams()
 
-	s.T().Log(string(resp))
+	gas := int64(1000000)
+	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.MinBaseFee.MulRaw(gas)))
 
-	// make params query to first node
-	resp, _, err = nodes[0].ExecQuery(context.Background(), "bank", "balances", s.user1.FormattedAddress())
-	s.Require().NoError(err)
-
-	s.T().Log(string(resp))
+	// send with the exact expected fee
+	_, err := s.SendCoins(
+		ctx,
+		cosmosChain,
+		s.user1.KeyName(),
+		s.user1.FormattedAddress(),
+		s.user2.FormattedAddress(),
+		sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+		minBaseFee,
+		gas,
+	)
+	s.Require().NoError(err, s.user1.FormattedAddress(), s.user2.FormattedAddress())
 }

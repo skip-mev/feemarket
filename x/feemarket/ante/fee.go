@@ -49,10 +49,16 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	fee := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
 
+	ctx.Logger().Info("fee deduct ante handle",
+		"min gas prices", minGasPrices,
+		"fee", fee,
+		"gas limit", gas,
+	)
+
 	if !simulate {
 		fee, _, err = CheckTxFees(minGasPrices, feeTx, gas)
 		if err != nil {
-			return ctx, err
+			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
 	}
 
@@ -82,7 +88,7 @@ func CheckTxFees(minFees sdk.Coins, feeTx sdk.FeeTx, gas uint64) (feeCoins sdk.C
 		}
 
 		if !feeCoins.IsAnyGTE(requiredFees) {
-			return nil, nil, sdkerrors.ErrInsufficientFee.Wrapf("got: %s required: %s", feeCoins, requiredFees)
+			return nil, nil, sdkerrors.ErrInsufficientFee.Wrapf("got: %s required: %s, minGasPrices: %s, gas: %d", feeCoins, requiredFees, minGasPrices, gas)
 		}
 
 		tip = feeCoins.Sub(minFees...) // tip is the difference between feeCoins and the min fees
