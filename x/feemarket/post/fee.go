@@ -55,10 +55,25 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 	var tip sdk.Coins
 
-	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
+	// update fee market params
+	params, err := dfd.feemarketKeeper.GetParams(ctx)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to get fee market params")
+	}
+
+	// return if disabled
+	if !params.Enabled {
+		return next(ctx, tx, simulate, success)
+	}
+
+	// update fee market state
+	state, err := dfd.feemarketKeeper.GetState(ctx)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
+
+	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee)
+	minGasPrices := sdk.NewCoins(baseFee)
 
 	fee := feeTx.GetFee()
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
@@ -84,13 +99,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, err
 	}
 
-	// update fee market state
-	state, err := dfd.feemarketKeeper.GetState(ctx)
-	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
-	}
-
-	err = state.Update(gas)
+	err = state.Update(gas, params)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
 	}

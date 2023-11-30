@@ -30,16 +30,8 @@ message State {
     (gogoproto.nullable) = false
   ];
 
-  // MinBaseFee is the minimum base fee that can be charged. This is denominated
-  // in the fee per gas unit.
-  string min_base_fee = 2 [
-    (cosmos_proto.scalar) = "cosmos.Int",
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
-    (gogoproto.nullable) = false
-  ];
-
   // LearningRate is the current learning rate.
-  string learning_rate = 3 [
+  string learning_rate = 2 [
     (cosmos_proto.scalar) = "cosmos.Legacy",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
@@ -48,16 +40,8 @@ message State {
   // Window contains a list of the last blocks' utilization values. This is used
   // to calculate the next base fee. This stores the number of units of gas
   // consumed per block.
-  repeated uint64 window = 4;
+  repeated uint64 window = 3;
 
   // Index is the index of the current block in the block utilization window.
-  uint64 index = 5;
-
-  // MaxBlockUtilization is the maximum utilization of a given block. This is
-  // denominated in the number of gas units consumed per block.
-  uint64 max_block_utilization = 6;
-
-  // TargetBlockUtilization is the target utilization of a given block. This is
-  // denominated in the number of gas units consumed per block.
-  uint64 target_block_utilization = 7;
+  uint64 index = 4;
 }

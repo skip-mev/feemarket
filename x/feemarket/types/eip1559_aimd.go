@@ -86,8 +86,6 @@ func DefaultAIMDParams() Params {
 func DefaultAIMDState() State {
 	return NewState(
 		DefaultAIMDWindow,
-		DefaultAIMDTargetBlockSize,
-		DefaultAIMDMaxBlockSize,
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 	)
