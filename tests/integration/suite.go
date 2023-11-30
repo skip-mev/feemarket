@@ -3,10 +3,11 @@ package integration
 import (
 	"context"
 
+	"github.com/strangelove-ventures/interchaintest/v7"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
@@ -149,7 +150,7 @@ func (s *TestSuite) TestSendTxUpdating() {
 	params := s.QueryParams()
 
 	gas := int64(1000000)
-	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.MinBaseFee.MulRaw(gas)))
+	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
 
 	// send with the exact expected fee
 	_, err := s.SendCoins(

@@ -41,13 +41,21 @@ var (
 				feemarkettypes.DefaultBeta,
 				feemarkettypes.DefaultTheta,
 				feemarkettypes.DefaultDelta,
-				feemarkettypes.DefaultTargetBlockSize,
-				feemarkettypes.DefaultMaxBlockSize,
+				feemarkettypes.DefaultTargetBlockUtilization,
+				feemarkettypes.DefaultMaxBlockUtilization,
 				sdk.NewInt(1000),
 				feemarkettypes.DefaultMinLearningRate,
 				feemarkettypes.DefaultMaxLearningRate,
 				feemarkettypes.DefaultFeeDenom,
 				true,
+			),
+		},
+		{
+			Key: "app_state.feemarket.state",
+			Value: feemarkettypes.NewState(
+				feemarkettypes.DefaultWindow,
+				sdk.NewInt(1000),
+				feemarkettypes.DefaultMaxLearningRate,
 			),
 		},
 	}

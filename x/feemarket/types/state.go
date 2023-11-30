@@ -11,12 +11,12 @@ import (
 // AIMD EIP-1559 fee market implementation. Note that on init, you initialize
 // both the minimum and current base fee to the same value.
 func NewState(
-	window uint64,
+	windowSize uint64,
 	baseFee math.Int,
 	learningRate math.LegacyDec,
 ) State {
 	return State{
-		Window:       make([]uint64, window),
+		Window:       make([]uint64, windowSize),
 		BaseFee:      baseFee,
 		Index:        0,
 		LearningRate: learningRate,
