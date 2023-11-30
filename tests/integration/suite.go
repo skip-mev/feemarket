@@ -6,7 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
@@ -111,7 +110,6 @@ func (s *TestSuite) SetupSubTest() {
 	state := s.QueryState()
 
 	s.T().Log("new test case at block height", height+1)
-	s.T().Log("params:", params.String())
 	s.T().Log("state:", state.String())
 }
 
