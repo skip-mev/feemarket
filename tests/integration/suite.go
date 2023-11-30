@@ -5,7 +5,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
@@ -149,9 +148,10 @@ func (s *TestSuite) TestSendTxUpdating() {
 	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "account", s.user1.FormattedAddress())
 	s.Require().NoError(err)
 
-	// unmarshal params
-	var acc authtypes.QueryAccountResponse
-	err = s.cdc.UnmarshalJSON(resp, &acc)
+	s.T().Log(string(resp))
+
+	// make params query to first node
+	resp, _, err = nodes[0].ExecQuery(context.Background(), "bank", "balances", s.user1.FormattedAddress())
 	s.Require().NoError(err)
 
 	s.T().Log(string(resp))

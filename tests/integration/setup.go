@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/strangelove-ventures/interchaintest/v7"
 	"io"
 	"math/rand"
 	"os"
@@ -15,7 +16,6 @@ import (
 	"testing"
 	"time"
 
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -25,9 +25,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -86,61 +84,6 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	require.NoError(t, err)
 
 	return ic
-}
-
-// SendCoins creates a bank SendCoins message and broadcasts the transaction with commit.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, sender, receiver cosmos.User, amt, fees sdk.Coins) (*coretypes.ResultBroadcastTxCommit, error) {
-	msg := &banktypes.MsgSend{
-		FromAddress: sender.FormattedAddress(),
-		ToAddress:   receiver.FormattedAddress(),
-		Amount:      amt,
-	}
-
-	txbz := s.CreateTx(ctx, sender, fees, msg)
-
-	// get an rpc endpoint for the chain
-	nodeClient := chain.FullNodes[0].Client
-	return nodeClient.BroadcastTxCommit(context.Background(), txbz)
-}
-
-// CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
-func (s *TestSuite) CreateTx(ctx context.Context, user cosmos.User, fees sdk.Coins, msgs ...sdk.Msg) []byte {
-	// create tx factory + Client Context
-	txf, err := s.bc.GetFactory(ctx, user)
-	s.Require().NoError(err)
-
-	cc, err := s.bc.GetClientContext(ctx, user)
-	s.Require().NoError(err)
-
-	txf = txf.WithSimulateAndExecute(true)
-
-	txf, err = txf.Prepare(cc)
-	s.Require().NoError(err)
-
-	txf = txf.WithSimulateAndExecute(true)
-
-	// get gas for tx
-	txf = txf.WithGas(25000000)
-
-	// set gas prices to 0 so that fees are used
-	txf = txf.WithGasPrices("")
-
-	// update sequence number
-	txf = txf.WithSequence(txf.Sequence())
-
-	// set fee
-	txf = txf.WithFees(fees.String())
-
-	// sign the tx
-	txBuilder, err := txf.BuildUnsignedTx(msgs...)
-	s.Require().NoError(err)
-
-	s.Require().NoError(tx.Sign(txf, cc.GetFromName(), txBuilder, true))
-
-	// encode and return
-	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
-	s.Require().NoError(err)
-	return bz
 }
 
 // SimulateTx simulates the provided messages, and checks whether the provided failure condition is met
@@ -408,6 +351,24 @@ func (s *TestSuite) keyringDirFromNode() string {
 	return localDir
 }
 
+// SendCoins creates a executes a SendCoins message and broadcasts the transaction.
+func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins) (string, error) {
+	resp, err := s.ExecTx(
+		ctx,
+		chain,
+		keyName,
+		"bank",
+		"send",
+		sender,
+		receiver,
+		amt.String(),
+		"--fees",
+		fees.String(),
+	)
+
+	return resp, err
+}
+
 // GetAndFundTestUserWithMnemonic restores a user using the given mnemonic
 // and funds it with the native chain denom.
 // The caller should wait for some blocks to complete before the funds will be accessible.
@@ -424,21 +385,16 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
 	}
 
-	addrBz, err := chain.GetAddress(ctx, interchaintest.FaucetAccountKeyName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get faucet user address: %w", err)
-	}
-
-	facuetWallet := cosmos.NewWallet(
+	_, err = s.SendCoins(
+		ctx,
+		chain,
 		interchaintest.FaucetAccountKeyName,
-		addrBz,
 		interchaintest.FaucetAccountKeyName,
-		chainCfg,
+		user.FormattedAddress(),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(200000000000))),
 	)
 
-	sendCoins := sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount)))
-	feeCoins := sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(200000000000)))
-	_, err = s.SendCoins(ctx, chain, facuetWallet, user, sendCoins, feeCoins)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get funds from faucet: %w", err)
 	}
