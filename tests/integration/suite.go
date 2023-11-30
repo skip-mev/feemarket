@@ -11,7 +11,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"strings"
 )
 
 const (
@@ -147,19 +146,13 @@ func (s *TestSuite) TestSendTxUpdating() {
 	s.Require().True(len(nodes) > 0)
 
 	// make params query to first node
-	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "accounts")
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "auth", "account", s.user1.FormattedAddress())
 	s.Require().NoError(err)
 
 	// unmarshal params
-	var accs authtypes.QueryAccountsResponse
-	err = s.cdc.UnmarshalJSON(resp, &accs)
+	var acc authtypes.QueryAccountResponse
+	err = s.cdc.UnmarshalJSON(resp, &acc)
 	s.Require().NoError(err)
 
 	s.T().Log(string(resp))
-
-	for _, acc := range accs.Accounts {
-		if strings.Contains(string(acc.Value), s.user1.FormattedAddress()) {
-			s.T().Log(string(acc.Value), s.user1.FormattedAddress())
-		}
-	}
 }
