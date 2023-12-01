@@ -5,6 +5,8 @@ option go_package = "github.com/skip-mev/feemarket/x/feemarket/types";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "amino/amino.proto";
 import "feemarket/feemarket/v1/params.proto";
 import "feemarket/feemarket/v1/genesis.proto";
 
@@ -23,6 +25,13 @@ service Query {
       get : "/feemarket/v1/state"
     };
   };
+
+  // BaseFee returns the current feemarket module base fee.
+  rpc BaseFee(BaseFeeRequest) returns (BaseFeeResponse) {
+    option (google.api.http) = {
+      get : "/feemarket/v1/base_fee"
+    };
+  };
 }
 
 // ParamsRequest is the request type for the Query/Params RPC method.
@@ -36,3 +45,16 @@ message StateRequest {}
 
 // StateResponse is the response type for the Query/State RPC method.
 message StateResponse { State state = 1 [ (gogoproto.nullable) = false ]; }
+
+// BaseFeeRequest is the request type for the Query/BaseFee RPC method.
+message BaseFeeRequest {}
+
+// StateResponse is the response type for the Query/BaseFee RPC method.
+message BaseFeeResponse {
+  repeated cosmos.base.v1beta1.Coin fee = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (amino.encoding) = "legacy_coins",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
