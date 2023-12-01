@@ -25,10 +25,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetParamsCmd(),
 		GetStateCmd(),
-<<<<<<< HEAD
-=======
 		GetBaseFeeCmd(),
->>>>>>> main
 	)
 
 	return cmd
@@ -87,8 +84,6 @@ func GetStateCmd() *cobra.Command {
 
 	return cmd
 }
-<<<<<<< HEAD
-=======
 
 // GetBaseFeeCmd returns the cli-command that queries the current feemarket base fee.
 func GetBaseFeeCmd() *cobra.Command {
@@ -116,4 +111,3 @@ func GetBaseFeeCmd() *cobra.Command {
 
 	return cmd
 }
->>>>>>> main

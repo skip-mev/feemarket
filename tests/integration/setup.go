@@ -16,11 +16,6 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/strangelove-ventures/interchaintest/v7"
-
-=======
->>>>>>> main
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -31,10 +26,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-<<<<<<< HEAD
-=======
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
->>>>>>> main
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -159,8 +151,6 @@ func (s *TestSuite) QueryState() types.State {
 	return state
 }
 
-<<<<<<< HEAD
-=======
 func (s *TestSuite) QueryBaseFee() sdk.Coins {
 	s.T().Helper()
 
@@ -181,7 +171,6 @@ func (s *TestSuite) QueryBaseFee() sdk.Coins {
 	return fees
 }
 
->>>>>>> main
 // QueryValidators queries for all the network's validators
 func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress {
 	s.T().Helper()

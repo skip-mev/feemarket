@@ -67,11 +67,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 		s.Require().Equal(resp.State, state)
 	})
 
-<<<<<<< HEAD
-	s.Run("can get updated params", func() {
-=======
 	s.Run("can get updated state", func() {
->>>>>>> main
 		state := types.State{
 			BaseFee:      math.OneInt(),
 			LearningRate: math.LegacyOneDec(),
@@ -94,8 +90,6 @@ func (s *KeeperTestSuite) TestStateRequest() {
 		s.Require().Equal(resp.State, state)
 	})
 }
-<<<<<<< HEAD
-=======
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
 	s.Run("can get default base fee", func() {
@@ -134,4 +128,3 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().Equal(resp.Fees, fees)
 	})
 }
->>>>>>> main

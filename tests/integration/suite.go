@@ -170,52 +170,6 @@ func (s *TestSuite) TestSendTxUpdating() {
 			gas,
 		)
 		s.Require().NoError(err, txResp)
+		s.T().Log(txResp)
 	})
-}
-
-func (s *TestSuite) TestQueryState() {
-	s.SetupSubTest()
-
-	// query params
-	state := s.QueryState()
-
-	// expect validate to pass
-	require.NoError(s.T(), state.ValidateBasic(), state)
-}
-
-func (s *TestSuite) TestSendTxUpdating() {
-	s.SetupSubTest()
-
-	ctx := context.Background()
-
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
-	// get nodes
-	nodes := cosmosChain.Nodes()
-	s.Require().True(len(nodes) > 0)
-
-	state := s.QueryState()
-	params := s.QueryParams()
-
-	gas := int64(1000000)
-	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
-
-	// send with the exact expected fee
-	txResp, err := s.SendCoins(
-		ctx,
-		cosmosChain,
-		s.user1.KeyName(),
-		s.user1.FormattedAddress(),
-		s.user2.FormattedAddress(),
-		sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
-		minBaseFee,
-		gas,
-	)
-	s.Require().NoError(err, s.user1.FormattedAddress(), s.user2.FormattedAddress())
-
-	s.SetupSubTest()
-
-	// check fee deduction and events
-	s.chain.N
 }

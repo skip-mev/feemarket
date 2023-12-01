@@ -43,15 +43,3 @@ func (q QueryServer) BaseFee(goCtx context.Context, _ *types.BaseFeeRequest) (*t
 	fees, err := q.k.GetMinGasPrices(ctx)
 	return &types.BaseFeeResponse{Fees: fees}, err
 }
-
-// State defines a method that returns the current feemarket state.
-func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types.StateResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	state, err := q.k.GetState(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.StateResponse{State: state}, nil
-}
