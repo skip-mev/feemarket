@@ -25,11 +25,7 @@ func (q QueryServer) Params(goCtx context.Context, _ *types.ParamsRequest) (*typ
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	params, err := q.k.GetParams(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.ParamsResponse{Params: params}, nil
+	return &types.ParamsResponse{Params: params}, err
 }
 
 // State defines a method that returns the current feemarket state.
@@ -37,9 +33,13 @@ func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	state, err := q.k.GetState(ctx)
-	if err != nil {
-		return nil, err
-	}
+	return &types.StateResponse{State: state}, err
+}
 
-	return &types.StateResponse{State: state}, nil
+// BaseFee defines a method that returns the current feemarket base fee.
+func (q QueryServer) BaseFee(goCtx context.Context, _ *types.BaseFeeRequest) (*types.BaseFeeResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	fees, err := q.k.GetMinGasPrices(ctx)
+	return &types.BaseFeeResponse{Fee: fees}, err
 }
