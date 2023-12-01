@@ -103,9 +103,11 @@ func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bo
 		}
 
 		if isCheck {
-			feeCoins = requiredFees //  set fee coins to be required amount if checking
+			//  set fee coins to be required amount if checking
+			feeCoins = requiredFees
 		} else {
-			tip = feeCoins.Sub(requiredFees...) // tip is the difference between feeCoins and the required fees
+			// tip is the difference between feeCoins and the required fees
+			tip = feeCoins.Sub(requiredFees...)
 			// set fee coins to be ONLY the consumed amount if we are calculated consumed fee to deduct
 			feeCoins = consumedFees
 		}
