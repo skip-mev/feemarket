@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -16,6 +17,14 @@ import (
 const (
 	initBalance = 10000000000000
 )
+
+var r *rand.Rand
+
+// initialize random generator with fixed seed for reproducibility
+func init() {
+	s := rand.NewSource(1)
+	r = rand.New(s)
+}
 
 // TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
