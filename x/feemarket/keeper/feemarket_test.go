@@ -70,12 +70,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("target block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
+		params := types.DefaultParams()
+
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(state.TargetBlockUtilization)
+		err := state.Update(params.TargetBlockUtilization, params)
 		s.Require().NoError(err)
 
-		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -92,13 +93,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("target block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
+		params := types.DefaultParams()
+
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(state.TargetBlockUtilization)
+		err := state.Update(params.TargetBlockUtilization, params)
 		s.Require().NoError(err)
 
-		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -115,12 +117,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("max block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
+		params := types.DefaultParams()
+
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(state.MaxBlockUtilization)
+		err := state.Update(params.MaxBlockUtilization, params)
 		s.Require().NoError(err)
 
-		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -140,13 +143,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("max block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
+		params := types.DefaultParams()
+
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(state.MaxBlockUtilization)
+		err := state.Update(params.MaxBlockUtilization, params)
 		s.Require().NoError(err)
 
-		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -166,14 +170,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("in-between min and target block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
-		state.MaxBlockUtilization = 100
-		state.TargetBlockUtilization = 50
-		err := state.Update(25)
-		s.Require().NoError(err)
-
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
 		params.TargetBlockUtilization = 50
+
+		err := state.Update(25, params)
+		s.Require().NoError(err)
+
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -191,14 +194,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between min and target block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
-		state.MaxBlockUtilization = 100
-		state.TargetBlockUtilization = 50
-		err := state.Update(25)
-		s.Require().NoError(err)
 
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
 		params.TargetBlockUtilization = 50
+		err := state.Update(25, params)
+
+		s.Require().NoError(err)
+
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -218,14 +221,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("in-between target and max block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
-		state.MaxBlockUtilization = 100
-		state.TargetBlockUtilization = 50
-		err := state.Update(75)
-		s.Require().NoError(err)
-
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
 		params.TargetBlockUtilization = 50
+
+		err := state.Update(75, params)
+		s.Require().NoError(err)
+
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -246,14 +248,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between target and max block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
-		state.MaxBlockUtilization = 100
-		state.TargetBlockUtilization = 50
-		err := state.Update(75)
-		s.Require().NoError(err)
-
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
 		params.TargetBlockUtilization = 50
+
+		err := state.Update(75, params)
+		s.Require().NoError(err)
+
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -338,13 +339,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("target block with aimd eip1559 at min base fee + LR", func() {
 		state := types.DefaultAIMDState()
+		params := types.DefaultAIMDParams()
+
 		// Reaching the target block size means that we expect this to not
 		// increase.
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = state.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		params := types.DefaultAIMDParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
@@ -364,13 +366,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state := types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
+		params := types.DefaultAIMDParams()
+
 		// Reaching the target block size means that we expect this to not
 		// increase.
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = state.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		params := types.DefaultAIMDParams()
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))

@@ -69,13 +69,10 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 	s.Run("can get updated params", func() {
 		state := types.State{
-			BaseFee:                math.OneInt(),
-			MinBaseFee:             math.OneInt(),
-			LearningRate:           math.LegacyOneDec(),
-			Window:                 []uint64{1},
-			Index:                  0,
-			MaxBlockUtilization:    10,
-			TargetBlockUtilization: 5,
+			BaseFee:      math.OneInt(),
+			LearningRate: math.LegacyOneDec(),
+			Window:       []uint64{1},
+			Index:        0,
 		}
 		err := s.feemarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)

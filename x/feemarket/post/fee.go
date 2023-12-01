@@ -55,23 +55,15 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 	var tip sdk.Coins
 
-	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
+	// update fee market params
+	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
+		return ctx, errorsmod.Wrapf(err, "unable to get fee market params")
 	}
 
-	fee := feeTx.GetFee()
-	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
-
-	if !simulate {
-		fee, tip, err = ante.CheckTxFees(minGasPrices, feeTx, gas)
-		if err != nil {
-			return ctx, err
-		}
-	}
-
-	if err := dfd.DeductFeeAndTip(ctx, tx, fee, tip); err != nil {
-		return ctx, err
+	// return if disabled
+	if !params.Enabled {
+		return next(ctx, tx, simulate, success)
 	}
 
 	// update fee market state
@@ -80,7 +72,34 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
-	err = state.Update(gas)
+	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee)
+	minGasPrices := sdk.NewCoins(baseFee)
+
+	fee := feeTx.GetFee()
+	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
+
+	ctx.Logger().Info("fee deduct post handle",
+		"min gas prices", minGasPrices,
+		"gas consumed", gas,
+	)
+
+	if !simulate {
+		fee, tip, err = ante.CheckTxFees(minGasPrices, feeTx, gas)
+		if err != nil {
+			return ctx, err
+		}
+	}
+
+	ctx.Logger().Info("fee deduct post handle",
+		"fee", fee,
+		"tip", tip,
+	)
+
+	if err := dfd.DeductFeeAndTip(ctx, tx, fee, tip); err != nil {
+		return ctx, err
+	}
+
+	err = state.Update(gas, params)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
 	}

@@ -27,13 +27,13 @@ var (
 	// DefaultDelta is not used in the base EIP-1559 implementation.
 	DefaultDelta = math.LegacyMustNewDecFromStr("0.0")
 
-	// DefaultTargetBlockSize is the default target block utilization. This is the default
+	// DefaultTargetBlockUtilization is the default target block utilization. This is the default
 	// on Ethereum. This denominated in units of gas consumed in a block.
-	DefaultTargetBlockSize uint64 = 15_000_000
+	DefaultTargetBlockUtilization uint64 = 15_000_000
 
-	// DefaultMaxBlockSize is the default maximum block utilization. This is the default
+	// DefaultMaxBlockUtilization is the default maximum block utilization. This is the default
 	// on Ethereum. This denominated in units of gas consumed in a block.
-	DefaultMaxBlockSize uint64 = 30_000_000
+	DefaultMaxBlockUtilization uint64 = 30_000_000
 
 	// DefaultMinBaseFee is the default minimum base fee. This is the default
 	// on Ethereum. Note that Ethereum is denominated in 1e18 wei. Cosmos chains will
@@ -60,8 +60,8 @@ func DefaultParams() Params {
 		DefaultBeta,
 		DefaultTheta,
 		DefaultDelta,
-		DefaultTargetBlockSize,
-		DefaultMaxBlockSize,
+		DefaultTargetBlockUtilization,
+		DefaultMaxBlockUtilization,
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 		DefaultMaxLearningRate,
@@ -75,8 +75,6 @@ func DefaultParams() Params {
 func DefaultState() State {
 	return NewState(
 		DefaultWindow,
-		DefaultTargetBlockSize,
-		DefaultMaxBlockSize,
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 	)

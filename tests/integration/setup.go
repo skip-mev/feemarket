@@ -11,23 +11,23 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/strangelove-ventures/interchaintest/v7"
 
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -71,7 +71,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	ic.AddChain(chain)
 
 	// create docker network
-	client, networkID := interchaintest.DockerSetup(t)
+	dockerClient, networkID := interchaintest.DockerSetup(t)
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
@@ -79,7 +79,7 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	// build the interchain
 	err := ic.Build(ctx, nil, interchaintest.InterchainBuildOptions{
 		SkipPathCreation: true,
-		Client:           client,
+		Client:           dockerClient,
 		NetworkID:        networkID,
 		TestName:         t.Name(),
 	})
@@ -88,46 +88,8 @@ func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interc
 	return ic
 }
 
-// CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
-func (s *TestSuite) CreateTx(ctx context.Context, chain *cosmos.CosmosChain, user cosmos.User, seqIncrement, height uint64, GasPrice int64, msgs ...sdk.Msg) []byte {
-	// create tx factory + Client Context
-	txf, err := s.bc.GetFactory(ctx, user)
-	s.Require().NoError(err)
-
-	cc, err := s.bc.GetClientContext(ctx, user)
-	s.Require().NoError(err)
-
-	txf = txf.WithSimulateAndExecute(true)
-
-	txf, err = txf.Prepare(cc)
-	s.Require().NoError(err)
-
-	// set timeout height
-	if height != 0 {
-		txf = txf.WithTimeoutHeight(height)
-	}
-
-	// get gas for tx
-	txf.WithGas(25000000)
-
-	// update sequence number
-	txf = txf.WithSequence(txf.Sequence() + seqIncrement)
-	txf = txf.WithGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(chain.Config().Denom, math.NewInt(GasPrice))).String())
-
-	// sign the tx
-	txBuilder, err := txf.BuildUnsignedTx(msgs...)
-	s.Require().NoError(err)
-
-	s.Require().NoError(tx.Sign(txf, cc.GetFromName(), txBuilder, true))
-
-	// encode and return
-	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
-	s.Require().NoError(err)
-	return bz
-}
-
 // SimulateTx simulates the provided messages, and checks whether the provided failure condition is met
-func (s *TestSuite) SimulateTx(ctx context.Context, chain *cosmos.CosmosChain, user cosmos.User, height uint64, expectFail bool, msgs ...sdk.Msg) {
+func (s *TestSuite) SimulateTx(ctx context.Context, user cosmos.User, height uint64, expectFail bool, msgs ...sdk.Msg) {
 	// create tx factory + Client Context
 	txf, err := s.bc.GetFactory(ctx, user)
 	s.Require().NoError(err)
@@ -148,95 +110,9 @@ func (s *TestSuite) SimulateTx(ctx context.Context, chain *cosmos.CosmosChain, u
 	s.Require().Equal(err != nil, expectFail)
 }
 
-type Tx struct {
-	User               cosmos.User
-	Msgs               []sdk.Msg
-	GasPrice           int64
-	SequenceIncrement  uint64
-	Height             uint64
-	SkipInclusionCheck bool
-	ExpectFail         bool
-}
-
-// BroadcastTxs broadcasts the given messages for each user. This function returns the broadcasted txs. If a message
-// is not expected to be included in a block, set SkipInclusionCheck to true and the method
-// will not block on the tx's inclusion in a block, otherwise this method will block on the tx's inclusion
-func (s *TestSuite) BroadcastTxs(ctx context.Context, chain *cosmos.CosmosChain, txs []Tx) [][]byte {
-	return s.BroadcastTxsWithCallback(ctx, chain, txs, nil)
-}
-
-// BroadcastTxsWithCallback broadcasts the given messages for each user. This function returns the broadcasted txs. If a message
-// is not expected to be included in a block, set SkipInclusionCheck to true and the method
-// will not block on the tx's inclusion in a block, otherwise this method will block on the tx's inclusion. The callback
-// function is called for each tx that is included in a block.
-func (s *TestSuite) BroadcastTxsWithCallback(
-	ctx context.Context,
-	chain *cosmos.CosmosChain,
-	txs []Tx,
-	cb func(tx []byte, resp *rpctypes.ResultTx),
-) [][]byte {
-	rawTxs := make([][]byte, len(txs))
-
-	for i, msg := range txs {
-		rawTxs[i] = s.CreateTx(ctx, chain, msg.User, msg.SequenceIncrement, msg.Height, msg.GasPrice, msg.Msgs...)
-	}
-
-	// broadcast each tx
-	s.Require().True(len(chain.Nodes()) > 0)
-	client := chain.Nodes()[0].Client
-
-	statusResp, err := client.Status(context.Background())
-	s.Require().NoError(err)
-
-	s.T().Logf("broadcasting transactions at latest height of %d", statusResp.SyncInfo.LatestBlockHeight)
-
-	for i, tx := range rawTxs {
-		// broadcast tx
-		resp, err := client.BroadcastTxSync(ctx, tx)
-
-		// check execution was successful
-		if !txs[i].ExpectFail {
-			s.Require().Equal(resp.Code, uint32(0))
-		} else {
-			if resp != nil {
-				s.Require().NotEqual(resp.Code, uint32(0))
-			} else {
-				s.Require().Error(err)
-			}
-		}
-	}
-
-	// block on all txs being included in block
-	eg := errgroup.Group{}
-	for i, tx := range rawTxs {
-		// if we don't expect this tx to be included.. skip it
-		if txs[i].SkipInclusionCheck || txs[i].ExpectFail {
-			continue
-		}
-
-		tx := tx // pin
-		eg.Go(func() error {
-			return testutil.WaitForCondition(30*time.Second, 500*time.Millisecond, func() (bool, error) {
-				res, err := client.Tx(context.Background(), comettypes.Tx(tx).Hash(), false)
-				if err != nil || res.TxResult.Code != uint32(0) {
-					return false, nil
-				}
-
-				if cb != nil {
-					cb(tx, res)
-				}
-
-				return true, nil
-			})
-		})
-	}
-
-	s.Require().NoError(eg.Wait())
-
-	return rawTxs
-}
-
 func (s *TestSuite) QueryParams() types.Params {
+	s.T().Helper()
+
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
 	s.Require().True(ok)
@@ -255,6 +131,27 @@ func (s *TestSuite) QueryParams() types.Params {
 	return params
 }
 
+func (s *TestSuite) QueryState() types.State {
+	s.T().Helper()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "state")
+	s.Require().NoError(err)
+
+	// unmarshal state
+	var state types.State
+	err = s.cdc.UnmarshalJSON(resp, &state)
+	s.Require().NoError(err)
+	return state
+}
+
 // QueryValidators queries for all the network's validators
 func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress {
 	s.T().Helper()
@@ -265,10 +162,10 @@ func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress 
 	s.Require().NoError(err)
 	defer cc.Close()
 
-	client := stakingtypes.NewQueryClient(cc)
+	nodeClient := stakingtypes.NewQueryClient(cc)
 
 	// query validators
-	resp, err := client.Validators(context.Background(), &stakingtypes.QueryValidatorsRequest{})
+	resp, err := nodeClient.Validators(context.Background(), &stakingtypes.QueryValidatorsRequest{})
 	s.Require().NoError(err)
 
 	addrs := make([]sdk.ValAddress, len(resp.Validators))
@@ -335,6 +232,8 @@ func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.Res
 
 // WaitForHeight waits for the chain to reach the given height
 func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
+	s.T().Helper()
+
 	// wait for next height
 	err := testutil.WaitForCondition(30*time.Second, 100*time.Millisecond, func() (bool, error) {
 		pollHeight, err := chain.Height(context.Background())
@@ -348,6 +247,8 @@ func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
 
 // VerifyBlock takes a Block and verifies that it contains the given bid at the 0-th index, and the bundled txs immediately after
 func (s *TestSuite) VerifyBlock(block *rpctypes.ResultBlock, offset int, bidTxHash string, txs [][]byte) {
+	s.T().Helper()
+
 	// verify the block
 	if bidTxHash != "" {
 		s.Require().Equal(bidTxHash, TxHash(block.Block.Data.Txs[offset+1]))
@@ -363,6 +264,8 @@ func (s *TestSuite) VerifyBlock(block *rpctypes.ResultBlock, offset int, bidTxHa
 // VerifyBlockWithExpectedBlock takes in a list of raw tx bytes and compares each tx hash to the tx hashes in the block.
 // The expected block is the block that should be returned by the chain at the given height.
 func (s *TestSuite) VerifyBlockWithExpectedBlock(chain *cosmos.CosmosChain, height uint64, txs [][]byte) {
+	s.T().Helper()
+
 	block := s.Block(chain, int64(height))
 	blockTxs := block.Block.Data.Txs[1:]
 
@@ -450,6 +353,26 @@ func (s *TestSuite) keyringDirFromNode() string {
 	return localDir
 }
 
+// SendCoins creates a executes a SendCoins message and broadcasts the transaction.
+func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+	resp, err := s.ExecTx(
+		ctx,
+		chain,
+		keyName,
+		"bank",
+		"send",
+		sender,
+		receiver,
+		amt.String(),
+		"--fees",
+		fees.String(),
+		"--gas",
+		strconv.FormatInt(gas, 10),
+	)
+
+	return resp, err
+}
+
 // GetAndFundTestUserWithMnemonic restores a user using the given mnemonic
 // and funds it with the native chain denom.
 // The caller should wait for some blocks to complete before the funds will be accessible.
@@ -466,28 +389,17 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
 	}
 
-	err = chain.SendFunds(ctx, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
-		Address: user.FormattedAddress(),
-		Amount:  math.NewInt(amount),
-		Denom:   chainCfg.Denom,
-	})
-
-	_, err = s.ExecTx(
+	_, err = s.SendCoins(
 		ctx,
 		chain,
 		interchaintest.FaucetAccountKeyName,
-		"bank",
-		"send",
 		interchaintest.FaucetAccountKeyName,
 		user.FormattedAddress(),
-		fmt.Sprintf("%d%s", amount, chainCfg.Denom),
-		"--fees",
-		fmt.Sprintf("%d%s", 200000000000, chainCfg.Denom),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(1000000000000))),
+		1000000,
 	)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get funds from faucet: %w", err)
-	}
+	s.Require().NoError(err, "failed to get funds from faucet")
 	return user, nil
 }
 
@@ -515,7 +427,6 @@ func (s *TestSuite) GetAndFundTestUsers(
 	}
 	s.Require().NoError(eg.Wait())
 
-	// TODO(nix 05-17-2022): Map with generics once using go 1.18
 	chainHeights := make([]testutil.ChainHeighter, len(chains))
 	for i := range chains {
 		chainHeights[i] = chains[i]
@@ -525,13 +436,25 @@ func (s *TestSuite) GetAndFundTestUsers(
 
 func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
 	node := chain.FullNodes[0]
-	return node.ExecTx(ctx, keyName, command...)
-}
 
-var chars = []byte("abcdefghijklmnopqrstuvwxyz")
+	resp, err := node.ExecTx(ctx, keyName, command...)
+	s.Require().NoError(err)
+
+	height, err := chain.Height(context.Background())
+	s.Require().NoError(err)
+	s.WaitForHeight(chain, height+1)
+
+	stdout, stderr, err := chain.FullNodes[0].ExecQuery(ctx, "tx", resp, "--type", "hash")
+	s.Require().NoError(err)
+	s.Require().Nil(stderr)
+
+	return string(stdout), nil
+}
 
 // RandLowerCaseLetterString returns a lowercase letter string of given length
 func RandLowerCaseLetterString(length int) string {
+	chars := []byte("abcdefghijklmnopqrstuvwxyz")
+
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = chars[rand.Intn(len(chars))]

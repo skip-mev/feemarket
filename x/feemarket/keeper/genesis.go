@@ -12,15 +12,6 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic(err)
 	}
 
-	// Ensure that state and fee market match required configurations.
-	if gs.Params.MaxBlockUtilization != gs.State.MaxBlockUtilization {
-		panic("genesis state and parameters do not match for max block utilization")
-	}
-
-	if gs.Params.TargetBlockUtilization != gs.State.TargetBlockUtilization {
-		panic("genesis state and parameters do not match for target block utilization")
-	}
-
 	if gs.Params.Window != uint64(len(gs.State.Window)) {
 		panic("genesis state and parameters do not match for window")
 	}

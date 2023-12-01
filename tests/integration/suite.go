@@ -3,19 +3,18 @@ package integration
 import (
 	"context"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 const (
-	initBalance = 1000000000000
+	initBalance = 10000000000000
 )
 
 // TestSuite runs the feemarket integration test-suite against a given interchaintest specification
@@ -35,7 +34,7 @@ type TestSuite struct {
 	// overrides for key-ring configuration of the broadcaster
 	broadcasterOverrides *KeyringOverride
 
-	// broadcaster is the RPC interface to the ITS network
+	// bc is the RPC interface to the ITS network
 	bc *cosmos.Broadcaster
 
 	cdc codec.Codec
@@ -80,6 +79,12 @@ func (s *TestSuite) SetupSuite() {
 		panic("unable to assert ibc.Chain as CosmosChain")
 	}
 
+	// create the broadcaster
+	s.T().Log("creating broadcaster")
+	s.setupBroadcaster()
+
+	s.cdc = s.chain.Config().EncodingConfig.Codec
+
 	// get the users
 	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
 	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
@@ -88,8 +93,6 @@ func (s *TestSuite) SetupSuite() {
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
 	s.setupBroadcaster()
-
-	s.cdc = s.chain.Config().EncodingConfig.Codec
 }
 
 func (s *TestSuite) TearDownSuite() {
@@ -103,12 +106,61 @@ func (s *TestSuite) SetupSubTest() {
 	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 	s.Require().NoError(err)
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+
+	state := s.QueryState()
+
+	s.T().Log("new test case at block height", height+1)
+	s.T().Log("state:", state.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
-	// query params
-	params := s.QueryParams()
+	s.Run("query params", func() {
+		// query params
+		params := s.QueryParams()
 
-	// expect validate to pass
-	require.NoError(s.T(), params.ValidateBasic(), params)
+		// expect validate to pass
+		require.NoError(s.T(), params.ValidateBasic(), params)
+	})
+}
+
+func (s *TestSuite) TestQueryState() {
+	s.Run("query state", func() {
+		// query state
+		state := s.QueryState()
+
+		// expect validate to pass
+		require.NoError(s.T(), state.ValidateBasic(), state)
+	})
+}
+
+func (s *TestSuite) TestSendTxUpdating() {
+	ctx := context.Background()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	s.Run("expect fee market state to update", func() {
+		state := s.QueryState()
+		params := s.QueryParams()
+
+		gas := int64(1000000)
+		minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
+
+		// send with the exact expected fee
+		txResp, err := s.SendCoins(
+			ctx,
+			cosmosChain,
+			s.user1.KeyName(),
+			s.user1.FormattedAddress(),
+			s.user2.FormattedAddress(),
+			sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+			minBaseFee,
+			gas,
+		)
+		s.Require().NoError(err, txResp)
+	})
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -32,8 +34,29 @@ var (
 
 	genesisKV = []cosmos.GenesisKV{
 		{
-			Key:   "app_state.feemarket.params",
-			Value: feemarkettypes.DefaultParams(),
+			Key: "app_state.feemarket.params",
+			Value: feemarkettypes.NewParams(
+				feemarkettypes.DefaultWindow,
+				feemarkettypes.DefaultAlpha,
+				feemarkettypes.DefaultBeta,
+				feemarkettypes.DefaultTheta,
+				feemarkettypes.DefaultDelta,
+				feemarkettypes.DefaultTargetBlockUtilization,
+				feemarkettypes.DefaultMaxBlockUtilization,
+				sdk.NewInt(1000),
+				feemarkettypes.DefaultMinLearningRate,
+				feemarkettypes.DefaultMaxLearningRate,
+				feemarkettypes.DefaultFeeDenom,
+				true,
+			),
+		},
+		{
+			Key: "app_state.feemarket.state",
+			Value: feemarkettypes.NewState(
+				feemarkettypes.DefaultWindow,
+				sdk.NewInt(1000),
+				feemarkettypes.DefaultMaxLearningRate,
+			),
 		},
 	}
 
@@ -62,7 +85,7 @@ var (
 			Bech32Prefix:        "cosmos",
 			CoinType:            "118",
 			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("200%s", denom),
+			GasPrices:           fmt.Sprintf("50%s", denom),
 			TrustingPeriod:      "48h",
 			NoHostMount:         noHostMount,
 			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),

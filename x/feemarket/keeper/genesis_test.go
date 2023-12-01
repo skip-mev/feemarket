@@ -33,24 +33,6 @@ func (s *KeeperTestSuite) TestInitGenesis() {
 			s.feemarketKeeper.InitGenesis(s.ctx, *gs)
 		})
 	})
-
-	s.Run("mismatch in params and state for target utilization should panic", func() {
-		gs := types.DefaultAIMDGenesisState()
-		gs.Params.TargetBlockUtilization = 1
-
-		s.Require().Panics(func() {
-			s.feemarketKeeper.InitGenesis(s.ctx, *gs)
-		})
-	})
-
-	s.Run("mismatch in params and state for max utilization should panic", func() {
-		gs := types.DefaultAIMDGenesisState()
-		gs.Params.MaxBlockUtilization = 1
-
-		s.Require().Panics(func() {
-			s.feemarketKeeper.InitGenesis(s.ctx, *gs)
-		})
-	})
 }
 
 func (s *KeeperTestSuite) TestExportGenesis() {
