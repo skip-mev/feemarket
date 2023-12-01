@@ -3,11 +3,10 @@ package integration
 import (
 	"context"
 
-	"github.com/strangelove-ventures/interchaintest/v7"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
@@ -115,28 +114,26 @@ func (s *TestSuite) SetupSubTest() {
 }
 
 func (s *TestSuite) TestQueryParams() {
-	s.SetupSubTest()
+	s.Run("query params", func() {
+		// query params
+		params := s.QueryParams()
 
-	// query params
-	params := s.QueryParams()
-
-	// expect validate to pass
-	require.NoError(s.T(), params.ValidateBasic(), params)
+		// expect validate to pass
+		require.NoError(s.T(), params.ValidateBasic(), params)
+	})
 }
 
 func (s *TestSuite) TestQueryState() {
-	s.SetupSubTest()
+	s.Run("query state", func() {
+		// query state
+		state := s.QueryState()
 
-	// query params
-	state := s.QueryState()
-
-	// expect validate to pass
-	require.NoError(s.T(), state.ValidateBasic(), state)
+		// expect validate to pass
+		require.NoError(s.T(), state.ValidateBasic(), state)
+	})
 }
 
 func (s *TestSuite) TestSendTxUpdating() {
-	s.SetupSubTest()
-
 	ctx := context.Background()
 
 	// cast chain to cosmos-chain
@@ -146,22 +143,24 @@ func (s *TestSuite) TestSendTxUpdating() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
-	state := s.QueryState()
-	params := s.QueryParams()
+	s.Run("expect fee market state to update", func() {
+		state := s.QueryState()
+		params := s.QueryParams()
 
-	gas := int64(1000000)
-	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
+		gas := int64(1000000)
+		minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
 
-	// send with the exact expected fee
-	_, err := s.SendCoins(
-		ctx,
-		cosmosChain,
-		s.user1.KeyName(),
-		s.user1.FormattedAddress(),
-		s.user2.FormattedAddress(),
-		sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
-		minBaseFee,
-		gas,
-	)
-	s.Require().NoError(err, s.user1.FormattedAddress(), s.user2.FormattedAddress())
+		// send with the exact expected fee
+		txResp, err := s.SendCoins(
+			ctx,
+			cosmosChain,
+			s.user1.KeyName(),
+			s.user1.FormattedAddress(),
+			s.user2.FormattedAddress(),
+			sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+			minBaseFee,
+			gas,
+		)
+		s.Require().NoError(err, txResp)
+	})
 }
