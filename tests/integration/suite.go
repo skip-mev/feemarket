@@ -133,6 +133,16 @@ func (s *TestSuite) TestQueryState() {
 	})
 }
 
+func (s *TestSuite) TestQueryBaseFee() {
+	s.Run("query base fee", func() {
+		// query base fee
+		fees := s.QueryBaseFee()
+
+		// expect validate to pass
+		require.NoError(s.T(), fees.Validate(), fees)
+	})
+}
+
 func (s *TestSuite) TestSendTxUpdating() {
 	ctx := context.Background()
 
@@ -144,11 +154,10 @@ func (s *TestSuite) TestSendTxUpdating() {
 	s.Require().True(len(nodes) > 0)
 
 	s.Run("expect fee market state to update", func() {
-		state := s.QueryState()
-		params := s.QueryParams()
+		baseFee := s.QueryBaseFee()
 
 		gas := int64(1000000)
-		minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
+		minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
 
 		// send with the exact expected fee
 		txResp, err := s.SendCoins(

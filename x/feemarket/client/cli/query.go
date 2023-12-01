@@ -103,7 +103,7 @@ func GetBaseFeeCmd() *cobra.Command {
 				return err
 			}
 
-			return clientCtx.PrintProto(resp)
+			return clientCtx.PrintString(resp.Fees.String())
 		},
 	}
 
