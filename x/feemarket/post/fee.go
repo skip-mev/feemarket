@@ -84,7 +84,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	)
 
 	if !simulate {
-		fee, tip, err = ante.CheckTxFees(minGasPrices, feeTx, gas)
+		fee, tip, err = ante.CheckTxFees(ctx, minGasPrices, feeTx, false)
 		if err != nil {
 			return ctx, err
 		}
@@ -156,8 +156,9 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		}
 	}
 
+	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 	if !tip.IsZero() {
-		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), ctx.BlockHeader().ProposerAddress, tip)
+		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), proposer, tip)
 		if err != nil {
 			return err
 		}
@@ -170,6 +171,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
 		),
 	}
 	ctx.EventManager().EmitEvents(events)

@@ -56,7 +56,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	)
 
 	if !simulate {
-		fee, _, err = CheckTxFees(minGasPrices, feeTx, gas)
+		fee, _, err = CheckTxFees(ctx, minGasPrices, feeTx, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
@@ -69,7 +69,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 // CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFees(minFees sdk.Coins, feeTx sdk.FeeTx, gas uint64) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
+func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bool) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
 	feesDec := sdk.NewDecCoinsFromCoins(minFees...)
 
 	feeCoins = feeTx.GetFee()
@@ -78,21 +78,37 @@ func CheckTxFees(minFees sdk.Coins, feeTx sdk.FeeTx, gas uint64) (feeCoins sdk.C
 	minGasPrices := feesDec
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
+		consumedFees := make(sdk.Coins, len(minGasPrices))
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas, where fee = ceil(minGasPrice * gas).
-		glDec := sdkmath.LegacyNewDec(int64(gas))
+		gasConsumed := int64(ctx.GasMeter().GasConsumed())
+		gcDec := sdkmath.LegacyNewDec(gasConsumed)
+		glDec := sdkmath.LegacyNewDec(int64(feeTx.GetGas()))
+
 		for i, gp := range minGasPrices {
-			fee := gp.Amount.Mul(glDec)
-			requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+			fee := gp.Amount.Mul(gcDec)
+			limitFee := gp.Amount.Mul(glDec)
+			consumedFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+			requiredFees[i] = sdk.NewCoin(gp.Denom, limitFee.Ceil().RoundInt())
 		}
 
 		if !feeCoins.IsAnyGTE(requiredFees) {
-			return nil, nil, sdkerrors.ErrInsufficientFee.Wrapf("got: %s required: %s, minGasPrices: %s, gas: %d", feeCoins, requiredFees, minGasPrices, gas)
+			return nil, nil, sdkerrors.ErrInsufficientFee.Wrapf(
+				"got: %s required: %s, minGasPrices: %s, gas: %d",
+				feeCoins,
+				requiredFees,
+				minGasPrices,
+				gasConsumed,
+			)
 		}
 
-		tip = feeCoins.Sub(minFees...) // tip is the difference between feeCoins and the min fees
-		feeCoins = requiredFees        //  set fee coins to be ONLY the required amount
+		tip = feeCoins.Sub(requiredFees...) // tip is the difference between feeCoins and the min fees
+		if isCheck {
+			feeCoins = requiredFees //  set fee coins to be required amount if checking
+		} else {
+			feeCoins = consumedFees //  set fee coins to be ONLY the consumed amount if we are calculated consumed fee to deduct
+		}
 	}
 
 	return feeCoins, tip, nil
