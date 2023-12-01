@@ -70,12 +70,11 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 // CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
 func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bool) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
-	feesDec := sdk.NewDecCoinsFromCoins(minFees...)
-
+	minFeesDecCoins := sdk.NewDecCoinsFromCoins(minFees...)
 	feeCoins = feeTx.GetFee()
 
 	// Ensure that the provided fees meet the minimum
-	minGasPrices := feesDec
+	minGasPrices := minFeesDecCoins
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
 		consumedFees := make(sdk.Coins, len(minGasPrices))
@@ -87,9 +86,9 @@ func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bo
 		glDec := sdkmath.LegacyNewDec(int64(feeTx.GetGas()))
 
 		for i, gp := range minGasPrices {
-			fee := gp.Amount.Mul(gcDec)
+			consumedFee := gp.Amount.Mul(gcDec)
 			limitFee := gp.Amount.Mul(glDec)
-			consumedFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+			consumedFees[i] = sdk.NewCoin(gp.Denom, consumedFee.Ceil().RoundInt())
 			requiredFees[i] = sdk.NewCoin(gp.Denom, limitFee.Ceil().RoundInt())
 		}
 
@@ -103,11 +102,12 @@ func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bo
 			)
 		}
 
-		tip = feeCoins.Sub(requiredFees...) // tip is the difference between feeCoins and the min fees
 		if isCheck {
 			feeCoins = requiredFees //  set fee coins to be required amount if checking
 		} else {
-			feeCoins = consumedFees //  set fee coins to be ONLY the consumed amount if we are calculated consumed fee to deduct
+			tip = feeCoins.Sub(requiredFees...) // tip is the difference between feeCoins and the required fees
+			// set fee coins to be ONLY the consumed amount if we are calculated consumed fee to deduct
+			feeCoins = consumedFees
 		}
 	}
 
