@@ -1,4 +1,4 @@
-package integration_test
+package e2e_test
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ import (
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/feemarket/tests/integration"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -24,7 +23,7 @@ var (
 	denom         = "stake"
 
 	image = ibc.DockerImage{
-		Repository: "feemarket-integration",
+		Repository: "feemarket-e2e",
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}

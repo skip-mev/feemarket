@@ -1,4 +1,4 @@
-package integration
+package e2e
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const (
 	initBalance = 10000000000000
 )
 
-// TestSuite runs the feemarket integration test-suite against a given interchaintest specification
+// TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
 	suite.Suite
 	// spec
