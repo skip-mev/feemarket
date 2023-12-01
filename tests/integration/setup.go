@@ -16,8 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/strangelove-ventures/interchaintest/v7"
-
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -28,6 +26,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
@@ -150,6 +149,26 @@ func (s *TestSuite) QueryState() types.State {
 	err = s.cdc.UnmarshalJSON(resp, &state)
 	s.Require().NoError(err)
 	return state
+}
+
+func (s *TestSuite) QueryBaseFee() sdk.Coins {
+	s.T().Helper()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	// make params query to first node
+	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "base-fee")
+	s.Require().NoError(err)
+
+	// unmarshal state
+	fees, err := sdk.ParseCoinsNormalized(string(resp))
+	s.Require().NoError(err)
+	return fees
 }
 
 // QueryValidators queries for all the network's validators
