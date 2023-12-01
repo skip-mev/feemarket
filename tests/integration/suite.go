@@ -3,11 +3,10 @@ package integration
 import (
 	"context"
 
-	"github.com/strangelove-ventures/interchaintest/v7"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
@@ -114,13 +113,64 @@ func (s *TestSuite) SetupSubTest() {
 }
 
 func (s *TestSuite) TestQueryParams() {
-	s.SetupSubTest()
+	s.Run("query params", func() {
+		// query params
+		params := s.QueryParams()
 
-	// query params
-	params := s.QueryParams()
+		// expect validate to pass
+		require.NoError(s.T(), params.ValidateBasic(), params)
+	})
+}
 
-	// expect validate to pass
-	require.NoError(s.T(), params.ValidateBasic(), params)
+func (s *TestSuite) TestQueryState() {
+	s.Run("query state", func() {
+		// query state
+		state := s.QueryState()
+
+		// expect validate to pass
+		require.NoError(s.T(), state.ValidateBasic(), state)
+	})
+}
+
+func (s *TestSuite) TestQueryBaseFee() {
+	s.Run("query base fee", func() {
+		// query base fee
+		fees := s.QueryBaseFee()
+
+		// expect validate to pass
+		require.NoError(s.T(), fees.Validate(), fees)
+	})
+}
+
+func (s *TestSuite) TestSendTxUpdating() {
+	ctx := context.Background()
+
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	s.Run("expect fee market state to update", func() {
+		baseFee := s.QueryBaseFee()
+
+		gas := int64(1000000)
+		minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
+
+		// send with the exact expected fee
+		txResp, err := s.SendCoins(
+			ctx,
+			cosmosChain,
+			s.user1.KeyName(),
+			s.user1.FormattedAddress(),
+			s.user2.FormattedAddress(),
+			sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+			minBaseFee,
+			gas,
+		)
+		s.Require().NoError(err, txResp)
+	})
 }
 
 func (s *TestSuite) TestQueryState() {
