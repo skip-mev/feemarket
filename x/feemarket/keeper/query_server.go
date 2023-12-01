@@ -41,5 +41,5 @@ func (q QueryServer) BaseFee(goCtx context.Context, _ *types.BaseFeeRequest) (*t
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	fees, err := q.k.GetMinGasPrices(ctx)
-	return &types.BaseFeeResponse{Fee: fees}, err
+	return &types.BaseFeeResponse{Fees: fees}, err
 }
