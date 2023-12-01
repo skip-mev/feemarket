@@ -2,6 +2,7 @@
 package sample
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/group"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -48,6 +49,7 @@ func InterfaceRegistry() codectypes.InterfaceRegistry {
 	distrtypes.RegisterInterfaces(interfaceRegistry)
 	vestingtypes.RegisterInterfaces(interfaceRegistry)
 	feegrant.RegisterInterfaces(interfaceRegistry)
+	group.RegisterInterfaces(interfaceRegistry)
 	govtypes.RegisterInterfaces(interfaceRegistry)
 	evidencetypes.RegisterInterfaces(interfaceRegistry)
 	crisistypes.RegisterInterfaces(interfaceRegistry)
