@@ -40,7 +40,7 @@ type TestSuite struct {
 	cdc codec.Codec
 }
 
-func NewIntegrationTestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
+func NewE2ETestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
 	return &TestSuite{
 		spec:  spec,
 		denom: "stake",

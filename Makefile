@@ -18,11 +18,11 @@ COVER_HTML_FILE := cover.html
 
 use-main:
 	@go work edit -use .
-	@go work edit -dropuse ./tests/integration
+	@go work edit -dropuse ./tests/e2e
 
-use-integration:
+use-e2e:
 	@go work edit -dropuse .
-	@go work edit -use ./tests/integration
+	@go work edit -use ./tests/e2e
 
 tidy:
 	@go mod tidy
@@ -102,7 +102,7 @@ build-and-start-app: build-test-app
 
 .PHONY: build-test-app build-and-start-app
 
-.PHONY: docker-build docker-build-integration
+.PHONY: docker-build docker-build-e2e
 ###############################################################################
 ##                                  Docker                                   ##
 ###############################################################################
@@ -111,20 +111,20 @@ docker-build: use-main
 	@echo "Building E2E Docker image..."
 	@DOCKER_BUILDKIT=1 docker build -t skip-mev/feemarket-e2e -f contrib/images/feemarket.e2e.Dockerfile .
 
-docker-build-integration: use-main
-	@echo "Building integration-test Docker image..."
-	@DOCKER_BUILDKIT=1 docker build -t feemarket-integration -f contrib/images/feemarket.integration.Dockerfile .
+docker-build-e2e: use-main
+	@echo "Building e2e-test Docker image..."
+	@DOCKER_BUILDKIT=1 docker build -t feemarket-e2e -f contrib/images/feemarket.e2e.Dockerfile .
 
 ###############################################################################
 ###                                  Tests                                  ###
 ###############################################################################
 
-TEST_INTEGRATION_DEPS = docker-build-integration use-integration
-TEST_INTEGRATION_TAGS = integration
+TEST_E2E_DEPS = docker-build-e2e use-e2e
+TEST_E2E_TAGS = e2e
 
-test-integration: $(TEST_INTEGRATION_DEPS)
-	@echo "Running integration tests..."
-	@go test ./tests/integration/integration_test.go -timeout 30m -p 1 -race -v -tags='$(TEST_INTEGRATION_TAGS)'
+test-e2e: $(TEST_E2E_DEPS)
+	@echo "Running e2e tests..."
+	@go test ./tests/e2e/e2e_test.go -timeout 30m -p 1 -race -v -tags='$(TEST_E2E_TAGS)'
 
 test:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
@@ -139,7 +139,7 @@ test-cover:
 	@rm $(COVER_FILE)
 
 
-.PHONY: test test-integration
+.PHONY: test test-e2e
 
 ###############################################################################
 ###                                Protobuf                                 ###

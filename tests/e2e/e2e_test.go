@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -13,6 +12,7 @@ import (
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/feemarket/tests/e2e"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -99,7 +99,7 @@ func MakeEncodingConfig() *testutil.TestEncodingConfig {
 	return &cfg
 }
 
-func TestIntegrationTestSuite(t *testing.T) {
-	s := integration.NewIntegrationTestSuiteFromSpec(spec)
+func TestE2ETestSuite(t *testing.T) {
+	s := e2e.NewE2ETestSuiteFromSpec(spec)
 	suite.Run(t, s)
 }
