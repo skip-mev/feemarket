@@ -24,6 +24,7 @@ func GetQueryCmd() *cobra.Command {
 	// add sub-commands
 	cmd.AddCommand(
 		GetParamsCmd(),
+		GetStateCmd(),
 	)
 
 	return cmd
@@ -48,6 +49,33 @@ func GetParamsCmd() *cobra.Command {
 			}
 
 			return clientCtx.PrintProto(&resp.Params)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetStateCmd returns the cli-command that queries the current feemarket state.
+func GetStateCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "state",
+		Short: "Query for the current feemarket state",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			resp, err := queryClient.State(cmd.Context(), &types.StateRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(&resp.State)
 		},
 	}
 
