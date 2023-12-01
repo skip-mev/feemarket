@@ -110,8 +110,7 @@ func (s *TestSuite) SetupSubTest() {
 
 	state := s.QueryState()
 
-	s.T().Log("new test case at block height", height+1)
-	s.T().Log("state:", state.String())
+	s.T().Log("state at block height", height+1, ":", state.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
@@ -153,7 +152,7 @@ func (s *TestSuite) TestSendTxUpdating() {
 	minBaseFee := sdk.NewCoins(sdk.NewCoin(params.FeeDenom, state.BaseFee.MulRaw(gas)))
 
 	// send with the exact expected fee
-	_, err := s.SendCoins(
+	txResp, err := s.SendCoins(
 		ctx,
 		cosmosChain,
 		s.user1.KeyName(),
@@ -164,4 +163,9 @@ func (s *TestSuite) TestSendTxUpdating() {
 		gas,
 	)
 	s.Require().NoError(err, s.user1.FormattedAddress(), s.user2.FormattedAddress())
+
+	s.SetupSubTest()
+
+	// check fee deduction and events
+	s.chain.N
 }
