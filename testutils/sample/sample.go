@@ -2,11 +2,12 @@
 package sample
 
 import (
-	"github.com/cosmos/cosmos-sdk/x/group"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/cosmos/cosmos-sdk/x/group"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto"
@@ -225,4 +226,9 @@ func Time(r *rand.Rand) time.Time {
 // ZeroTime returns time.Time that represents 0
 func ZeroTime() time.Time {
 	return time.UnixMilli(0).UTC()
+}
+
+// Rand returns a sample Rand object for randomness
+func Rand() *rand.Rand {
+	return rand.New(rand.NewSource(time.Now().Unix()))
 }
