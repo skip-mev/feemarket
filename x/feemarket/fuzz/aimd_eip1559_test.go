@@ -19,7 +19,10 @@ import (
 func TestAIMDLearningRate(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
+		window := rapid.Int64Range(1, 50).Draw(t, "window")
+		state.Window = make([]uint64, window)
+
+		params := CreateRandomAIMDParams(t)
 
 		// Randomly generate the block utilization.
 		numBlocks := rapid.Uint64Range(0, 1000).Draw(t, "num_blocks")
@@ -63,7 +66,10 @@ func TestAIMDBaseFee(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
-		params := types.DefaultAIMDParams()
+		window := rapid.Int64Range(1, 50).Draw(t, "window")
+		state.Window = make([]uint64, window)
+
+		params := CreateRandomAIMDParams(t)
 
 		// Randomly generate the block utilization.
 		numBlocks := rapid.Uint64Range(0, 1000).Draw(t, "num_blocks")
@@ -100,4 +106,36 @@ func TestAIMDBaseFee(t *testing.T) {
 			state.IncrementHeight()
 		}
 	})
+}
+
+// CreateRandomAIMDParams returns a random set of parameters for the AIMD
+// EIP-1559 fee market implementation.
+func CreateRandomAIMDParams(t *rapid.T) types.Params {
+	// Randomly generate the learning rate parameters.
+	a := rapid.Uint64Range(1, 1000).Draw(t, "alpha")
+	alpha := math.LegacyNewDec(int64(a)).Quo(math.LegacyNewDec(1000))
+
+	b := rapid.Uint64Range(50, 99).Draw(t, "beta")
+	beta := math.LegacyNewDec(int64(b)).Quo(math.LegacyNewDec(100))
+
+	// Randomly generate the block utilization parameters.
+	th := rapid.Uint64Range(10, 90).Draw(t, "theta")
+	theta := math.LegacyNewDec(int64(th)).Quo(math.LegacyNewDec(100))
+
+	d := rapid.Uint64Range(1, 1000).Draw(t, "delta")
+	delta := math.LegacyNewDec(int64(d)).Quo(math.LegacyNewDec(1000))
+
+	// Randomly generate the block utilization.
+	maxBlockUtilization := rapid.Uint64Range(1, 15_000_000).Draw(t, "max_block_utilization")
+	targetBlockUtilization := rapid.Uint64Range(15_000_00, 30_000_000).Draw(t, "target_block_utilization")
+
+	params := types.DefaultAIMDParams()
+	params.Alpha = alpha
+	params.Beta = beta
+	params.Theta = theta
+	params.Delta = delta
+	params.MaxBlockUtilization = maxBlockUtilization
+	params.TargetBlockUtilization = targetBlockUtilization
+
+	return params
 }
