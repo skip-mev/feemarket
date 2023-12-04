@@ -2,16 +2,17 @@ package integration_test
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc/codes"
-	"strconv"
 	"testing"
 
 	tmcli "github.com/cometbft/cometbft/libs/cli"
+	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/grpc/status"
 
 	"github.com/skip-mev/feemarket/testutils/networksuite"
+	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // QueryTestSuite is a test suite for query tests
@@ -24,55 +25,79 @@ func TestNetworkTestSuite(t *testing.T) {
 	suite.Run(t, new(NetworkTestSuite))
 }
 
-func (suite *NetworkTestSuite) TestShowGenesisAccount() {
-	ctx := suite.Network.Validators[0].ClientCtx
+func (s *NetworkTestSuite) TestGetParams() {
+	s.T().Parallel()
+
+	ctx := s.Network.Validators[0].ClientCtx
 
 	common := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 	for _, tc := range []struct {
-		desc       string
-		idLaunchID string
-		idAddress  string
+		name string
 
 		args []string
 		err  error
-		obj  types.GenesisAccount
+		obj  types.Params
 	}{
 		{
-			desc:       "should show an existing genesis account",
-			idLaunchID: strconv.Itoa(int(accs[0].LaunchID)),
-			idAddress:  accs[0].Address,
-
+			name: "should return default params",
 			args: common,
-			obj:  accs[0],
-		},
-		{
-			desc:       "should send error for a non existing genesis account",
-			idLaunchID: strconv.Itoa(100000),
-			idAddress:  strconv.Itoa(100000),
-
-			args: common,
-			err:  status.Error(codes.NotFound, "not found"),
+			obj:  types.DefaultParams(),
 		},
 	} {
-		suite.T().Run(tc.desc, func(t *testing.T) {
-			args := []string{
-				tc.idLaunchID,
-				tc.idAddress,
-			}
-			args = append(args, tc.args...)
-			out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdShowGenesisAccount(), args)
+		s.T().Run(tc.name, func(t *testing.T) {
+			tc := tc
+			out, err := clitestutil.ExecTestCLICmd(ctx, cli.GetParamsCmd(), tc.args)
 			if tc.err != nil {
 				stat, ok := status.FromError(tc.err)
 				require.True(t, ok)
 				require.ErrorIs(t, stat.Err(), tc.err)
 			} else {
 				require.NoError(t, err)
-				var resp types.QueryGetGenesisAccountResponse
-				require.NoError(t, suite.Network.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
-				require.NotNil(t, resp.GenesisAccount)
-				require.Equal(t, tc.obj, resp.GenesisAccount)
+				var resp types.ParamsResponse
+				require.NoError(t, s.Network.Config.Codec.UnmarshalJSON(out.Bytes(), &resp.Params))
+				require.NotNil(t, resp.Params)
+				require.Equal(t, tc.obj, resp.Params)
+			}
+		})
+	}
+}
+
+func (s *NetworkTestSuite) TestGetState() {
+	s.T().Parallel()
+
+	ctx := s.Network.Validators[0].ClientCtx
+
+	common := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	for _, tc := range []struct {
+		name string
+
+		args []string
+		err  error
+		obj  types.State
+	}{
+		{
+			name: "should return default state",
+			args: common,
+			obj:  types.DefaultState(),
+		},
+	} {
+		s.T().Run(tc.name, func(t *testing.T) {
+			tc := tc
+			out, err := clitestutil.ExecTestCLICmd(ctx, cli.GetStateCmd(), tc.args)
+			if tc.err != nil {
+				stat, ok := status.FromError(tc.err)
+				require.True(t, ok)
+				require.ErrorIs(t, stat.Err(), tc.err)
+			} else {
+				require.NoError(t, err)
+				var resp types.StateResponse
+				require.NoError(t, s.Network.Config.Codec.UnmarshalJSON(out.Bytes(), &resp.State))
+				require.NotNil(t, resp.State)
+				require.Equal(t, tc.obj, resp.State)
 			}
 		})
 	}

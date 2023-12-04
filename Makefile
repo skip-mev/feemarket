@@ -126,10 +126,12 @@ test-e2e: $(TEST_E2E_DEPS)
 	@echo "Running e2e tests..."
 	@go test ./tests/e2e/e2e_test.go -timeout 30m -p 1 -race -v -tags='$(TEST_E2E_TAGS)'
 
-test:
+test-unit:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
 
-## test-cover: Run the unit tests and create a coverage html report
+test-integration:
+	@go test -v -race ./tests/integration
+
 test-cover:
 	@echo Running unit tests and creating coverage report...
 	@go test -mod=readonly -v -timeout 30m -coverprofile=$(COVER_FILE) -covermode=atomic $(shell go list ./... | grep -v tests/ | grep -v api/ | grep -v testutils/)
@@ -138,8 +140,9 @@ test-cover:
 	@go tool cover -html=$(COVER_FILE) -o $(COVER_HTML_FILE)
 	@rm $(COVER_FILE)
 
+test-all: test-unit test-integration test-e2e
 
-.PHONY: test test-e2e
+.PHONY: test-unit test-e2e test-integration test-cover test-all
 
 ###############################################################################
 ###                                Protobuf                                 ###
