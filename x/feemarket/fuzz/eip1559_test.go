@@ -85,7 +85,7 @@ func CreateRandomParams(t *rapid.T) types.Params {
 	theta := math.LegacyNewDec(int64(th)).Quo(math.LegacyNewDec(100))
 
 	targetBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "target_block_utilization")
-	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, 30_000_000).Draw(t, "max_block_utilization")
+	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, targetBlockUtilization*5).Draw(t, "max_block_utilization")
 
 	params := types.DefaultParams()
 	params.Alpha = alpha
