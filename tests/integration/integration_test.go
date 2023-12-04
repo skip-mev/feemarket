@@ -4,14 +4,13 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/feemarket/testutils"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	appparams "github.com/skip-mev/feemarket/tests/app/params"
+	"github.com/skip-mev/feemarket/testutils/encoding"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type IntegrationTestSuite struct {
@@ -19,7 +18,7 @@ type IntegrationTestSuite struct {
 
 	testKeepers    testkeeper.TestKeepers
 	testMsgServers testkeeper.TestMsgServers
-	encCfg         testutils.EncodingConfig
+	encCfg         appparams.EncodingConfig
 	ctx            sdk.Context
 }
 
@@ -28,7 +27,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	s.encCfg = testutils.CreateTestEncodingConfig()
+	s.encCfg = encoding.MakeTestEncodingConfig()
 
 	s.ctx, s.testKeepers, s.testMsgServers = testkeeper.NewTestSetup(s.T())
 }

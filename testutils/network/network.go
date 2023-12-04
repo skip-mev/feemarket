@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/skip-mev/feemarket/testutils/encoding"
+
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -20,7 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/skip-mev/feemarket/tests/app"
-	"github.com/skip-mev/feemarket/testutils"
 )
 
 type (
@@ -41,14 +42,14 @@ func New(t *testing.T, cfg network.Config) *network.Network {
 // genesis and single validator. All other parameters are inherited from cosmos-sdk/testutil/network.DefaultConfig
 func DefaultConfig() network.Config {
 	var (
-		cdc     = testutils.CreateTestEncodingConfig()
+		encCfg  = encoding.MakeTestEncodingConfig()
 		chainID = "chain-" + tmrand.NewRand().Str(6)
 	)
 	return network.Config{
-		Codec:             cdc.Codec,
-		TxConfig:          cdc.TxConfig,
-		LegacyAmino:       cdc.Amino,
-		InterfaceRegistry: cdc.InterfaceRegistry,
+		Codec:             encCfg.Codec,
+		TxConfig:          encCfg.TxConfig,
+		LegacyAmino:       encCfg.Amino,
+		InterfaceRegistry: encCfg.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
 			return app.New(
@@ -62,7 +63,7 @@ func DefaultConfig() network.Config {
 				baseapp.SetChainID(chainID),
 			)
 		},
-		GenesisState:    app.ModuleBasics.DefaultGenesis(cdc.Codec),
+		GenesisState:    app.ModuleBasics.DefaultGenesis(encCfg.Codec),
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         chainID,
 		NumValidators:   1,
