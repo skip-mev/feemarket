@@ -44,7 +44,7 @@ func (s *KeeperTestSuite) SetupTest() {
 
 	s.authorityAccount = []byte("authority")
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
-	s.accountKeeper.On("GetModuleAddress", "feemarket-fee-collector").Return(sdk.AccAddress("feemarket-fee-collector"))
+	// s.accountKeeper.On("GetModuleAddress", "feemarket-fee-collector").Return(sdk.AccAddress("feemarket-fee-collector"))
 
 	s.feemarketKeeper = keeper.NewKeeper(
 		s.encCfg.Codec,

@@ -21,6 +21,9 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+
 	"github.com/skip-mev/feemarket/testutils/sample"
 )
 
@@ -160,6 +163,20 @@ func (i initializer) Distribution(
 		bankKeeper,
 		stakingKeeper,
 		authtypes.FeeCollectorName,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+}
+
+func (i initializer) FeeMarket(
+	authKeeper authkeeper.AccountKeeper,
+) *feemarketkeeper.Keeper {
+	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
+	i.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, i.DB)
+
+	return feemarketkeeper.NewKeeper(
+		i.Codec,
+		storeKey,
+		authKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 }

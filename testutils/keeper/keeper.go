@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,25 +30,25 @@ var (
 
 // TestKeepers holds all keepers used during keeper tests for all modules
 type TestKeepers struct {
-	T             testing.TB
-	AccountKeeper authkeeper.AccountKeeper
-	BankKeeper    bankkeeper.Keeper
-	DistrKeeper   distrkeeper.Keeper
-	StakingKeeper *stakingkeeper.Keeper
+	T               testing.TB
+	AccountKeeper   authkeeper.AccountKeeper
+	BankKeeper      bankkeeper.Keeper
+	DistrKeeper     distrkeeper.Keeper
+	StakingKeeper   *stakingkeeper.Keeper
+	FeeMarketKeeper *feemarketkeeper.Keeper
 }
 
 // TestMsgServers holds all message servers used during keeper tests for all modules
 type TestMsgServers struct {
-	T testing.TB
+	T                  testing.TB
+	FeeMarketMsgServer feemarkettypes.MsgServer
 }
 
 // SetupOption represents an option that can be provided to NewTestSetup
 type SetupOption func(*setupOptions)
 
 // setupOptions represents the set of SetupOption
-type setupOptions struct {
-	LaunchHooksMock bool
-}
+type setupOptions struct{}
 
 // NewTestSetup returns initialized instances of all the keepers and message servers of the modules
 func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
@@ -62,6 +65,8 @@ func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeeper
 	bankKeeper := initializer.Bank(paramKeeper, authKeeper)
 	stakingKeeper := initializer.Staking(authKeeper, bankKeeper, paramKeeper)
 	distrKeeper := initializer.Distribution(authKeeper, bankKeeper, stakingKeeper)
+	feeMarketKeeper := initializer.FeeMarket(authKeeper)
+
 	require.NoError(t, initializer.StateStore.LoadLatestVersion())
 
 	// Create a context using a custom timestamp
@@ -70,10 +75,7 @@ func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeeper
 		Height: ExampleHeight,
 	}, false, log.NewNopLogger())
 
-	// Initialize community pool
-	distrKeeper.SetFeePool(ctx, distrtypes.InitialFeePool())
-
-	// Initialize params
+	// initialize params
 	err := distrKeeper.SetParams(ctx, distrtypes.DefaultParams())
 	if err != nil {
 		panic(err)
@@ -82,15 +84,29 @@ func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeeper
 	if err != nil {
 		panic(err)
 	}
+	err = feeMarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
+	if err != nil {
+		panic(err)
+	}
+	err = feeMarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
+	if err != nil {
+		panic(err)
+	}
 
-	// set max shares - only set during app InitGenesis
-	return ctx, TestKeepers{
-			T:             t,
-			AccountKeeper: authKeeper,
-			BankKeeper:    bankKeeper,
-			DistrKeeper:   distrKeeper,
-			StakingKeeper: stakingKeeper,
-		}, TestMsgServers{
-			T: t,
+	// initialize msg servers
+	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(*feeMarketKeeper)
+
+	return ctx,
+		TestKeepers{
+			T:               t,
+			AccountKeeper:   authKeeper,
+			BankKeeper:      bankKeeper,
+			DistrKeeper:     distrKeeper,
+			StakingKeeper:   stakingKeeper,
+			FeeMarketKeeper: feeMarketKeeper,
+		},
+		TestMsgServers{
+			T:                  t,
+			FeeMarketMsgServer: feeMarketMsgSrv,
 		}
 }
