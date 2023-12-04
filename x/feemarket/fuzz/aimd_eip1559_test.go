@@ -136,8 +136,8 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	delta := math.LegacyNewDec(int64(d)).Quo(math.LegacyNewDec(1000))
 
 	// Randomly generate the block utilization.
-	maxBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "max_block_utilization")
-	targetBlockUtilization := rapid.Uint64Range(maxBlockUtilization, 30_000_000).Draw(t, "target_block_utilization")
+	targetBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "target_block_utilization")
+	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, 30_000_000).Draw(t, "max_block_utilization")
 
 	params := types.DefaultAIMDParams()
 	params.Alpha = alpha
