@@ -99,7 +99,17 @@ func TestAIMDBaseFee(t *testing.T) {
 			case blockUtilization < params.TargetBlockUtilization:
 				require.True(t, state.BaseFee.LTE(prevBaseFee))
 			default:
-				require.Equal(t, state.BaseFee, prevBaseFee)
+
+				// Account for the delta adjustment.
+				net := state.GetNetUtilization(params)
+				switch {
+				case net.GT(math.ZeroInt()):
+					require.True(t, state.BaseFee.GTE(prevBaseFee))
+				case net.LT(math.ZeroInt()):
+					require.True(t, state.BaseFee.LTE(prevBaseFee))
+				default:
+					require.True(t, state.BaseFee.Equal(prevBaseFee))
+				}
 			}
 
 			// Update the current height.
