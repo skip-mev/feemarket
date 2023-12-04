@@ -234,6 +234,160 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		expectedBaseFee := params.MinBaseFee
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
+
+	t.Run("empty blocks with aimd eip1559 with a delta", func(t *testing.T) {
+		// Instantiate the params with a delta.
+		params := types.DefaultAIMDParams()
+
+		paramsWithDelta := types.DefaultAIMDParams()
+		delta := math.LegacyNewDec(10)
+		paramsWithDelta.Delta = delta
+
+		// Empty blocks
+		state := types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		lr := state.UpdateLearningRate(params)
+		bf := state.UpdateBaseFee(params)
+
+		state = types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
+
+		// Ensure that the learning rate is the same.
+		require.Equal(t, lr, lrWithDelta)
+
+		// Ensure that the base fee is less with the delta.
+		require.True(t, bfWithDelta.LT(bf))
+	})
+
+	t.Run("full blocks with aimd eip1559 with a delta", func(t *testing.T) {
+		// Instantiate the params with a delta.
+		params := types.DefaultAIMDParams()
+
+		paramsWithDelta := types.DefaultAIMDParams()
+		delta := math.LegacyNewDec(10)
+		paramsWithDelta.Delta = delta
+
+		// Empty blocks
+		state := types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = params.MaxBlockUtilization
+		}
+
+		lr := state.UpdateLearningRate(params)
+		bf := state.UpdateBaseFee(params)
+
+		state = types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = params.MaxBlockUtilization
+		}
+
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
+
+		// Ensure that the learning rate is the same.
+		require.Equal(t, lr, lrWithDelta)
+
+		// Ensure that the base fee is greater with the delta.
+		require.True(t, bfWithDelta.GT(bf))
+	})
+
+	t.Run("target blocks with aimd eip1559 with a delta", func(t *testing.T) {
+		// Instantiate the params with a delta.
+		params := types.DefaultAIMDParams()
+
+		paramsWithDelta := types.DefaultAIMDParams()
+		delta := math.LegacyNewDec(10)
+		paramsWithDelta.Delta = delta
+
+		// Empty blocks
+		state := types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = params.TargetBlockUtilization
+		}
+
+		lr := state.UpdateLearningRate(params)
+		bf := state.UpdateBaseFee(params)
+
+		state = types.DefaultAIMDState()
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		for i := 0; i < len(state.Window); i++ {
+			state.Window[i] = params.TargetBlockUtilization
+		}
+
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
+
+		// Ensure that the learning rate is the same.
+		require.Equal(t, lr, lrWithDelta)
+
+		// Ensure that the base fee's are equal.
+		require.Equal(t, bf, bfWithDelta)
+	})
+
+	t.Run("half target block size with aimd eip1559 with a delta", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		state.Window = make([]uint64, 1)
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		prevBF := state.BaseFee
+
+		// Instantiate the params with a delta.
+		params := types.DefaultAIMDParams()
+		params.Window = 1
+		params.Delta = math.LegacyNewDec(10)
+
+		// 1/4th of the window is full.
+		state.Window[0] = params.TargetBlockUtilization / 2
+
+		prevLR := state.LearningRate
+		lr := state.UpdateLearningRate(params)
+		bf := state.UpdateBaseFee(params)
+
+		expectedUtilization := math.LegacyMustNewDecFromStr("-0.5")
+		expectedLR := prevLR.Add(params.Alpha)
+		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
+
+		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization) / 2)
+		deltaDiff := expectedNetUtilization.Mul(params.Delta)
+		expectedFee := (math.LegacyNewDecFromInt(prevBF).Mul(expectedLRAdjustment)).Add(deltaDiff).TruncateInt()
+
+		require.Equal(t, expectedLR, lr)
+		require.Equal(t, expectedFee, bf)
+	})
+
+	t.Run("3/4 max block size with aimd eip1559 with a delta", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		state.Window = make([]uint64, 1)
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		prevBF := state.BaseFee
+
+		// Instantiate the params with a delta.
+		params := types.DefaultAIMDParams()
+		params.Window = 1
+		params.Delta = math.LegacyNewDec(10)
+
+		// 1/4th of the window is full.
+		state.Window[0] = params.MaxBlockUtilization / 4 * 3
+
+		prevLR := state.LearningRate
+		lr := state.UpdateLearningRate(params)
+		bf := state.UpdateBaseFee(params)
+
+		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
+		expectedLR := prevLR.Add(params.Alpha)
+		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
+
+		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4)
+		deltaDiff := expectedNetUtilization.Mul(params.Delta)
+		expectedFee := (math.LegacyNewDecFromInt(prevBF).Mul(expectedLRAdjustment)).Add(deltaDiff).TruncateInt()
+
+		require.Equal(t, expectedLR, lr)
+		require.Equal(t, expectedFee, bf)
+	})
 }
 
 func TestState_UpdateLearningRate(t *testing.T) {
