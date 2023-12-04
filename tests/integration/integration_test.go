@@ -17,11 +17,10 @@ import (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	testKeepers      testkeeper.TestKeepers
-	testMsgServers   testkeeper.TestMsgServers
-	encCfg           testutils.EncodingConfig
-	ctx              sdk.Context
-	authorityAccount sdk.AccAddress
+	testKeepers    testkeeper.TestKeepers
+	testMsgServers testkeeper.TestMsgServers
+	encCfg         testutils.EncodingConfig
+	ctx            sdk.Context
 }
 
 func TestIntegrationTestSuite(t *testing.T) {

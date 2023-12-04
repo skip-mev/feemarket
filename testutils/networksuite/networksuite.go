@@ -41,6 +41,7 @@ func (nts *NetworkTestSuite) SetupSuite() {
 	nts.Network = network.New(nts.T(), cfg)
 }
 
-func populateFeeMarket(r *rand.Rand, feeMarketState feemarkettypes.GenesisState) feemarkettypes.GenesisState {
+func populateFeeMarket(_ *rand.Rand, feeMarketState feemarkettypes.GenesisState) feemarkettypes.GenesisState {
+	// TODO intercept and populate state randomly if desired
 	return feeMarketState
 }
