@@ -5,9 +5,6 @@ import (
 	"testing"
 	"time"
 
-	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,9 +12,13 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
+
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 var (
@@ -36,6 +37,7 @@ type TestKeepers struct {
 	DistrKeeper     distrkeeper.Keeper
 	StakingKeeper   *stakingkeeper.Keeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
+	FeeGrantKeeper  feegrantkeeper.Keeper
 }
 
 // TestMsgServers holds all message servers used during keeper tests for all modules
@@ -66,6 +68,7 @@ func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeeper
 	stakingKeeper := initializer.Staking(authKeeper, bankKeeper, paramKeeper)
 	distrKeeper := initializer.Distribution(authKeeper, bankKeeper, stakingKeeper)
 	feeMarketKeeper := initializer.FeeMarket(authKeeper)
+	feeGrantKeeper := initializer.FeeGrant(authKeeper)
 
 	require.NoError(t, initializer.StateStore.LoadLatestVersion())
 
@@ -104,6 +107,7 @@ func NewTestSetup(t testing.TB, options ...SetupOption) (sdk.Context, TestKeeper
 			DistrKeeper:     distrKeeper,
 			StakingKeeper:   stakingKeeper,
 			FeeMarketKeeper: feeMarketKeeper,
+			FeeGrantKeeper:  feeGrantKeeper,
 		},
 		TestMsgServers{
 			T:                  t,

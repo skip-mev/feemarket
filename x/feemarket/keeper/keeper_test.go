@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -86,5 +88,43 @@ func (s *KeeperTestSuite) TestState() {
 		s.Require().NoError(err)
 
 		s.Require().Equal(state, gotState)
+	})
+}
+
+func (s *KeeperTestSuite) TestParams() {
+	s.Run("set and get default params", func() {
+		params := types.DefaultParams()
+
+		err := s.feemarketKeeper.SetParams(s.ctx, params)
+		s.Require().NoError(err)
+
+		gotParams, err := s.feemarketKeeper.GetParams(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().EqualValues(params, gotParams)
+	})
+
+	s.Run("set and get custom params", func() {
+		params := types.Params{
+			Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
+			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
+			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
+			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
+			MinBaseFee:             math.NewInt(10),
+			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
+			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
+			TargetBlockUtilization: 5,
+			MaxBlockUtilization:    10,
+			Window:                 1,
+			Enabled:                true,
+		}
+
+		err := s.feemarketKeeper.SetParams(s.ctx, params)
+		s.Require().NoError(err)
+
+		gotParams, err := s.feemarketKeeper.GetParams(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().EqualValues(params, gotParams)
 	})
 }

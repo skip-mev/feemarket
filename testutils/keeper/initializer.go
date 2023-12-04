@@ -12,6 +12,8 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/feegrant"
+	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
@@ -21,18 +23,19 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	"github.com/skip-mev/feemarket/testutils/sample"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
-
-	"github.com/skip-mev/feemarket/testutils/sample"
 )
 
 var moduleAccountPerms = map[string][]string{
-	authtypes.FeeCollectorName:     nil,
-	distrtypes.ModuleName:          nil,
-	minttypes.ModuleName:           {authtypes.Minter},
-	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+	authtypes.FeeCollectorName:      nil,
+	distrtypes.ModuleName:           nil,
+	minttypes.ModuleName:            {authtypes.Minter},
+	stakingtypes.BondedPoolName:     {authtypes.Burner, authtypes.Staking},
+	stakingtypes.NotBondedPoolName:  {authtypes.Burner, authtypes.Staking},
+	feemarkettypes.ModuleName:       nil,
+	feemarkettypes.FeeCollectorName: {authtypes.Burner},
 }
 
 // initializer allows to initialize each module keeper
@@ -62,7 +65,7 @@ func ModuleAccountAddrs(maccPerms map[string][]string) map[string]bool {
 	return modAccAddrs
 }
 
-func (i initializer) Param() paramskeeper.Keeper {
+func (i *initializer) Param() paramskeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(paramstypes.StoreKey)
 	tkeys := sdk.NewTransientStoreKey(paramstypes.TStoreKey)
 
@@ -77,7 +80,7 @@ func (i initializer) Param() paramskeeper.Keeper {
 	)
 }
 
-func (i initializer) Auth(paramKeeper paramskeeper.Keeper) authkeeper.AccountKeeper {
+func (i *initializer) Auth(paramKeeper paramskeeper.Keeper) authkeeper.AccountKeeper {
 	storeKey := sdk.NewKVStoreKey(authtypes.StoreKey)
 	i.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, i.DB)
 	paramKeeper.Subspace(authtypes.ModuleName)
@@ -92,7 +95,7 @@ func (i initializer) Auth(paramKeeper paramskeeper.Keeper) authkeeper.AccountKee
 	)
 }
 
-func (i initializer) Bank(paramKeeper paramskeeper.Keeper, authKeeper authkeeper.AccountKeeper) bankkeeper.Keeper {
+func (i *initializer) Bank(paramKeeper paramskeeper.Keeper, authKeeper authkeeper.AccountKeeper) bankkeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(banktypes.StoreKey)
 	i.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, i.DB)
 	paramKeeper.Subspace(banktypes.ModuleName)
@@ -113,7 +116,7 @@ type ProtocolVersionSetter struct{}
 
 func (vs ProtocolVersionSetter) SetProtocolVersion(uint64) {}
 
-func (i initializer) Upgrade() *upgradekeeper.Keeper {
+func (i *initializer) Upgrade() *upgradekeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(upgradetypes.StoreKey)
 	i.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, i.DB)
 
@@ -130,7 +133,7 @@ func (i initializer) Upgrade() *upgradekeeper.Keeper {
 	)
 }
 
-func (i initializer) Staking(
+func (i *initializer) Staking(
 	authKeeper authkeeper.AccountKeeper,
 	bankKeeper bankkeeper.Keeper,
 	paramKeeper paramskeeper.Keeper,
@@ -148,7 +151,7 @@ func (i initializer) Staking(
 	)
 }
 
-func (i initializer) Distribution(
+func (i *initializer) Distribution(
 	authKeeper authkeeper.AccountKeeper,
 	bankKeeper bankkeeper.Keeper,
 	stakingKeeper *stakingkeeper.Keeper,
@@ -167,7 +170,7 @@ func (i initializer) Distribution(
 	)
 }
 
-func (i initializer) FeeMarket(
+func (i *initializer) FeeMarket(
 	authKeeper authkeeper.AccountKeeper,
 ) *feemarketkeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
@@ -178,5 +181,18 @@ func (i initializer) FeeMarket(
 		storeKey,
 		authKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+}
+
+func (i *initializer) FeeGrant(
+	authKeeper authkeeper.AccountKeeper,
+) feegrantkeeper.Keeper {
+	storeKey := sdk.NewKVStoreKey(feegrant.StoreKey)
+	i.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, i.DB)
+
+	return feegrantkeeper.NewKeeper(
+		i.Codec,
+		storeKey,
+		authKeeper,
 	)
 }
