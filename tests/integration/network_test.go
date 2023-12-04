@@ -102,3 +102,45 @@ func (s *NetworkTestSuite) TestGetState() {
 		})
 	}
 }
+
+func (s *NetworkTestSuite) TestSpamTx() {
+	s.T().Parallel()
+
+	ctx := s.Network.Validators[0].ClientCtx
+
+	common := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	for _, tc := range []struct {
+		name string
+
+		args []string
+		err  error
+		obj  types.State
+	}{
+		{
+			name: "should return default state",
+			args: common,
+			obj:  types.DefaultState(),
+		},
+	} {
+
+		// TODO SPAM TX
+
+		s.T().Run(tc.name, func(t *testing.T) {
+			tc := tc
+			out, err := clitestutil.ExecTestCLICmd(ctx, cli.GetStateCmd(), tc.args)
+			if tc.err != nil {
+				stat, ok := status.FromError(tc.err)
+				require.True(t, ok)
+				require.ErrorIs(t, stat.Err(), tc.err)
+			} else {
+				require.NoError(t, err)
+				var resp types.StateResponse
+				require.NoError(t, s.Network.Config.Codec.UnmarshalJSON(out.Bytes(), &resp.State))
+				require.NotNil(t, resp.State)
+				require.Equal(t, tc.obj, resp.State)
+			}
+		})
+	}
+}
