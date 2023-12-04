@@ -66,7 +66,7 @@ func TestAIMDBaseFee(t *testing.T) {
 		params := types.DefaultAIMDParams()
 
 		// Randomly generate the block utilization.
-		numBlocks := rapid.Uint64Range(0, 20).Draw(t, "num_blocks")
+		numBlocks := rapid.Uint64Range(0, 1000).Draw(t, "num_blocks")
 		gasGen := rapid.Uint64Range(0, params.MaxBlockUtilization)
 
 		// Update the fee market.
