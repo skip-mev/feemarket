@@ -47,7 +47,7 @@ func TestDeductCoins(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t)
+			s := antesuite.SetupTestSuite(t, false)
 			acc := s.CreateTestAccounts(1)[0]
 			if !tc.invalidCoin {
 				s.BankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
@@ -86,7 +86,7 @@ func TestSendTip(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t)
+			s := antesuite.SetupTestSuite(t, false)
 			accs := s.CreateTestAccounts(2)
 			if !tc.invalidCoin {
 				s.BankKeeper.On("SendCoins", s.Ctx, mock.Anything, mock.Anything, tc.coins).Return(nil).Once()
@@ -184,7 +184,7 @@ func TestPostHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t)
+			s := antesuite.SetupTestSuite(t, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
