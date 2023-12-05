@@ -171,6 +171,20 @@ func TestParams(t *testing.T) {
 			expectedErr: true,
 		},
 		{
+			name: "max to target block size ratio is too large",
+			p: types.Params{
+				Window:                 1,
+				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
+				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
+				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
+				Delta:                  math.LegacyMustNewDecFromStr("0.1"),
+				TargetBlockUtilization: 2,
+				MaxBlockUtilization:    200,
+				FeeDenom:               types.DefaultFeeDenom,
+			},
+			expectedErr: true,
+		},
+		{
 			name: "min base fee is nil",
 			p: types.Params{
 				Window:                 1,
