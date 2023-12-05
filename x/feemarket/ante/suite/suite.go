@@ -36,8 +36,8 @@ type TestSuite struct {
 	ClientCtx   client.Context
 	TxBuilder   client.TxBuilder
 
-	AccountKeeper    authkeeper.AccountKeeper
-	FeemarketKeeper  *keeper.Keeper
+	AccountKeeper    feemarketante.AccountKeeper
+	FeeMarketKeeper  feemarketante.FeeMarketKeeper
 	BankKeeper       *mocks.BankKeeper
 	FeeGrantKeeper   *mocks.FeeGrantKeeper
 	EncCfg           appparams.EncodingConfig
@@ -96,17 +96,17 @@ func SetupTestSuite(t *testing.T) *TestSuite {
 		s.EncCfg.Codec, authKey, authtypes.ProtoBaseAccount, maccPerms, sdk.Bech32MainPrefix, s.AuthorityAccount.String(),
 	)
 
-	s.FeemarketKeeper = keeper.NewKeeper(
+	s.FeeMarketKeeper = keeper.NewKeeper(
 		s.EncCfg.Codec,
 		s.Key,
 		s.AccountKeeper,
 		s.AuthorityAccount.String(),
 	)
 
-	err = s.FeemarketKeeper.SetParams(s.Ctx, types.DefaultParams())
+	err = s.FeeMarketKeeper.SetParams(s.Ctx, types.DefaultParams())
 	require.NoError(t, err)
 
-	err = s.FeemarketKeeper.SetState(s.Ctx, types.DefaultState())
+	err = s.FeeMarketKeeper.SetState(s.Ctx, types.DefaultState())
 	require.NoError(t, err)
 
 	s.BankKeeper = mocks.NewBankKeeper(t)
@@ -119,7 +119,7 @@ func SetupTestSuite(t *testing.T) *TestSuite {
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
-			s.FeemarketKeeper,
+			s.FeeMarketKeeper,
 		),
 		authante.NewSigGasConsumeDecorator(s.AccountKeeper, authante.DefaultSigVerificationGasConsumer),
 	}
@@ -132,7 +132,7 @@ func SetupTestSuite(t *testing.T) *TestSuite {
 			s.AccountKeeper,
 			s.BankKeeper,
 			s.FeeGrantKeeper,
-			s.FeemarketKeeper,
+			s.FeeMarketKeeper,
 		),
 	}
 
