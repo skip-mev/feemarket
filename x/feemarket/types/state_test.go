@@ -401,9 +401,12 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		params.MaxBlockUtilization = 9_999_999_999_999_999_999
 
 		for {
-			state.Update(params.MaxBlockUtilization, params)
-			state.UpdateLearningRate(params)
-			baseFee := state.UpdateBaseFee(params)
+			var baseFee math.Int
+			require.NotPanics(t, func() {
+				state.Update(params.MaxBlockUtilization, params)
+				state.UpdateLearningRate(params)
+				baseFee = state.UpdateBaseFee(params)
+			})
 
 			// An overflow should have occurred.
 			if baseFee.Equal(params.MinBaseFee) {
