@@ -32,11 +32,11 @@ type TestSuite struct {
 	ClientCtx   client.Context
 	TxBuilder   client.TxBuilder
 
-	AccountKeeper   feemarketante.AccountKeeper
-	FeeMarketKeeper feemarketante.FeeMarketKeeper
-	BankKeeper      *mocks.BankKeeper
-	FeeGrantKeeper  *mocks.FeeGrantKeeper
-	EncCfg          appparams.EncodingConfig
+	AccountKeeper      feemarketante.AccountKeeper
+	FeeMarketKeeper    feemarketante.FeeMarketKeeper
+	MockBankKeeper     *mocks.BankKeeper
+	MockFeeGrantKeeper *mocks.FeeGrantKeeper
+	EncCfg             appparams.EncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -72,9 +72,12 @@ func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
+	s.MockBankKeeper = mocks.NewBankKeeper(t)
+	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
 
-	s.BankKeeper = mocks.NewBankKeeper(t)
-	s.FeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
+	if isIntegration {
+
+	}
 
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
@@ -94,8 +97,8 @@ func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
 	postDecorators := []sdk.PostDecorator{
 		feemarketpost.NewFeeMarketDeductDecorator(
 			s.AccountKeeper,
-			s.BankKeeper,
-			s.FeeGrantKeeper,
+			s.MockBankKeeper,
+			s.MockFeeGrantKeeper,
 			s.FeeMarketKeeper,
 		),
 	}

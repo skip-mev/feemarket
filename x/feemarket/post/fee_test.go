@@ -50,10 +50,10 @@ func TestDeductCoins(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, false)
 			acc := s.CreateTestAccounts(1)[0]
 			if !tc.invalidCoin {
-				s.BankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
 			}
 
-			if err := post.DeductCoins(s.BankKeeper, s.Ctx, acc.Account, tc.coins); (err != nil) != tc.wantErr {
+			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -89,10 +89,10 @@ func TestSendTip(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, false)
 			accs := s.CreateTestAccounts(2)
 			if !tc.invalidCoin {
-				s.BankKeeper.On("SendCoins", s.Ctx, mock.Anything, mock.Anything, tc.coins).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoins", s.Ctx, mock.Anything, mock.Anything, tc.coins).Return(nil).Once()
 			}
 
-			if err := post.SendTip(s.BankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
+			if err := post.SendTip(s.MockBankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
 				s.Errorf(err, "SendTip() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -110,9 +110,9 @@ func TestPostHandle(t *testing.T) {
 	testCases := []antesuite.TestCase{
 		{
 			Name: "signer has no funds",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -145,9 +145,9 @@ func TestPostHandle(t *testing.T) {
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -163,10 +163,10 @@ func TestPostHandle(t *testing.T) {
 		},
 		{
 			Name: "signer has enough funds, should pass with tip",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
-				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
