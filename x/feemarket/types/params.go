@@ -6,10 +6,10 @@ import (
 	"cosmossdk.io/math"
 )
 
-// MaxRatio is the maximum ratio of the max block size to the target block size. This
+// MaxBlockUtilizationRatio is the maximum ratio of the max block size to the target block size. This
 // can be trivially understood to be the maximum base fee increase that can occur in between
 // blocks. This is a constant that is used to prevent the base fee from increasing too quickly.
-const MaxRatio = 10
+const MaxBlockUtilizationRatio = 10
 
 // NewParams instantiates a new EIP-1559 Params object. This params object is utilized
 // to implement both the base EIP-1559 fee and AIMD EIP-1559 fee market implementations.
@@ -73,8 +73,8 @@ func (p *Params) ValidateBasic() error {
 		return fmt.Errorf("target block size cannot be greater than max block size")
 	}
 
-	if p.MaxBlockUtilization/p.TargetBlockUtilization > MaxRatio {
-		return fmt.Errorf("max block size cannot be greater than target block size times %d", MaxRatio)
+	if p.MaxBlockUtilization/p.TargetBlockUtilization > MaxBlockUtilizationRatio {
+		return fmt.Errorf("max block size cannot be greater than target block size times %d", MaxBlockUtilizationRatio)
 	}
 
 	if p.MinBaseFee.IsNil() || !p.MinBaseFee.GTE(math.ZeroInt()) {
