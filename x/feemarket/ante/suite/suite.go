@@ -3,17 +3,13 @@ package suite
 import (
 	"testing"
 
-	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-
-	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
-	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
@@ -21,8 +17,10 @@ import (
 
 	appparams "github.com/skip-mev/feemarket/tests/app/params"
 	"github.com/skip-mev/feemarket/testutils/encoding"
+	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
+	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 )
 
 type TestSuite struct {
