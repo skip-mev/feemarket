@@ -388,6 +388,35 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedFee, bf)
 	})
+
+	t.Run("recovers from overflow with large max block utilization ratio", func(t *testing.T) {
+		state := types.DefaultAIMDState()
+		state.Window = make([]uint64, 50)
+		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+
+		params := types.DefaultAIMDParams()
+		params.Window = 50
+		// This should overflow the base fee after a few iterations.
+		params.TargetBlockUtilization = 1
+		params.MaxBlockUtilization = 9_999_999_999_999_999_999
+
+		for {
+			var baseFee math.Int
+			require.NotPanics(t, func() {
+				state.Update(params.MaxBlockUtilization, params)
+				state.UpdateLearningRate(params)
+				baseFee = state.UpdateBaseFee(params)
+			})
+
+			// An overflow should have occurred.
+			if baseFee.Equal(params.MinBaseFee) {
+				return
+			}
+
+			// Update the height and try again.
+			state.IncrementHeight()
+		}
+	})
 }
 
 func TestState_UpdateLearningRate(t *testing.T) {
