@@ -180,6 +180,25 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:  true,
 			ExpErr:   nil,
 		},
+		{
+			Name: "signer has enough funds, should pass with tip",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
 	}
 
 	for _, tc := range testCases {
