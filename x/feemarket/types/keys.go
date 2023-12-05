@@ -24,4 +24,5 @@ var (
 
 	AttributeKeyTip      = "tip"
 	AttributeKeyTipPayer = "tip_payer"
+	AttributeKeyTipPayee = "tip_payee"
 )

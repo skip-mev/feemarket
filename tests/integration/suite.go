@@ -109,8 +109,7 @@ func (s *TestSuite) SetupSubTest() {
 
 	state := s.QueryState()
 
-	s.T().Log("new test case at block height", height+1)
-	s.T().Log("state:", state.String())
+	s.T().Log("state at block height", height+1, ":", state.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
@@ -171,5 +170,6 @@ func (s *TestSuite) TestSendTxUpdating() {
 			gas,
 		)
 		s.Require().NoError(err, txResp)
+		s.T().Log(txResp)
 	})
 }
