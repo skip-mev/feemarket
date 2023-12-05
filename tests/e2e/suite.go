@@ -1,7 +1,8 @@
-package integration
+package e2e
 
 import (
 	"context"
+	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -17,7 +18,15 @@ const (
 	initBalance = 10000000000000
 )
 
-// TestSuite runs the feemarket integration test-suite against a given interchaintest specification
+var r *rand.Rand
+
+// initialize random generator with fixed seed for reproducibility
+func init() {
+	s := rand.NewSource(1)
+	r = rand.New(s)
+}
+
+// TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
 	suite.Suite
 	// spec
@@ -40,7 +49,7 @@ type TestSuite struct {
 	cdc codec.Codec
 }
 
-func NewIntegrationTestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
+func NewE2ETestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
 	return &TestSuite{
 		spec:  spec,
 		denom: "stake",

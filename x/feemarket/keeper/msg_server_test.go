@@ -23,7 +23,7 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		params, err := s.feemarketKeeper.GetParams(s.ctx)
+		params, err := s.feeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(req.Params, params)
 	})

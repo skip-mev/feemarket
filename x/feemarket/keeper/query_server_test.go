@@ -15,7 +15,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 
 		s.Require().Equal(types.DefaultParams(), resp.Params)
 
-		params, err := s.feemarketKeeper.GetParams(s.ctx)
+		params, err := s.feeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Params, params)
@@ -35,7 +35,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 			Window:                 1,
 			Enabled:                true,
 		}
-		err := s.feemarketKeeper.SetParams(s.ctx, params)
+		err := s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
 		req := &types.ParamsRequest{}
@@ -45,7 +45,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 
 		s.Require().Equal(params, resp.Params)
 
-		params, err = s.feemarketKeeper.GetParams(s.ctx)
+		params, err = s.feeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Params, params)
@@ -61,7 +61,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 		s.Require().Equal(types.DefaultState(), resp.State)
 
-		state, err := s.feemarketKeeper.GetState(s.ctx)
+		state, err := s.feeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.State, state)
@@ -74,7 +74,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 			Window:       []uint64{1},
 			Index:        0,
 		}
-		err := s.feemarketKeeper.SetState(s.ctx, state)
+		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
 
 		req := &types.StateRequest{}
@@ -84,7 +84,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 		s.Require().Equal(state, resp.State)
 
-		state, err = s.feemarketKeeper.GetState(s.ctx)
+		state, err = s.feeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.State, state)
@@ -98,7 +98,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feemarketKeeper.GetMinGasPrices(s.ctx)
+		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Fees, fees)
@@ -108,13 +108,13 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		state := types.State{
 			BaseFee: math.OneInt(),
 		}
-		err := s.feemarketKeeper.SetState(s.ctx, state)
+		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
 
 		params := types.Params{
 			FeeDenom: "test",
 		}
-		err = s.feemarketKeeper.SetParams(s.ctx, params)
+		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
 		req := &types.BaseFeeRequest{}
@@ -122,7 +122,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feemarketKeeper.GetMinGasPrices(s.ctx)
+		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Fees, fees)

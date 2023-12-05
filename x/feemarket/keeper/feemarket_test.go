@@ -13,13 +13,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -30,17 +30,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to decrease by 1/8th.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.875")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -56,14 +56,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to decrease by 1/8th.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -79,14 +79,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to remain the same.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -103,14 +103,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to remain the same.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(state.BaseFee, fee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -126,17 +126,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to increase by 1/8th.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -153,17 +153,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to increase by 1/8th.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -179,14 +179,14 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to remain the same since it is at min base fee.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -204,17 +204,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to decrease by 1/8th * 1/2.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.9375")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -230,17 +230,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to increase by 1/8th * 1/2.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -257,17 +257,17 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to increase by 1/8th * 1/2.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
 		s.Require().Equal(fee, expectedFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
@@ -277,13 +277,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		params := types.DefaultAIMDParams()
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		expectedLR := state.LearningRate.Add(params.Alpha)
 		s.Require().Equal(expectedLR, lr)
@@ -295,16 +295,16 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		params := types.DefaultAIMDParams()
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to decrease by 1/8th and the learning rate to
 		// increase by alpha.
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		expectedLR := state.LearningRate.Add(params.Alpha)
 		s.Require().Equal(expectedLR, lr)
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		factor := math.LegacyOneDec().Add(math.LegacyMustNewDecFromStr("-1.0").Mul(lr))
 		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
@@ -323,16 +323,16 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		expectedLR := state.LearningRate.Add(params.Alpha)
 		s.Require().Equal(expectedLR, lr)
 
 		// We expect the base fee to decrease by 1/8th and the learning rate to
 		// increase by alpha.
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, params.MinBaseFee)
 	})
@@ -349,15 +349,15 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to remain the same and the learning rate to
 		// remain at minimum.
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(params.MinLearningRate, lr)
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(state.BaseFee, fee)
 	})
@@ -376,16 +376,16 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		s.setGenesisState(params, state)
 
-		s.Require().NoError(s.feemarketKeeper.UpdateFeeMarket(s.ctx))
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
 
 		// We expect the base fee to decrease by 1/8th and the learning rate to
 		// decrease by lr * beta.
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		expectedLR := state.LearningRate.Mul(params.Beta)
 		s.Require().Equal(expectedLR, lr)
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(state.BaseFee, fee)
 	})
@@ -394,18 +394,18 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 func (s *KeeperTestSuite) TestGetBaseFee() {
 	s.Run("can retrieve base fee with default eip-1559", func() {
 		gs := types.DefaultGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, gs.State.BaseFee)
 	})
 
 	s.Run("can retrieve base fee with aimd eip-1559", func() {
 		gs := types.DefaultAIMDGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		fee, err := s.feemarketKeeper.GetBaseFee(s.ctx)
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(fee, gs.State.BaseFee)
 	})
@@ -414,18 +414,18 @@ func (s *KeeperTestSuite) TestGetBaseFee() {
 func (s *KeeperTestSuite) TestGetLearningRate() {
 	s.Run("can retrieve learning rate with default eip-1559", func() {
 		gs := types.DefaultGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(lr, gs.State.LearningRate)
 	})
 
 	s.Run("can retrieve learning rate with aimd eip-1559", func() {
 		gs := types.DefaultAIMDGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		lr, err := s.feemarketKeeper.GetLearningRate(s.ctx)
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(lr, gs.State.LearningRate)
 	})
@@ -434,22 +434,22 @@ func (s *KeeperTestSuite) TestGetLearningRate() {
 func (s *KeeperTestSuite) TestGetMinGasPrices() {
 	s.Run("can retrieve min gas prices with default eip-1559", func() {
 		gs := types.DefaultGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
 		expected := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee))
 
-		mgp, err := s.feemarketKeeper.GetMinGasPrices(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})
 
 	s.Run("can retrieve min gas prices with aimd eip-1559", func() {
 		gs := types.DefaultAIMDGenesisState()
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
 		expected := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee))
 
-		mgp, err := s.feemarketKeeper.GetMinGasPrices(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})
@@ -458,6 +458,6 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 func (s *KeeperTestSuite) setGenesisState(params types.Params, state types.State) {
 	gs := types.NewGenesisState(params, state)
 	s.NotPanics(func() {
-		s.feemarketKeeper.InitGenesis(s.ctx, *gs)
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 	})
 }

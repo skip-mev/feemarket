@@ -3,51 +3,15 @@ package testutils
 import (
 	"math/rand"
 
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
-
-type EncodingConfig struct {
-	InterfaceRegistry types.InterfaceRegistry
-	Codec             codec.Codec
-	TxConfig          client.TxConfig
-	Amino             *codec.LegacyAmino
-}
-
-func CreateTestEncodingConfig() EncodingConfig {
-	amino := codec.NewLegacyAmino()
-	interfaceRegistry := types.NewInterfaceRegistry()
-
-	banktypes.RegisterInterfaces(interfaceRegistry)
-	authtypes.RegisterInterfaces(interfaceRegistry)
-	cryptocodec.RegisterInterfaces(interfaceRegistry)
-	feemarkettypes.RegisterInterfaces(interfaceRegistry)
-	stakingtypes.RegisterInterfaces(interfaceRegistry)
-
-	cdc := codec.NewProtoCodec(interfaceRegistry)
-
-	return EncodingConfig{
-		InterfaceRegistry: interfaceRegistry,
-		Codec:             cdc,
-		TxConfig:          tx.NewTxConfig(cdc, tx.DefaultSignModes),
-		Amino:             amino,
-	}
-}
 
 type Account struct {
 	PrivKey cryptotypes.PrivKey
