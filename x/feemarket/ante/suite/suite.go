@@ -1,8 +1,12 @@
 package suite
 
 import (
-	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"testing"
+
+	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+
+	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
+	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -10,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
-	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
@@ -20,7 +23,6 @@ import (
 	"github.com/skip-mev/feemarket/testutils/encoding"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
-	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 )
 
 type TestSuite struct {
@@ -32,8 +34,11 @@ type TestSuite struct {
 	ClientCtx   client.Context
 	TxBuilder   client.TxBuilder
 
-	AccountKeeper      feemarketante.AccountKeeper
-	FeeMarketKeeper    feemarketante.FeeMarketKeeper
+	AccountKeeper   feemarketante.AccountKeeper
+	FeeMarketKeeper feemarketante.FeeMarketKeeper
+	BankKeeper      feemarketante.BankKeeper
+	FeeGrantKeeper  feemarketante.FeeGrantKeeper
+
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
 	EncCfg             appparams.EncodingConfig
@@ -63,7 +68,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
-func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
+func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
 	s.EncCfg = encoding.MakeTestEncodingConfig()
@@ -75,12 +80,21 @@ func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
 
-	if isIntegration {
-
-	}
-
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
+
+	s.SetupHandlers(mock)
+	s.SetT(t)
+	return s
+}
+
+func (s *TestSuite) SetupHandlers(mock bool) {
+	bankKeeper := s.BankKeeper
+	feeGrantKeeper := s.FeeGrantKeeper
+	if mock {
+		bankKeeper = s.MockBankKeeper
+		feeGrantKeeper = s.MockFeeGrantKeeper
+	}
 
 	// create basic antehandler with the feemarket decorator
 	anteDecorators := []sdk.AnteDecorator{
@@ -97,14 +111,13 @@ func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
 	postDecorators := []sdk.PostDecorator{
 		feemarketpost.NewFeeMarketDeductDecorator(
 			s.AccountKeeper,
-			s.MockBankKeeper,
-			s.MockFeeGrantKeeper,
+			bankKeeper,
+			feeGrantKeeper,
 			s.FeeMarketKeeper,
 		),
 	}
 
 	s.PostHandler = sdk.ChainPostDecorators(postDecorators...)
-	return s
 }
 
 // TestCase represents a test case used in test tables.

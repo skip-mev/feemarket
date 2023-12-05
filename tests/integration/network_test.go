@@ -124,7 +124,6 @@ func (s *NetworkTestSuite) TestSpamTx() {
 			obj:  types.DefaultState(),
 		},
 	} {
-
 		// TODO SPAM TX
 
 		s.T().Run(tc.name, func(t *testing.T) {

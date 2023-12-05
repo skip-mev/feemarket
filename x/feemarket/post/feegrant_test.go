@@ -126,7 +126,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 	for name, stc := range cases {
 		tc := stc // to make scopelint happy
 		t.Run(name, func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, false)
+			s := antesuite.SetupTestSuite(t, true)
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
 			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper)
