@@ -1,14 +1,14 @@
 package integration_test
 
 import (
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/skip-mev/chaintestutil/encoding"
 	"testing"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
-	appparams "github.com/skip-mev/feemarket/tests/app/params"
-	"github.com/skip-mev/feemarket/testutils/encoding"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -18,7 +18,7 @@ type IntegrationTestSuite struct {
 
 	testKeepers    testkeeper.TestKeepers
 	testMsgServers testkeeper.TestMsgServers
-	encCfg         appparams.EncodingConfig
+	encCfg         encoding.TestEncodingConfig
 	ctx            sdk.Context
 }
 
@@ -27,7 +27,9 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	s.encCfg = encoding.MakeTestEncodingConfig()
+	s.encCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
+		types.RegisterInterfaces(registry)
+	})
 
 	s.ctx, s.testKeepers, s.testMsgServers = testkeeper.NewTestSetup(s.T())
 }

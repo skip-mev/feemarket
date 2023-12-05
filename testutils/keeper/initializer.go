@@ -3,6 +3,7 @@ package keeper
 import (
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -48,9 +49,13 @@ type initializer struct {
 
 func newInitializer() initializer {
 	db := tmdb.NewMemDB()
+	addFeeMarket := func(ir codectypes.InterfaceRegistry) {
+		feemarkettypes.RegisterInterfaces(ir)
+	}
+
 	return initializer{
 		DB:         db,
-		Codec:      sample.Codec(),
+		Codec:      sample.Codec(addFeeMarket),
 		StateStore: store.NewCommitMultiStore(db),
 	}
 }

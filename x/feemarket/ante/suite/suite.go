@@ -1,6 +1,9 @@
 package suite
 
 import (
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/skip-mev/chaintestutil/encoding"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -15,8 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	appparams "github.com/skip-mev/feemarket/tests/app/params"
-	"github.com/skip-mev/feemarket/testutils/encoding"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
@@ -39,7 +40,7 @@ type TestSuite struct {
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-	EncCfg             appparams.EncodingConfig
+	EncCfg             encoding.TestEncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -69,7 +70,9 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = encoding.MakeTestEncodingConfig()
+	s.EncCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
+		feemarkettypes.RegisterInterfaces(registry)
+	})
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
 	s.Ctx = ctx
 

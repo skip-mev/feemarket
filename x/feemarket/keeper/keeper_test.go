@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/suite"
 
-	appparams "github.com/skip-mev/feemarket/tests/app/params"
-	"github.com/skip-mev/feemarket/testutils/encoding"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
@@ -23,7 +23,7 @@ type KeeperTestSuite struct {
 
 	accountKeeper    *mocks.AccountKeeper
 	feeMarketKeeper  *keeper.Keeper
-	encCfg           appparams.EncodingConfig
+	encCfg           encoding.TestEncodingConfig
 	ctx              sdk.Context
 	key              *storetypes.KVStoreKey
 	authorityAccount sdk.AccAddress
@@ -40,7 +40,9 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (s *KeeperTestSuite) SetupTest() {
-	s.encCfg = encoding.MakeTestEncodingConfig()
+	s.encCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
+		types.RegisterInterfaces(registry)
+	})
 	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
 	ctx, tk, tm := testkeeper.NewTestSetup(s.T())

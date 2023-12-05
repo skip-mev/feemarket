@@ -3,14 +3,14 @@ package network
 
 import (
 	"fmt"
+
 	"testing"
 	"time"
-
-	"github.com/skip-mev/feemarket/testutils/encoding"
 
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -19,9 +19,11 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/require"
 
 	"github.com/skip-mev/feemarket/tests/app"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type (
@@ -42,7 +44,9 @@ func New(t *testing.T, cfg network.Config) *network.Network {
 // genesis and single validator. All other parameters are inherited from cosmos-sdk/testutil/network.DefaultConfig
 func DefaultConfig() network.Config {
 	var (
-		encCfg  = encoding.MakeTestEncodingConfig()
+		encCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
+			feemarkettypes.RegisterInterfaces(registry)
+		})
 		chainID = "chain-" + tmrand.NewRand().Str(6)
 	)
 	return network.Config{
