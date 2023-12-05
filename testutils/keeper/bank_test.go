@@ -5,10 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/skip-mev/chaintestutil/sample"
 	"github.com/stretchr/testify/require"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
-	"github.com/skip-mev/feemarket/testutils/sample"
 )
 
 func TestTestKeepers_MintToAccount(t *testing.T) {

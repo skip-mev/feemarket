@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/chaintestutil/sample"
 	"github.com/skip-mev/feemarket/testutils/network"
-	"github.com/skip-mev/feemarket/testutils/sample"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
