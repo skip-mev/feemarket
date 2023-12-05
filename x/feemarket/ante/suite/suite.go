@@ -1,18 +1,16 @@
 package suite
 
 import (
+	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	"github.com/cosmos/cosmos-sdk/testutil"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
@@ -22,9 +20,7 @@ import (
 	"github.com/skip-mev/feemarket/testutils/encoding"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
-	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type TestSuite struct {
@@ -36,13 +32,11 @@ type TestSuite struct {
 	ClientCtx   client.Context
 	TxBuilder   client.TxBuilder
 
-	AccountKeeper    feemarketante.AccountKeeper
-	FeeMarketKeeper  feemarketante.FeeMarketKeeper
-	BankKeeper       *mocks.BankKeeper
-	FeeGrantKeeper   *mocks.FeeGrantKeeper
-	EncCfg           appparams.EncodingConfig
-	Key              *storetypes.KVStoreKey
-	AuthorityAccount sdk.AccAddress
+	AccountKeeper   feemarketante.AccountKeeper
+	FeeMarketKeeper feemarketante.FeeMarketKeeper
+	BankKeeper      *mocks.BankKeeper
+	FeeGrantKeeper  *mocks.FeeGrantKeeper
+	EncCfg          appparams.EncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -69,45 +63,15 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
-func SetupTestSuite(t *testing.T) *TestSuite {
+func SetupTestSuite(t *testing.T, isIntegration bool) *TestSuite {
 	s := &TestSuite{}
 
 	s.EncCfg = encoding.MakeTestEncodingConfig()
-	s.Key = storetypes.NewKVStoreKey(types.StoreKey)
-	tkey := storetypes.NewTransientStoreKey("transient_test_feemarket")
-	testCtx := testutil.DefaultContextWithDB(t, s.Key, tkey)
-	s.Ctx = testCtx.Ctx.WithIsCheckTx(false).WithBlockHeight(1)
-	cms, db := testCtx.CMS, testCtx.DB
+	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
+	s.Ctx = ctx
 
-	authKey := storetypes.NewKVStoreKey(authtypes.StoreKey)
-	tkey = storetypes.NewTransientStoreKey("transient_test_auth")
-	cms.MountStoreWithDB(authKey, storetypes.StoreTypeIAVL, db)
-	cms.MountStoreWithDB(tkey, storetypes.StoreTypeTransient, db)
-	err := cms.LoadLatestVersion()
-	require.NoError(t, err)
-
-	maccPerms := map[string][]string{
-		types.ModuleName:       nil,
-		types.FeeCollectorName: {"burner"},
-	}
-
-	s.AuthorityAccount = authtypes.NewModuleAddress("gov")
-	s.AccountKeeper = authkeeper.NewAccountKeeper(
-		s.EncCfg.Codec, authKey, authtypes.ProtoBaseAccount, maccPerms, sdk.Bech32MainPrefix, s.AuthorityAccount.String(),
-	)
-
-	s.FeeMarketKeeper = keeper.NewKeeper(
-		s.EncCfg.Codec,
-		s.Key,
-		s.AccountKeeper,
-		s.AuthorityAccount.String(),
-	)
-
-	err = s.FeeMarketKeeper.SetParams(s.Ctx, types.DefaultParams())
-	require.NoError(t, err)
-
-	err = s.FeeMarketKeeper.SetState(s.Ctx, types.DefaultState())
-	require.NoError(t, err)
+	s.AccountKeeper = testKeepers.AccountKeeper
+	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
 
 	s.BankKeeper = mocks.NewBankKeeper(t)
 	s.FeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
