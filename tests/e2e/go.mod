@@ -1,4 +1,6 @@
-module github.com/skip-mev/feemarket/tests/integration
+module github.com/skip-mev/feemarket/tests/e2e
+
+go 1.21.4
 
 replace (
 	cosmossdk.io/api => cosmossdk.io/api v0.3.1
@@ -14,11 +16,9 @@ replace (
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 )
 
-go 1.21.4
-
 require (
 	github.com/cometbft/cometbft v0.37.2
-	github.com/cosmos/cosmos-sdk v0.47.5
+	github.com/cosmos/cosmos-sdk v0.47.6
 	github.com/skip-mev/feemarket v0.0.0-00010101000000-000000000000
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0
 	github.com/stretchr/testify v1.8.4

@@ -1,4 +1,4 @@
-package integration
+package e2e
 
 import (
 	"archive/tar"
@@ -8,13 +8,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/skip-mev/feemarket/testutils/sample"
 
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
@@ -402,7 +403,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	chain *cosmos.CosmosChain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
-	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, RandLowerCaseLetterString(3))
+	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, sample.AlphaString(r, 3))
 	user, err := chain.BuildWallet(ctx, keyName, mnemonic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
@@ -453,6 +454,7 @@ func (s *TestSuite) GetAndFundTestUsers(
 	return users
 }
 
+// ExecTx executes a cli command on a node, waits a block and queries the Tx to verify it was included on chain.
 func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
 	node := chain.FullNodes[0]
 
@@ -468,15 +470,4 @@ func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyNa
 	s.Require().Nil(stderr)
 
 	return string(stdout), nil
-}
-
-// RandLowerCaseLetterString returns a lowercase letter string of given length
-func RandLowerCaseLetterString(length int) string {
-	chars := []byte("abcdefghijklmnopqrstuvwxyz")
-
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
-	}
-	return string(b)
 }

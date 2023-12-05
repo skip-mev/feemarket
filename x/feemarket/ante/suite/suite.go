@@ -18,7 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/feemarket/testutils"
+	appparams "github.com/skip-mev/feemarket/tests/app/params"
+	"github.com/skip-mev/feemarket/testutils/encoding"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
@@ -39,7 +40,7 @@ type TestSuite struct {
 	FeemarketKeeper  *keeper.Keeper
 	BankKeeper       *mocks.BankKeeper
 	FeeGrantKeeper   *mocks.FeeGrantKeeper
-	EncCfg           testutils.EncodingConfig
+	EncCfg           appparams.EncodingConfig
 	Key              *storetypes.KVStoreKey
 	AuthorityAccount sdk.AccAddress
 }
@@ -67,11 +68,11 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	return accounts
 }
 
-// SetupTest setups a new test, with new app, context, and anteHandler.
+// SetupTestSuite setups a new test, with new app, context, and anteHandler.
 func SetupTestSuite(t *testing.T) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = testutils.CreateTestEncodingConfig()
+	s.EncCfg = encoding.MakeTestEncodingConfig()
 	s.Key = storetypes.NewKVStoreKey(types.StoreKey)
 	tkey := storetypes.NewTransientStoreKey("transient_test_feemarket")
 	testCtx := testutil.DefaultContextWithDB(t, s.Key, tkey)

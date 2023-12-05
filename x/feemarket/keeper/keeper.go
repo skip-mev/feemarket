@@ -28,11 +28,6 @@ func NewKeeper(
 	authKeeper types.AccountKeeper,
 	authority string,
 ) *Keeper {
-	// ensure governance module account is set
-	if addr := authKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
-		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
-	}
-
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
 	}
