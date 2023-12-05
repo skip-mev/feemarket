@@ -1,9 +1,8 @@
 package suite
 
 import (
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/skip-mev/chaintestutil/encoding"
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/skip-mev/feemarket/tests/app"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -70,9 +69,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
-		feemarkettypes.RegisterInterfaces(registry)
-	})
+	s.EncCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
 	s.Ctx = ctx
 
