@@ -3,10 +3,6 @@ package suite
 import (
 	"testing"
 
-	"github.com/skip-mev/chaintestutil/encoding"
-
-	"github.com/skip-mev/feemarket/tests/app"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -16,9 +12,11 @@ import (
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/feemarket/tests/app"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"

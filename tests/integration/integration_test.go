@@ -3,13 +3,12 @@ package integration_test
 import (
 	"testing"
 
-	"github.com/skip-mev/feemarket/tests/app"
-
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/feemarket/tests/app"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )

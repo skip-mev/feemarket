@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/skip-mev/feemarket/tests/app"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
@@ -38,9 +38,7 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (s *KeeperTestSuite) SetupTest() {
-	s.encCfg = encoding.MakeTestEncodingConfig(func(registry codectypes.InterfaceRegistry) {
-		types.RegisterInterfaces(registry)
-	})
+	s.encCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
 	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
 	ctx, tk, tm := testkeeper.NewTestSetup(s.T())
