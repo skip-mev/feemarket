@@ -1,9 +1,11 @@
 package suite
 
 import (
-	"github.com/skip-mev/chaintestutil/encoding"
-	"github.com/skip-mev/feemarket/tests/app"
 	"testing"
+
+	"github.com/skip-mev/chaintestutil/encoding"
+
+	"github.com/skip-mev/feemarket/tests/app"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"

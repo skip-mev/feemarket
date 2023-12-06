@@ -5,7 +5,6 @@ import (
 
 	"cosmossdk.io/math"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -25,7 +24,6 @@ type KeeperTestSuite struct {
 	feeMarketKeeper  *keeper.Keeper
 	encCfg           encoding.TestEncodingConfig
 	ctx              sdk.Context
-	key              *storetypes.KVStoreKey
 	authorityAccount sdk.AccAddress
 
 	// Message server variables

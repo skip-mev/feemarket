@@ -1,8 +1,9 @@
 package integration_test
 
 import (
-	"github.com/skip-mev/feemarket/tests/app"
 	"testing"
+
+	"github.com/skip-mev/feemarket/tests/app"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
