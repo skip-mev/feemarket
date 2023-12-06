@@ -46,7 +46,15 @@ func (s *State) IncrementHeight() {
 // based on the average utilization of the block window. The base fee is
 // update using the new learning rate and the delta adjustment. Please
 // see the EIP-1559 specification for more details.
-func (s *State) UpdateBaseFee(params Params) math.Int {
+func (s *State) UpdateBaseFee(params Params) (fee math.Int) {
+	// Panic catch in case there is an overflow
+	defer func() {
+		if rec := recover(); rec != nil {
+			s.BaseFee = params.MinBaseFee
+			fee = s.BaseFee
+		}
+	}()
+
 	// Calculate the new base fee with the learning rate adjustment.
 	currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(s.Window[s.Index]))
 	targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization))
@@ -62,7 +70,7 @@ func (s *State) UpdateBaseFee(params Params) math.Int {
 	net := math.LegacyNewDecFromInt(s.GetNetUtilization(params)).Mul(params.Delta)
 
 	// Update the base fee.
-	fee := (math.LegacyNewDecFromInt(s.BaseFee).Mul(learningRateAdjustment)).Add(net).TruncateInt()
+	fee = (math.LegacyNewDecFromInt(s.BaseFee).Mul(learningRateAdjustment)).Add(net).TruncateInt()
 
 	// Ensure the base fee is greater than the minimum base fee.
 	if fee.LT(params.MinBaseFee) {
@@ -86,27 +94,34 @@ func (s *State) UpdateBaseFee(params Params) math.Int {
 //     when blocks are relatively close to the target block utilization.
 //
 // For more details, please see the EIP-1559 specification.
-func (s *State) UpdateLearningRate(params Params) math.LegacyDec {
+func (s *State) UpdateLearningRate(params Params) (lr math.LegacyDec) {
+	// Panic catch in case there is an overflow
+	defer func() {
+		if rec := recover(); rec != nil {
+			s.LearningRate = params.MinLearningRate
+			lr = s.LearningRate
+		}
+	}()
+
 	// Calculate the average utilization of the block window.
 	avg := s.GetAverageUtilization(params)
 
 	// Determine if the average utilization is above or below the target
 	// threshold and adjust the learning rate accordingly.
-	var updatedLearningRate math.LegacyDec
 	if avg.LTE(params.Theta) || avg.GTE(math.LegacyOneDec().Sub(params.Theta)) {
-		updatedLearningRate = params.Alpha.Add(s.LearningRate)
-		if updatedLearningRate.GT(params.MaxLearningRate) {
-			updatedLearningRate = params.MaxLearningRate
+		lr = params.Alpha.Add(s.LearningRate)
+		if lr.GT(params.MaxLearningRate) {
+			lr = params.MaxLearningRate
 		}
 	} else {
-		updatedLearningRate = s.LearningRate.Mul(params.Beta)
-		if updatedLearningRate.LT(params.MinLearningRate) {
-			updatedLearningRate = params.MinLearningRate
+		lr = s.LearningRate.Mul(params.Beta)
+		if lr.LT(params.MinLearningRate) {
+			lr = params.MinLearningRate
 		}
 	}
 
 	// Update the current learning rate.
-	s.LearningRate = updatedLearningRate
+	s.LearningRate = lr
 	return s.LearningRate
 }
 
