@@ -71,7 +71,7 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	return ctx, testKeepers, testMsgServers
 }
 
-// FeeMarket  initializes
+// FeeMarket initializes the fee market module using the testkeepers intializer.
 func FeeMarket(
 	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,

@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
-	sdknetwork "github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	"github.com/cosmos/gogoproto/proto"
 
@@ -25,7 +24,7 @@ import (
 var (
 	chainID = "chain-" + tmrand.NewRand().Str(6)
 
-	DefaultAppConstructor = func(val sdknetwork.ValidatorI) servertypes.Application {
+	DefaultAppConstructor = func(val network.ValidatorI) servertypes.Application {
 		return app.New(
 			val.GetCtx().Logger,
 			tmdb.NewMemDB(),

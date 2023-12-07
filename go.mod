@@ -18,7 +18,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/golangci/golangci-lint v1.55.3-0.20231203192459-84442f26446b
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/skip-mev/chaintestutil v0.0.0-00010101000000-000000000000
+	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
@@ -330,4 +330,4 @@ replace (
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 )
 
-replace github.com/skip-mev/chaintestutil => ../chaintestutil
+// replace github.com/skip-mev/chaintestutil => ../chaintestutil

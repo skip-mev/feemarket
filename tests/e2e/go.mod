@@ -20,7 +20,7 @@ replace (
 require (
 	github.com/cometbft/cometbft v0.37.2
 	github.com/cosmos/cosmos-sdk v0.47.6
-	github.com/skip-mev/chaintestutil v0.0.0-00010101000000-000000000000
+	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
 	github.com/skip-mev/feemarket v0.0.0-00010101000000-000000000000
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0
 	github.com/stretchr/testify v1.8.4
