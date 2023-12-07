@@ -10,7 +10,6 @@ replace (
 	github.com/cosmos/gogoproto => github.com/cosmos/gogoproto v1.4.8
 	github.com/cosmos/iavl => github.com/cosmos/iavl v0.20.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/skip-mev/chaintestutil => ../../../chaintestutil
 	github.com/skip-mev/feemarket => ../../
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
