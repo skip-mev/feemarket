@@ -33,7 +33,7 @@ type TestSuite struct {
 	TxBuilder   client.TxBuilder
 
 	AccountKeeper   feemarketante.AccountKeeper
-	FeeMarketKeeper feemarketante.FeeMarketKeeper
+	FeeMarketKeeper feemarketpost.FeeMarketKeeper
 	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
