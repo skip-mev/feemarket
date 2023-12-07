@@ -48,10 +48,10 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 		"paying with good funds": {
 			fee:   24497000000,
 			valid: true,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(1)
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return accs[0], nil
 			},
@@ -75,11 +75,11 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			// SetAccount for the grantee.
 			fee:   36630000000,
 			valid: true,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				suite.BankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := s.CreateTestAccounts(2)
+				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return accs[0], accs[1].Account.GetAddress()
 			},
@@ -88,9 +88,9 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			fee:   36630000000,
 			valid: false,
 			err:   sdkerrors.ErrNotFound,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.On(
+			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := s.CreateTestAccounts(2)
+				s.MockFeeGrantKeeper.On(
 					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
 					Return(sdkerrors.ErrNotFound.Wrap("fee-grant not found")).
 					Once()
@@ -101,9 +101,9 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			fee:   36630000000,
 			valid: false,
 			err:   feegrant.ErrFeeLimitExceeded,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.On(
+			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := s.CreateTestAccounts(2)
+				s.MockFeeGrantKeeper.On(
 					"UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).
 					Return(feegrant.ErrFeeLimitExceeded.Wrap("basic allowance")).
 					Once()
@@ -114,10 +114,10 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			fee:   36630000000,
 			valid: false,
 			err:   sdkerrors.ErrInsufficientFunds,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
-				accs := suite.CreateTestAccounts(2)
-				suite.FeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
-				suite.BankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
+			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+				accs := s.CreateTestAccounts(2)
+				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
@@ -126,27 +126,27 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 	for name, stc := range cases {
 		tc := stc // to make scopelint happy
 		t.Run(name, func(t *testing.T) {
-			suite := antesuite.SetupTestSuite(t)
-			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(suite.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
+			s := antesuite.SetupTestSuite(t, true)
+			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
-			dfd := feemarketpost.NewFeeMarketDeductDecorator(suite.AccountKeeper, suite.BankKeeper, suite.FeeGrantKeeper, suite.FeemarketKeeper)
+			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper)
 			feePostHandler := sdk.ChainPostDecorators(dfd)
 
-			signer, feeAcc := stc.malleate(suite)
+			signer, feeAcc := stc.malleate(s)
 
 			fee := sdk.NewCoins(sdk.NewInt64Coin("stake", tc.fee))
 			msgs := []sdk.Msg{testdata.NewTestMsg(signer.Account.GetAddress())}
 
-			acc := suite.AccountKeeper.GetAccount(suite.Ctx, signer.Account.GetAddress())
+			acc := s.AccountKeeper.GetAccount(s.Ctx, signer.Account.GetAddress())
 			privs, accNums, seqs := []cryptotypes.PrivKey{signer.Priv}, []uint64{0}, []uint64{0}
 			if acc != nil {
 				accNums, seqs = []uint64{acc.GetAccountNumber()}, []uint64{acc.GetSequence()}
 			}
 
 			var defaultGenTxGas uint64 = 10
-			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, suite.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
+			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
-			_, err = feePostHandler(suite.Ctx, tx, false, true) // tests only feegrant post
+			_, err = feePostHandler(s.Ctx, tx, false, true) // tests only feegrant post
 			if tc.valid {
 				require.NoError(t, err)
 			} else {

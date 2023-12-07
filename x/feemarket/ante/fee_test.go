@@ -57,7 +57,7 @@ func TestAnteHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t)
+			s := antesuite.SetupTestSuite(t, true)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 

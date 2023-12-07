@@ -4,9 +4,10 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
+
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // TestAIMDLearningRate ensure's that the additive increase

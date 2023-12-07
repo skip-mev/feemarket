@@ -5,12 +5,14 @@ import (
 
 	"cosmossdk.io/math"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/suite"
 
 	appparams "github.com/skip-mev/feemarket/tests/app/params"
 	"github.com/skip-mev/feemarket/testutils/encoding"
+	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/skip-mev/feemarket/x/feemarket/types/mocks"
@@ -39,27 +41,13 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (s *KeeperTestSuite) SetupTest() {
 	s.encCfg = encoding.MakeTestEncodingConfig()
-	s.key = storetypes.NewKVStoreKey(types.StoreKey)
-	testCtx := testutil.DefaultContextWithDB(s.T(), s.key, storetypes.NewTransientStoreKey("transient_test"))
-	s.ctx = testCtx.Ctx
-
-	s.authorityAccount = []byte("authority")
+	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
+	ctx, tk, tm := testkeeper.NewTestSetup(s.T())
 
-	s.feeMarketKeeper = keeper.NewKeeper(
-		s.encCfg.Codec,
-		s.key,
-		s.accountKeeper,
-		s.authorityAccount.String(),
-	)
-
-	err := s.feeMarketKeeper.SetParams(s.ctx, types.DefaultParams())
-	s.Require().NoError(err)
-
-	err = s.feeMarketKeeper.SetState(s.ctx, types.DefaultState())
-	s.Require().NoError(err)
-
-	s.msgServer = keeper.NewMsgServer(*s.feeMarketKeeper)
+	s.ctx = ctx
+	s.feeMarketKeeper = tk.FeeMarketKeeper
+	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
 }
 
