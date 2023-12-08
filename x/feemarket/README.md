@@ -1,5 +1,3 @@
-
-
 # Additive Increase Multiplicative Decrease (AIMD) EIP-1559
 
 ## Overview
