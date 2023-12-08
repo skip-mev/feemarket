@@ -172,9 +172,10 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		}
 
 		events = append(events, sdk.NewEvent(
-			feemarkettypes.EventTypeFeePay,
-			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
+			feemarkettypes.EventTypeTipPay,
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
 		))
 	}
 
