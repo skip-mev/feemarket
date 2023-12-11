@@ -12,10 +12,10 @@ This module is planned to be used in the Cosmos Hub.
 ## Contents
 
 * [State](#state)
-  * [BaseFee](#basefee)
-  * [LearningRate](#learningrate)
-  * [Window](#window)
-  * [Index](#index)
+    * [BaseFee](#basefee)
+    * [LearningRate](#learningrate)
+    * [Window](#window)
+    * [Index](#index)
 * [Keeper](#keeper)
 * [Messages](#messages)
 * [Events](#events)
@@ -151,7 +151,7 @@ The message handling can fail if:
 
 The feemarket module emits the following events:
 
-#### FeePay
+### FeePay
 
 ```json
 {
@@ -171,7 +171,7 @@ The feemarket module emits the following events:
 }
 ```
 
-#### TipPay
+### TipPay
 
 ```json
 {
