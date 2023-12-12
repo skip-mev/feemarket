@@ -12,11 +12,11 @@ import (
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/skip-mev/chaintestutil/encoding"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	appparams "github.com/skip-mev/feemarket/tests/app/params"
-	"github.com/skip-mev/feemarket/testutils/encoding"
+	"github.com/skip-mev/feemarket/tests/app"
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
@@ -39,7 +39,7 @@ type TestSuite struct {
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-	EncCfg             appparams.EncodingConfig
+	EncCfg             encoding.TestEncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -69,7 +69,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = encoding.MakeTestEncodingConfig()
+	s.EncCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
 	s.Ctx = ctx
 

@@ -15,12 +15,12 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-// QueryTestSuite is a test suite for query tests
+// NetworkTestSuite is a test suite for network integration tests.
 type NetworkTestSuite struct {
 	networksuite.NetworkTestSuite
 }
 
-// TestQueryTestSuite runs test of the query suite
+// TestQueryTestSuite runs test of network integration tests.
 func TestNetworkTestSuite(t *testing.T) {
 	suite.Run(t, new(NetworkTestSuite))
 }

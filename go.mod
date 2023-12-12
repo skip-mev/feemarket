@@ -18,6 +18,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/golangci/golangci-lint v1.55.3-0.20231203192459-84442f26446b
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
@@ -26,6 +27,7 @@ require (
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 	mvdan.cc/gofumpt v0.5.0
+	pgregory.net/rapid v1.1.0
 )
 
 require (
@@ -316,7 +318,6 @@ require (
 	mvdan.cc/lint v0.0.0-20170908181259-adc824a0674b // indirect
 	mvdan.cc/unparam v0.0.0-20221223090309-7455f1af531d // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
-	pgregory.net/rapid v1.1.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
