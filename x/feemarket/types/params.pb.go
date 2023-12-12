@@ -28,7 +28,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // Params contains the required set of parameters for the EIP1559 fee market
 // plugin implementation.
 type Params struct {
-	// Alpha is the amount we additively increase the learninig rate
+	// Alpha is the amount we additively increase the learning rate
 	// when it is above or below the target +/- threshold.
 	Alpha cosmossdk_io_math.LegacyDec `protobuf:"bytes,1,opt,name=alpha,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"alpha"`
 	// Beta is the amount we multiplicatively decrease the learning rate
@@ -44,8 +44,7 @@ type Params struct {
 	// utilization.
 	Delta cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=delta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"delta"`
 	// MinBaseFee determines the initial base fee of the module and the global
-	// minimum
-	// for the network. This is denominated in fee per gas unit.
+	// minimum for the network. This is denominated in fee per gas unit.
 	MinBaseFee cosmossdk_io_math.Int `protobuf:"bytes,5,opt,name=min_base_fee,json=minBaseFee,proto3,customtype=cosmossdk.io/math.Int" json:"min_base_fee"`
 	// MinLearningRate is the lower bound for the learning rate.
 	MinLearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,6,opt,name=min_learning_rate,json=minLearningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"min_learning_rate"`

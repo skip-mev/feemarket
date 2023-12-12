@@ -148,12 +148,20 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
+	var events sdk.Events
+
 	// deduct the fees and tip
 	if !fee.IsZero() {
 		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
 		if err != nil {
 			return err
 		}
+
+		events = append(events, sdk.NewEvent(
+			feemarkettypes.EventTypeFeePay,
+			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
+			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
+		))
 	}
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
@@ -162,20 +170,16 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		if err != nil {
 			return err
 		}
-	}
 
-	events := sdk.Events{
-		sdk.NewEvent(
-			sdk.EventTypeTx,
-			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
+		events = append(events, sdk.NewEvent(
+			feemarkettypes.EventTypeTipPay,
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
-		),
+		))
 	}
-	ctx.EventManager().EmitEvents(events)
 
+	ctx.EventManager().EmitEvents(events)
 	return nil
 }
 
