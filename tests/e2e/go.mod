@@ -17,7 +17,7 @@ replace (
 )
 
 require (
-	github.com/cometbft/cometbft v0.37.2
+	github.com/cometbft/cometbft v0.38.1
 	github.com/cosmos/cosmos-sdk v0.47.6
 	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
 	github.com/skip-mev/feemarket v0.0.0-00010101000000-000000000000
@@ -81,7 +81,6 @@ require (
 	github.com/cosmos/interchain-security/v3 v3.1.1-0.20231102122221-81650a84f989 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.13.3 // indirect
 	github.com/cosmos/rosetta-sdk-go v0.10.0 // indirect
-	github.com/creachadair/taskgroup v0.4.2 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
@@ -176,6 +175,7 @@ require (
 	github.com/multiformats/go-multicodec v0.8.1 // indirect
 	github.com/multiformats/go-multihash v0.2.1 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
+	github.com/oasisprotocol/curve25519-voi v0.0.0-20220708102147-0a8a51822cae // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
@@ -216,7 +216,7 @@ require (
 	go.etcd.io/bbolt v1.3.7 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
