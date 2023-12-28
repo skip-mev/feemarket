@@ -1,8 +1,11 @@
 package post_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
+
+	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -144,10 +147,72 @@ func TestPostHandle(t *testing.T) {
 			ExpErr:   sdkerrors.ErrInvalidGasLimit,
 		},
 		{
+			Name: "error getting consensus params - should fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(nil, errors.New("invalid"))
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrKeyNotFound,
+		},
+		{
+			Name: "using consensus params for invalid gas limit (exceeds max gas)",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				params := testkeeper.ConsensusParams
+				params.Block.MaxGas = 10 // use tiny gas so that max gas is exceeded
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(params, nil)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrTxTooLarge,
+		},
+		{
+			Name: "using consensus params for max gas override - valid)",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				params := testkeeper.ConsensusParams
+				params.Block.MaxGas = int64(gasLimit - 1)
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(params, nil)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
 			Name: "signer has enough funds, should pass, no tip",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(testkeeper.ConsensusParams, nil)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -167,6 +232,7 @@ func TestPostHandle(t *testing.T) {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
 				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(testkeeper.ConsensusParams, nil)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -186,6 +252,7 @@ func TestPostHandle(t *testing.T) {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
 				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockConsensusParamsKeeper.On("Get", mock.Anything).Return(testkeeper.ConsensusParams, nil)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},

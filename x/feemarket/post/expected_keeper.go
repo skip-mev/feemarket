@@ -50,7 +50,7 @@ type FeeMarketKeeper interface {
 
 // ConsensusKeeper defines the expected consensus keeper (noalias)
 //
-//go:generate mockery --name ConsensusKeeper --filename mock_conensus_keeper.go
+//go:generate mockery --name ConsensusKeeper --filename mock_consensus_keeper.go
 type ConsensusKeeper interface {
 	Get(ctx sdk.Context) (*tmproto.ConsensusParams, error)
 }
