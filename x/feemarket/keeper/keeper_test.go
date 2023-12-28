@@ -112,14 +112,3 @@ func (s *KeeperTestSuite) TestParams() {
 		s.Require().EqualValues(params, gotParams)
 	})
 }
-
-func (s *KeeperTestSuite) TestConsensusParams() {
-	s.Run("get test keeper default", func() {
-		params := testkeeper.ConsensusParams
-
-		gotParams, err := s.feeMarketKeeper.GetConsensusParams(s.ctx)
-		s.Require().NoError(err)
-
-		s.Require().EqualValues(params, gotParams)
-	})
-}

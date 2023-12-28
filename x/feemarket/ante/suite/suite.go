@@ -21,6 +21,7 @@ import (
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+	postmocks "github.com/skip-mev/feemarket/x/feemarket/post/mocks"
 )
 
 type TestSuite struct {
@@ -34,12 +35,14 @@ type TestSuite struct {
 
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper feemarketpost.FeeMarketKeeper
+	ConsensusKeeper feemarketpost.ConsensusKeeper
 	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
-	MockBankKeeper     *mocks.BankKeeper
-	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-	EncCfg             encoding.TestEncodingConfig
+	MockBankKeeper            *mocks.BankKeeper
+	MockFeeGrantKeeper        *mocks.FeeGrantKeeper
+	MockConsensusParamsKeeper *postmocks.ConsensusKeeper
+	EncCfg                    encoding.TestEncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -75,8 +78,10 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
+	s.ConsensusKeeper = testKeepers.ConsensusKeeper
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
+	s.MockConsensusParamsKeeper = postmocks.NewConsensusKeeper(t)
 
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
@@ -89,9 +94,12 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 func (s *TestSuite) SetupHandlers(mock bool) {
 	bankKeeper := s.BankKeeper
 	feeGrantKeeper := s.FeeGrantKeeper
+	consensusKeeper := s.ConsensusKeeper
+
 	if mock {
 		bankKeeper = s.MockBankKeeper
 		feeGrantKeeper = s.MockFeeGrantKeeper
+		consensusKeeper = s.MockConsensusParamsKeeper
 	}
 
 	// create basic antehandler with the feemarket decorator
@@ -112,6 +120,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 			bankKeeper,
 			feeGrantKeeper,
 			s.FeeMarketKeeper,
+			consensusKeeper,
 		),
 	}
 

@@ -129,7 +129,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
-			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper)
+			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper, s.ConsensusKeeper)
 			feePostHandler := sdk.ChainPostDecorators(dfd)
 
 			signer, feeAcc := stc.malleate(s)

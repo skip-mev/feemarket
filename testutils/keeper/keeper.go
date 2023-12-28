@@ -4,7 +4,6 @@ package keeper
 import (
 	"testing"
 
-	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 
 	"github.com/cometbft/cometbft/libs/log"
@@ -13,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	testkeeper "github.com/skip-mev/chaintestutil/keeper"
 	"github.com/stretchr/testify/require"
@@ -41,8 +41,8 @@ var additionalMaccPerms = map[string][]string{
 
 var ConsensusParams = &tmproto.ConsensusParams{
 	Block: &tmproto.BlockParams{
-		MaxBytes: 1000,
-		MaxGas:   1000,
+		MaxBytes: 1_000_000,
+		MaxGas:   1_000_000,
 	},
 	Evidence:  nil,
 	Validator: nil,
@@ -55,10 +55,9 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 
 	_, tk, tms := testkeeper.NewTestSetup(t, options...)
 
-	consensusKeeper := Consensus(tk.Initializer)
-
 	// initialize extra keeper
-	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper, consensusKeeper)
+	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper)
+	consensusKeeper := Consensus(tk.Initializer)
 	require.NoError(t, tk.Initializer.LoadLatest())
 
 	// initialize msg servers
@@ -74,6 +73,7 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	err = feeMarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
 	require.NoError(t, err)
 
+	// init dummy consensus params
 	consensusKeeper.Set(ctx, ConsensusParams)
 
 	testKeepers := TestKeepers{
@@ -96,6 +96,7 @@ func Consensus(
 ) *consensuskeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(consensustypes.StoreKey)
 	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
+
 	k := consensuskeeper.NewKeeper(
 		initializer.Codec,
 		storeKey,
@@ -109,7 +110,6 @@ func Consensus(
 func FeeMarket(
 	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,
-	consensus *consensuskeeper.Keeper,
 ) *feemarketkeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
 	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
@@ -118,7 +118,6 @@ func FeeMarket(
 		initializer.Codec,
 		storeKey,
 		authKeeper,
-		consensus,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 }

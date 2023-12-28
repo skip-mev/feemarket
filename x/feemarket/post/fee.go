@@ -20,18 +20,20 @@ import (
 // Call next PostHandler if fees successfully deducted.
 // CONTRACT: Tx must implement FeeTx interface
 type FeeMarketDeductDecorator struct {
-	accountKeeper   AccountKeeper
-	bankKeeper      BankKeeper
-	feegrantKeeper  FeeGrantKeeper
-	feemarketKeeper FeeMarketKeeper
+	accountKeeper         AccountKeeper
+	bankKeeper            BankKeeper
+	feegrantKeeper        FeeGrantKeeper
+	feemarketKeeper       FeeMarketKeeper
+	consensusParamsKeeper ConsensusKeeper
 }
 
-func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper) FeeMarketDeductDecorator {
+func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper, cpk ConsensusKeeper) FeeMarketDeductDecorator {
 	return FeeMarketDeductDecorator{
-		accountKeeper:   ak,
-		bankKeeper:      bk,
-		feegrantKeeper:  fk,
-		feemarketKeeper: fmk,
+		accountKeeper:         ak,
+		bankKeeper:            bk,
+		feegrantKeeper:        fk,
+		feemarketKeeper:       fmk,
+		consensusParamsKeeper: cpk,
 	}
 }
 
