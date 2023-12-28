@@ -101,7 +101,17 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, err
 	}
 
-	err = state.Update(gas, params.MaxBlockUtilization)
+	consensusParams, err := dfd.consensusParamsKeeper.Get(ctx)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to gen consensus params")
+	}
+
+	maxGas := params.MaxBlockUtilization
+	if consensusParams.Block.MaxGas < int64(params.MaxBlockUtilization) && consensusParams.Block.MaxGas >= 0 {
+		maxGas = uint64(consensusParams.Block.MaxGas)
+	}
+
+	err = state.Update(gas, maxGas)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
 	}
