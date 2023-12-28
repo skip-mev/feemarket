@@ -66,10 +66,10 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // TargetBlockUtilization is the target block utilization.
+  // TargetBlockUtilization is the target block utilization (in units of gas).
   uint64 target_block_utilization = 8;
 
-  // MaxBlockUtilization is the maximum block utilization.
+  // MaxBlockUtilization is the maximum block utilization (in units of gas).
   uint64 max_block_utilization = 9;
 
   // Window defines the window size for calculating an adaptive learning rate

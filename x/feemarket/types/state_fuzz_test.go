@@ -33,7 +33,7 @@ func FuzzDefaultFeeMarket(f *testing.F) {
 
 		params.MinBaseFee = math.NewIntFromUint64(100)
 		state.BaseFee = math.NewIntFromUint64(200)
-		err := state.Update(blockGasUsed, params)
+		err := state.Update(blockGasUsed, params.MaxBlockUtilization)
 
 		if blockGasUsed > params.MaxBlockUtilization {
 			require.Error(t, err)
@@ -82,7 +82,7 @@ func FuzzAIMDFeeMarket(f *testing.F) {
 		params.MinBaseFee = math.NewIntFromUint64(100)
 		state.BaseFee = math.NewIntFromUint64(200)
 		state.Window = make([]uint64, 1)
-		err := state.Update(blockGasUsed, params)
+		err := state.Update(blockGasUsed, params.MaxBlockUtilization)
 
 		if blockGasUsed > params.MaxBlockUtilization {
 			require.Error(t, err)

@@ -99,7 +99,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, err
 	}
 
-	err = state.Update(gas, params)
+	err = state.Update(gas, params.MaxBlockUtilization)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
 	}

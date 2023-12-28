@@ -2,6 +2,8 @@
 package keeper
 
 import (
+	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	"testing"
 
 	"github.com/cometbft/cometbft/libs/log"
@@ -22,6 +24,7 @@ import (
 type TestKeepers struct {
 	testkeeper.TestKeepers
 	FeeMarketKeeper *feemarketkeeper.Keeper
+	ConsensusKeeper *consensuskeeper.Keeper
 }
 
 // TestMsgServers holds all message servers used during keeper tests for all modules
@@ -35,14 +38,26 @@ var additionalMaccPerms = map[string][]string{
 	feemarkettypes.FeeCollectorName: {authtypes.Burner},
 }
 
+var ConsensusParams = &tmproto.ConsensusParams{
+	Block: &tmproto.BlockParams{
+		MaxBytes: 1000,
+		MaxGas:   1000,
+	},
+	Evidence:  nil,
+	Validator: nil,
+	Version:   nil,
+}
+
 // NewTestSetup returns initialized instances of all the keepers and message servers of the modules
 func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
 	options = append(options, testkeeper.WithAdditionalModuleAccounts(additionalMaccPerms))
 
 	_, tk, tms := testkeeper.NewTestSetup(t, options...)
 
+	consensusKeeper := Consensus(tk.Initializer)
+
 	// initialize extra keeper
-	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper)
+	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper, consensusKeeper)
 	require.NoError(t, tk.Initializer.LoadLatest())
 
 	// initialize msg servers
@@ -58,9 +73,12 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	err = feeMarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
 	require.NoError(t, err)
 
+	consensusKeeper.Set(ctx, ConsensusParams)
+
 	testKeepers := TestKeepers{
 		TestKeepers:     tk,
 		FeeMarketKeeper: feeMarketKeeper,
+		ConsensusKeeper: consensusKeeper,
 	}
 
 	testMsgServers := TestMsgServers{
@@ -71,10 +89,26 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	return ctx, testKeepers, testMsgServers
 }
 
+// Consensus initializes the consensus params module using the testkeepers intializer.
+func Consensus(
+	initializer *testkeeper.Initializer,
+) *consensuskeeper.Keeper {
+	storeKey := sdk.NewKVStoreKey(consensustypes.StoreKey)
+	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
+	k := consensuskeeper.NewKeeper(
+		initializer.Codec,
+		storeKey,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	return &k
+}
+
 // FeeMarket initializes the fee market module using the testkeepers intializer.
 func FeeMarket(
 	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,
+	consensus *consensuskeeper.Keeper,
 ) *feemarketkeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
 	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
@@ -83,6 +117,7 @@ func FeeMarket(
 		initializer.Codec,
 		storeKey,
 		authKeeper,
+		consensus,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 }

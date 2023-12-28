@@ -17,7 +17,7 @@ func TestState_Update(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		err := state.Update(100, params)
+		err := state.Update(100, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 	})
@@ -26,11 +26,11 @@ func TestState_Update(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		err := state.Update(100, params)
+		err := state.Update(100, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
-		err = state.Update(200, params)
+		err = state.Update(200, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[0])
 	})
@@ -39,7 +39,7 @@ func TestState_Update(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		err := state.Update(params.MaxBlockUtilization+1, params)
+		err := state.Update(params.MaxBlockUtilization+1, params.MaxBlockUtilization)
 		require.Error(t, err)
 	})
 
@@ -47,17 +47,17 @@ func TestState_Update(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		err := state.Update(100, params)
+		err := state.Update(100, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params)
+		err = state.Update(200, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[0])
 
-		err = state.Update(300, params)
+		err = state.Update(300, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), state.Window[0])
 	})
@@ -66,25 +66,25 @@ func TestState_Update(t *testing.T) {
 		state := types.DefaultAIMDState()
 		params := types.DefaultAIMDParams()
 
-		err := state.Update(100, params)
+		err := state.Update(100, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params)
+		err = state.Update(200, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[1])
 
 		state.IncrementHeight()
 
-		err = state.Update(300, params)
+		err = state.Update(300, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[2])
 
 		state.IncrementHeight()
 
-		err = state.Update(400, params)
+		err = state.Update(400, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(400), state.Window[3])
 	})
@@ -94,26 +94,26 @@ func TestState_Update(t *testing.T) {
 		params := types.DefaultAIMDParams()
 		state.Window = make([]uint64, 3)
 
-		err := state.Update(100, params)
+		err := state.Update(100, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params)
+		err = state.Update(200, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[1])
 
 		state.IncrementHeight()
 
-		err = state.Update(300, params)
+		err = state.Update(300, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[2])
 
 		state.IncrementHeight()
 		require.Equal(t, uint64(0), state.Window[0])
 
-		err = state.Update(400, params)
+		err = state.Update(400, params.MaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(400), state.Window[0])
 		require.Equal(t, uint64(200), state.Window[1])
@@ -403,7 +403,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		for {
 			var baseFee math.Int
 			require.NotPanics(t, func() {
-				state.Update(params.MaxBlockUtilization, params)
+				state.Update(params.MaxBlockUtilization, params.MaxBlockUtilization)
 				state.UpdateLearningRate(params)
 				baseFee = state.UpdateBaseFee(params)
 			})

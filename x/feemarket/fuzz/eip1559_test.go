@@ -24,7 +24,7 @@ func TestLearningRate(t *testing.T) {
 		blockUtilization := rapid.Uint64Range(0, params.MaxBlockUtilization).Draw(t, "gas")
 
 		// Update the fee market.
-		if err := state.Update(blockUtilization, params); err != nil {
+		if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
 			t.Fatalf("block update errors: %v", err)
 		}
 
@@ -50,7 +50,7 @@ func TestBaseFee(t *testing.T) {
 		blockUtilization := rapid.Uint64Range(0, params.MaxBlockUtilization).Draw(t, "gas")
 
 		// Update the fee market.
-		if err := state.Update(blockUtilization, params); err != nil {
+		if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
 			t.Fatalf("block update errors: %v", err)
 		}
 

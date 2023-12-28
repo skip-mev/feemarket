@@ -47,7 +47,7 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		state, err := s.feeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
-		err = state.Update(params.MaxBlockUtilization, params)
+		err = state.Update(params.MaxBlockUtilization, params.MaxBlockUtilization)
 		s.Require().NoError(err)
 
 		err = s.feeMarketKeeper.SetState(s.ctx, state)

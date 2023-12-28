@@ -19,5 +19,5 @@ type AccountKeeper interface {
 //
 //go:generate mockery --name ConsensusKeeper --filename mock_conensus_keeper.go
 type ConsensusKeeper interface {
-	Set(ctx sdk.Context, cp *tmproto.ConsensusParams)
+	Get(ctx sdk.Context) (*tmproto.ConsensusParams, error)
 }

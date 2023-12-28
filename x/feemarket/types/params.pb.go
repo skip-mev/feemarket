@@ -50,9 +50,9 @@ type Params struct {
 	MinLearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,6,opt,name=min_learning_rate,json=minLearningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"min_learning_rate"`
 	// MaxLearningRate is the upper bound for the learning rate.
 	MaxLearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,7,opt,name=max_learning_rate,json=maxLearningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"max_learning_rate"`
-	// TargetBlockUtilization is the target block utilization.
+	// TargetBlockUtilization is the target block utilization (in units of gas).
 	TargetBlockUtilization uint64 `protobuf:"varint,8,opt,name=target_block_utilization,json=targetBlockUtilization,proto3" json:"target_block_utilization,omitempty"`
-	// MaxBlockUtilization is the maximum block utilization.
+	// MaxBlockUtilization is the maximum block utilization (in units of gas).
 	MaxBlockUtilization uint64 `protobuf:"varint,9,opt,name=max_block_utilization,json=maxBlockUtilization,proto3" json:"max_block_utilization,omitempty"`
 	// Window defines the window size for calculating an adaptive learning rate
 	// over a moving window of blocks.

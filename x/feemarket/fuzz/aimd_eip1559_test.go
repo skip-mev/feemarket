@@ -35,7 +35,7 @@ func TestAIMDLearningRate(t *testing.T) {
 			prevLearningRate := state.LearningRate
 
 			// Update the fee market.
-			if err := state.Update(blockUtilization, params); err != nil {
+			if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
 				t.Fatalf("block update errors: %v", err)
 			}
 
@@ -80,7 +80,7 @@ func TestAIMDBaseFee(t *testing.T) {
 			blockUtilization := gasGen.Draw(t, "gas")
 			prevBaseFee := state.BaseFee
 
-			if err := state.Update(blockUtilization, params); err != nil {
+			if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
 				t.Fatalf("block update errors: %v", err)
 			}
 

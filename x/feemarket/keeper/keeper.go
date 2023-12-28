@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -15,6 +16,7 @@ type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
 	ak       types.AccountKeeper
+	ck       types.ConsensusKeeper
 
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
@@ -26,6 +28,7 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	authKeeper types.AccountKeeper,
+	consensusKeeper types.ConsensusKeeper,
 	authority string,
 ) *Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
@@ -36,6 +39,7 @@ func NewKeeper(
 		cdc,
 		storeKey,
 		authKeeper,
+		consensusKeeper,
 		authority,
 	}
 
@@ -50,6 +54,11 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority
+}
+
+// GetConsensusParams gets the consensus params keeper params.
+func (k *Keeper) GetConsensusParams(ctx sdk.Context) (*tmproto.ConsensusParams, error) {
+	return k.ck.Get(ctx)
 }
 
 // GetState returns the feemarket module's state.
