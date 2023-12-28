@@ -23,7 +23,8 @@ func (_m *ConsensusKeeper) Set(ctx types.Context, cp *tenderminttypes.ConsensusP
 func NewConsensusKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *ConsensusKeeper {
+},
+) *ConsensusKeeper {
 	mock := &ConsensusKeeper{}
 	mock.Mock.Test(t)
 

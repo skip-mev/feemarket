@@ -30,10 +30,7 @@ import (
 	"github.com/skip-mev/feemarket/tests/app/params"
 )
 
-var (
-	flagCrisisDummy = "x-crisis-skip-assert-invariants" // dummy flag so that the crisis module does not need to be imported for security reasons
-
-)
+var flagCrisisDummy = "x-crisis-skip-assert-invariants" // dummy flag so that the crisis module does not need to be imported for security reasons
 
 func NewRootCmd() *cobra.Command {
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration

@@ -122,5 +122,4 @@ func (s *KeeperTestSuite) TestConsensusParams() {
 
 		s.Require().EqualValues(params, gotParams)
 	})
-
 }

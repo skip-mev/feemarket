@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/cometbft/cometbft/libs/log"
