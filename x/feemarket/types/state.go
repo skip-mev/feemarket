@@ -28,7 +28,7 @@ func NewState(
 func (s *State) Update(gas, maxGas uint64) error {
 	update := s.Window[s.Index] + gas
 	if update > maxGas {
-		return fmt.Errorf("block utilization cannot exceed max block utilization")
+		return fmt.Errorf("block utilization of %d cannot exceed max block utilization of %d", update, maxGas)
 	}
 
 	s.Window[s.Index] = update

@@ -1,7 +1,6 @@
 package post
 
 import (
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -46,11 +45,4 @@ type FeeMarketKeeper interface {
 	SetParams(ctx sdk.Context, params feemarkettypes.Params) error
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
 	GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
-}
-
-// ConsensusKeeper defines the expected consensus keeper (noalias)
-//
-//go:generate mockery --name ConsensusKeeper --filename mock_consensus_keeper.go
-type ConsensusKeeper interface {
-	Get(ctx sdk.Context) (*tmproto.ConsensusParams, error)
 }

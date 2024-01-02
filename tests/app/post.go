@@ -10,11 +10,10 @@ import (
 
 // PostHandlerOptions are the options required for constructing a FeeMarket PostHandler.
 type PostHandlerOptions struct {
-	AccountKeeper         feemarketpost.AccountKeeper
-	BankKeeper            feemarketpost.BankKeeper
-	FeeMarketKeeper       feemarketpost.FeeMarketKeeper
-	FeeGrantKeeper        feemarketpost.FeeGrantKeeper
-	ConsensusParamsKeeper feemarketpost.ConsensusKeeper
+	AccountKeeper   feemarketpost.AccountKeeper
+	BankKeeper      feemarketpost.BankKeeper
+	FeeMarketKeeper feemarketpost.FeeMarketKeeper
+	FeeGrantKeeper  feemarketpost.FeeGrantKeeper
 }
 
 // NewPostHandler returns a PostHandler chain with the fee deduct decorator.
@@ -31,17 +30,12 @@ func NewPostHandler(options PostHandlerOptions) (sdk.PostHandler, error) {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feemarket keeper is required for post builder")
 	}
 
-	if options.ConsensusParamsKeeper == nil {
-		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "consensus params keeper is required for post builder")
-	}
-
 	postDecorators := []sdk.PostDecorator{
 		feemarketpost.NewFeeMarketDeductDecorator(
 			options.AccountKeeper,
 			options.BankKeeper,
 			options.FeeGrantKeeper,
 			options.FeeMarketKeeper,
-			options.ConsensusParamsKeeper,
 		),
 	}
 

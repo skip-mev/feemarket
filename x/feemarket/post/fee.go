@@ -20,20 +20,18 @@ import (
 // Call next PostHandler if fees successfully deducted.
 // CONTRACT: Tx must implement FeeTx interface
 type FeeMarketDeductDecorator struct {
-	accountKeeper         AccountKeeper
-	bankKeeper            BankKeeper
-	feegrantKeeper        FeeGrantKeeper
-	feemarketKeeper       FeeMarketKeeper
-	consensusParamsKeeper ConsensusKeeper
+	accountKeeper   AccountKeeper
+	bankKeeper      BankKeeper
+	feegrantKeeper  FeeGrantKeeper
+	feemarketKeeper FeeMarketKeeper
 }
 
-func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper, cpk ConsensusKeeper) FeeMarketDeductDecorator {
+func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper) FeeMarketDeductDecorator {
 	return FeeMarketDeductDecorator{
-		accountKeeper:         ak,
-		bankKeeper:            bk,
-		feegrantKeeper:        fk,
-		feemarketKeeper:       fmk,
-		consensusParamsKeeper: cpk,
+		accountKeeper:   ak,
+		bankKeeper:      bk,
+		feegrantKeeper:  fk,
+		feemarketKeeper: fmk,
 	}
 }
 
@@ -101,14 +99,11 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, err
 	}
 
-	consensusParams, err := dfd.consensusParamsKeeper.Get(ctx)
-	if err != nil {
-		return ctx, sdkerrors.ErrKeyNotFound.Wrap(err.Error())
-	}
-
+	consensusMaxGas := ctx.ConsensusParams().GetBlock().GetMaxGas()
 	maxGas := params.MaxBlockUtilization
-	if consensusParams.Block.MaxGas < int64(params.MaxBlockUtilization) && consensusParams.Block.MaxGas >= 0 {
-		maxGas = uint64(consensusParams.Block.MaxGas)
+
+	if consensusMaxGas < int64(maxGas) && consensusMaxGas >= 0 {
+		maxGas = uint64(consensusMaxGas)
 		ctx.Logger().Info("using consensus params max gas",
 			"max gas", maxGas,
 		)

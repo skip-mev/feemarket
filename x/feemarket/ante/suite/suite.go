@@ -3,6 +3,8 @@ package suite
 import (
 	"testing"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -21,7 +23,6 @@ import (
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
-	postmocks "github.com/skip-mev/feemarket/x/feemarket/post/mocks"
 )
 
 type TestSuite struct {
@@ -35,14 +36,12 @@ type TestSuite struct {
 
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper feemarketpost.FeeMarketKeeper
-	ConsensusKeeper feemarketpost.ConsensusKeeper
 	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
-	MockBankKeeper            *mocks.BankKeeper
-	MockFeeGrantKeeper        *mocks.FeeGrantKeeper
-	MockConsensusParamsKeeper *postmocks.ConsensusKeeper
-	EncCfg                    encoding.TestEncodingConfig
+	MockBankKeeper     *mocks.BankKeeper
+	MockFeeGrantKeeper *mocks.FeeGrantKeeper
+	EncCfg             encoding.TestEncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -74,14 +73,20 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.EncCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
-	s.Ctx = ctx
+	s.Ctx = ctx.WithConsensusParams(&tmproto.ConsensusParams{
+		Block: &tmproto.BlockParams{
+			MaxBytes: 0,
+			MaxGas:   1_000_000_000,
+		},
+		Evidence:  nil,
+		Validator: nil,
+		Version:   nil,
+	})
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
-	s.ConsensusKeeper = testKeepers.ConsensusKeeper
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
-	s.MockConsensusParamsKeeper = postmocks.NewConsensusKeeper(t)
 
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
@@ -94,12 +99,10 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 func (s *TestSuite) SetupHandlers(mock bool) {
 	bankKeeper := s.BankKeeper
 	feeGrantKeeper := s.FeeGrantKeeper
-	consensusKeeper := s.ConsensusKeeper
 
 	if mock {
 		bankKeeper = s.MockBankKeeper
 		feeGrantKeeper = s.MockFeeGrantKeeper
-		consensusKeeper = s.MockConsensusParamsKeeper
 	}
 
 	// create basic antehandler with the feemarket decorator
@@ -120,7 +123,6 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 			bankKeeper,
 			feeGrantKeeper,
 			s.FeeMarketKeeper,
-			consensusKeeper,
 		),
 	}
 
@@ -203,6 +205,17 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			t.Fatal("expected one of txErr, handleErr to be an error")
 		}
 	}
+
+	// reset consensus params
+	s.Ctx = s.Ctx.WithConsensusParams(&tmproto.ConsensusParams{
+		Block: &tmproto.BlockParams{
+			MaxBytes: 0,
+			MaxGas:   1_000_000_000,
+		},
+		Evidence:  nil,
+		Validator: nil,
+		Version:   nil,
+	})
 }
 
 // CreateTestTx is a helper function to create a tx given multiple inputs.

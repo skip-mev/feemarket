@@ -267,11 +267,10 @@ func New(
 	}
 
 	postHandlerOptions := PostHandlerOptions{
-		AccountKeeper:         app.AccountKeeper,
-		BankKeeper:            app.BankKeeper,
-		FeeGrantKeeper:        app.FeeGrantKeeper,
-		FeeMarketKeeper:       &app.FeeMarketKeeper,
-		ConsensusParamsKeeper: &app.ConsensusParamsKeeper,
+		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
+		FeeGrantKeeper:  app.FeeGrantKeeper,
+		FeeMarketKeeper: &app.FeeMarketKeeper,
 	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
 	if err != nil {
