@@ -3,6 +3,8 @@ package suite
 import (
 	"testing"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -71,7 +73,15 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.EncCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
-	s.Ctx = ctx
+	s.Ctx = ctx.WithConsensusParams(&tmproto.ConsensusParams{
+		Block: &tmproto.BlockParams{
+			MaxBytes: 0,
+			MaxGas:   1_000_000_000,
+		},
+		Evidence:  nil,
+		Validator: nil,
+		Version:   nil,
+	})
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
@@ -89,6 +99,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 func (s *TestSuite) SetupHandlers(mock bool) {
 	bankKeeper := s.BankKeeper
 	feeGrantKeeper := s.FeeGrantKeeper
+
 	if mock {
 		bankKeeper = s.MockBankKeeper
 		feeGrantKeeper = s.MockFeeGrantKeeper
@@ -194,6 +205,17 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			t.Fatal("expected one of txErr, handleErr to be an error")
 		}
 	}
+
+	// reset consensus params
+	s.Ctx = s.Ctx.WithConsensusParams(&tmproto.ConsensusParams{
+		Block: &tmproto.BlockParams{
+			MaxBytes: 0,
+			MaxGas:   1_000_000_000,
+		},
+		Evidence:  nil,
+		Validator: nil,
+		Version:   nil,
+	})
 }
 
 // CreateTestTx is a helper function to create a tx given multiple inputs.
