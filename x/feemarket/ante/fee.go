@@ -37,7 +37,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	if !simulate && ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
+	if ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
 		return ctx, sdkerrors.ErrInvalidGasLimit.Wrapf("must provide positive gas")
 	}
 
@@ -55,11 +55,9 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		"gas limit", gas,
 	)
 
-	if !simulate {
-		fee, _, err = CheckTxFees(ctx, minGasPrices, feeTx, true)
-		if err != nil {
-			return ctx, errorsmod.Wrapf(err, "error checking fee")
-		}
+	fee, _, err = CheckTxFees(ctx, minGasPrices, feeTx, true)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "error checking fee")
 	}
 
 	minGasPricesDecCoins := sdk.NewDecCoinsFromCoins(minGasPrices...)
