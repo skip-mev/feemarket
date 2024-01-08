@@ -49,7 +49,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	if !simulate && ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
+	if ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
@@ -83,11 +83,9 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		"gas consumed", gas,
 	)
 
-	if !simulate {
-		fee, tip, err = ante.CheckTxFees(ctx, minGasPrices, feeTx, false)
-		if err != nil {
-			return ctx, err
-		}
+	fee, tip, err = ante.CheckTxFees(ctx, minGasPrices, feeTx, false)
+	if err != nil {
+		return ctx, err
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
