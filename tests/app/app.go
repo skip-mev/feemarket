@@ -3,6 +3,7 @@ package app
 //nolint:revive
 import (
 	_ "embed"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"io"
 	"os"
 	"path/filepath"
@@ -182,7 +183,7 @@ func New(
 				// authtypes.RandomGenesisAccountsFn(simulation.RandomGenesisAccounts),
 
 				// For providing a custom a base account type add it below.
-				// By default the auth module uses authtypes.ProtoBaseAccount().
+				// By default, the auth module uses authtypes.ProtoBaseAccount().
 				//
 				// func() authtypes.AccountI { return authtypes.ProtoBaseAccount() },
 
@@ -250,6 +251,9 @@ func New(
 	// baseAppOptions = append(baseAppOptions, prepareOpt)
 
 	app.App = appBuilder.Build(logger, db, traceStore, baseAppOptions...)
+
+	// set denom resolver to test variant.
+	app.FeeMarketKeeper.SetDenomResolver(&feemarkettypes.TestDenomResolver{})
 
 	// Create a global ante handler that will be called on each transaction when
 	// proposals are being built and verified.
