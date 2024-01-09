@@ -90,7 +90,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	)
 
 	if !simulate {
-		feeCoin, tip, err = ante.CheckTxFee(ctx, baseFee, feeTx, false)
+		feeCoin, tip, err = ante.CheckTxFee(ctx, baseFee, feeTx, false, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, err
 		}

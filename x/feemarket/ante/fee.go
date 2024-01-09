@@ -72,7 +72,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	)
 
 	if !simulate {
-		feeCoin, _, err = CheckTxFee(ctx, requiredBaseFee, feeTx, true)
+		feeCoin, _, err = CheckTxFee(ctx, requiredBaseFee, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
@@ -110,7 +110,7 @@ func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool,
 		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
 		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
 
-		if !feeCoin.IsGTE(requiredFee) {
+		if feeCoin.Denom != requiredFee.Denom || !feeCoin.IsGTE(requiredFee) {
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
 				feeCoin,
