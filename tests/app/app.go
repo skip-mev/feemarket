@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"reflect"
 
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
-
 	"cosmossdk.io/depinject"
 	dbm "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
@@ -68,6 +66,7 @@ import (
 
 	feemarketmodule "github.com/skip-mev/feemarket/x/feemarket"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 const (
