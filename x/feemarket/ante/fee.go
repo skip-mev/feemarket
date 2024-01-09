@@ -45,7 +45,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, sdkerrors.ErrInvalidGasLimit.Wrapf("must provide positive gas")
 	}
 
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx)
+	requiredBaseFee, err := dfd.feemarketKeeper.GetMinGasPrice(ctx)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
@@ -60,34 +60,38 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	// If there is a fee attached to the tx, make sure the fee denom is a denom accepted by the chain
 	if len(feeCoins) == 1 {
 		feeDenom := feeCoins.GetDenomByIndex(0)
-		if feeDenom != minGasPrice.Denom {
+		if feeDenom != requiredBaseFee.Denom {
 			return ctx, err
 		}
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
-		"min gas prices", minGasPrice,
+		"min gas prices", requiredBaseFee,
 		"fee", feeCoins,
 		"gas limit", gas,
 	)
 
 	if !simulate {
-		feeCoin, _, err = CheckTxFee(ctx, minGasPrice, feeTx, true)
+		feeCoin, _, err = CheckTxFee(ctx, requiredBaseFee, feeTx, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
 	}
 
-	minGasPricesDecCoin := sdk.NewDecCoinFromCoin(minGasPrice)
+	minGasPricesDecCoin := sdk.NewDecCoinFromCoin(requiredBaseFee)
 	newCtx := ctx.WithPriority(getTxPriority(feeCoin, int64(gas))).WithMinGasPrices(sdk.NewDecCoins(minGasPricesDecCoin))
 	return next(newCtx, tx, simulate)
 }
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool) (feeCoin sdk.Coin, tip sdk.Coin, err error) {
+func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (feeCoin sdk.Coin, tip sdk.Coin, err error) {
 	minFeesDecCoin := sdk.NewDecCoinFromCoin(minFee)
 	feeCoin = feeTx.GetFee()[0]
+	feeCoin, err = resolver.ConvertToBaseToken(ctx, feeCoin, minFee.Denom)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
 
 	// Ensure that the provided fees meet the minimum
 	minGasPrice := minFeesDecCoin
