@@ -436,9 +436,9 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		gs := types.DefaultGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		expected := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee))
+		expected := sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee)
 
-		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})
@@ -447,9 +447,9 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		gs := types.DefaultAIMDGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		expected := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee))
+		expected := sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee)
 
-		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})
