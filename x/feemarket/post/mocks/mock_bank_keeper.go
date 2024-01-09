@@ -67,7 +67,8 @@ func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx types.Context, senderAddr
 func NewBankKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *BankKeeper {
+},
+) *BankKeeper {
 	mock := &BankKeeper{}
 	mock.Mock.Test(t)
 

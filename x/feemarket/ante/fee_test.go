@@ -18,6 +18,7 @@ func TestAnteHandle(t *testing.T) {
 	gasLimit := antesuite.NewTestGasLimit()
 	validFeeAmount := types.DefaultMinBaseFee.MulRaw(int64(gasLimit))
 	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount))
+	validFeeDifferentDenom := sdk.NewCoins(sdk.NewCoin("atom", validFeeAmount))
 
 	testCases := []antesuite.TestCase{
 		{
@@ -38,6 +39,23 @@ func TestAnteHandle(t *testing.T) {
 			ExpErr:   sdkerrors.ErrInvalidGasLimit,
 		},
 		{
+			Name: "0 gas given should fail with resolvable denom",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFeeDifferentDenom,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+		},
+		{
 			Name: "signer has enough funds, should pass",
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
@@ -45,6 +63,22 @@ func TestAnteHandle(t *testing.T) {
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
 					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
+			Name: "signer has enough funds in resolvable denom, should pass",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeDifferentDenom,
 				}
 			},
 			RunAnte:  true,

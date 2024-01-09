@@ -88,6 +88,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (feeCoin sdk.Coin, tip sdk.Coin, err error) {
 	minFeesDecCoin := sdk.NewDecCoinFromCoin(minFee)
 	feeCoin = feeTx.GetFee()[0]
+
 	feeCoin, err = resolver.ConvertToBaseToken(ctx, feeCoin, minFee.Denom)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
