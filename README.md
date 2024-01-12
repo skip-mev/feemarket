@@ -4,8 +4,8 @@
 
 This document specifies the feemarket module.
 
-The feemarket module is an implementation of the Additive Increase Multiplicative Decrease (AIMD) EIP-1559 
-feemarket.  More information about the implementation can be found [here](./x/feemarket/README.md).
+The feemarket module is an implementation of the Additive Increase Multiplicative Decrease (AIMD) EIP-1559
+feemarket. More information about the implementation can be found [here](./x/feemarket/README.md).
 
 This module is planned to be used in the Cosmos Hub.
 
@@ -107,7 +107,7 @@ The feemarket module provides a keeper interface for accessing the KVStore.
 
 ```go
 type FeeMarketKeeper interface {
-	// Get the current state from the store.
+    // Get the current state from the store.
     GetState(ctx sdk.Context) (types.State, error)
 
     // Set the state in the store.
@@ -118,8 +118,8 @@ type FeeMarketKeeper interface {
 
     // Set the params in the store.
     SetParams(ctx sdk.Context, params types.Params) error
-	
-	// Get the current minimum gas prices (base fee) from the store.
+
+    // Get the current minimum gas prices (base fee) from the store.
     GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
 }
 ```
@@ -212,9 +212,8 @@ when it is above or below the target +/- threshold.
 
 ### Beta
 
-The default send enabled value controls send transfer capability for all
-coin denominations unless specifically included in the array of `SendEnabled`
-parameters.
+Beta is the amount we multiplicatively decrease the learning rate
+when it is within the target +/- threshold.
 
 ### Theta
 
@@ -248,13 +247,13 @@ TargetBlockUtilization is the target block utilization for the current block.
 
 ### MaxBlockUtilization
 
-MaxBlockUtilization is the maximum block utilization.  Once this has been surpassed,
+MaxBlockUtilization is the maximum block utilization. Once this has been surpassed,
 no more transactions will be added to the current block.
 
 ### Window
 
 Window defines the window size for calculating an adaptive learning rate
-over a moving window of blocks.  The default EIP1559 implementation uses
+over a moving window of blocks. The default EIP1559 implementation uses
 a window of size 1.
 
 ### FeeDenom
@@ -264,7 +263,7 @@ FeeDenom is the denom that will be used for all fee payments.
 ### Enabled
 
 Enabled is a boolean that determines whether the EIP1559 fee market is
-enabled. This can be used to add the feemarket module and enable it 
+enabled. This can be used to add the feemarket module and enable it
 through governance at a later time.
 
 ```protobuf
@@ -536,4 +535,3 @@ Example Output:
   ]
 }
 ```
-
