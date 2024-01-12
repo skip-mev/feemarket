@@ -101,11 +101,18 @@ func TestSendTip(t *testing.T) {
 
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
+	const (
+		baseDenom       = "stake"
+		resolvableDenom = "atom"
+	)
+
 	gasLimit := antesuite.NewTestGasLimit()
 	validFeeAmount := types.DefaultMinBaseFee.MulRaw(int64(gasLimit))
 	validFeeAmountWithTip := validFeeAmount.Add(sdk.NewInt(100))
-	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount))
-	validFeeWithTip := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmountWithTip))
+	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount))
+	validFeeWithTip := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmountWithTip))
+	validResolvableFee := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmount))
+	validResolvableFeeWithTip := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmountWithTip))
 
 	testCases := []antesuite.TestCase{
 		{
@@ -181,7 +188,25 @@ func TestPostHandle(t *testing.T) {
 			ExpErr:   nil,
 		},
 		{
-			Name: "signer has enough funds, should pass with tip",
+			Name: "signer has enough funds, should pass, no tip - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip - resolvable denom",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
@@ -190,7 +215,7 @@ func TestPostHandle(t *testing.T) {
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
-					FeeAmount: validFeeWithTip,
+					FeeAmount: validResolvableFeeWithTip,
 				}
 			},
 			RunAnte:  true,

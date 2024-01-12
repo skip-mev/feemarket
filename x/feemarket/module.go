@@ -189,6 +189,7 @@ func ProvideModule(in Inputs) Outputs {
 		in.Cdc,
 		in.Key,
 		in.AccountKeeper,
+		nil,
 		authority.String(),
 	)
 

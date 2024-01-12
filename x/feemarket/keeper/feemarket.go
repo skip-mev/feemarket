@@ -68,20 +68,18 @@ func (k *Keeper) GetLearningRate(ctx sdk.Context) (math.LegacyDec, error) {
 	return state.LearningRate, nil
 }
 
-// GetMinGasPrices returns the mininum gas prices as sdk.Coins from the fee market state.
-func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error) {
+// GetMinGasPrice returns the minimum gas prices as sdk.Coins from the fee market state.
+func (k *Keeper) GetMinGasPrice(ctx sdk.Context) (sdk.Coin, error) {
 	baseFee, err := k.GetBaseFee(ctx)
 	if err != nil {
-		return sdk.NewCoins(), err
+		return sdk.Coin{}, err
 	}
 
 	params, err := k.GetParams(ctx)
 	if err != nil {
-		return sdk.NewCoins(), err
+		return sdk.Coin{}, err
 	}
 
 	fee := sdk.NewCoin(params.FeeDenom, baseFee)
-	minGasPrices := sdk.NewCoins(fee)
-
-	return minGasPrices, nil
+	return fee, nil
 }
