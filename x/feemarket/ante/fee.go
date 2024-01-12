@@ -85,20 +85,28 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (feeCoin sdk.Coin, tip sdk.Coin, err error) {
+func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	minFeesDecCoin := sdk.NewDecCoinFromCoin(minFee)
-	feeCoin = feeTx.GetFee()[0]
+	if len(feeTx.GetFee()) != 1 {
+		return sdk.Coin{}, sdk.Coin{}, feemarkettypes.ErrTooManyFeeCoins
+	}
 
-	feeCoin, err = resolver.ConvertToBaseToken(ctx, feeCoin, minFee.Denom)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
+	feeCoin := feeTx.GetFee()[0]
+	coinWithBaseDenom := feeCoin
+	if feeCoin.Denom != minFee.Denom {
+		coinWithBaseDenom, err = resolver.ConvertToDenom(ctx, feeCoin, minFee.Denom)
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, err
+		}
 	}
 
 	// Ensure that the provided fees meet the minimum
 	minGasPrice := minFeesDecCoin
 	if !minGasPrice.IsZero() {
-		var requiredFee sdk.Coin
-		var consumedFee sdk.Coin
+		var (
+			requiredFee sdk.Coin
+			consumedFee sdk.Coin
+		)
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas, where fee = ceil(minGasPrice * gas).
@@ -111,14 +119,29 @@ func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool,
 		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
 		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
 
-		if feeCoin.Denom != requiredFee.Denom || !feeCoin.IsGTE(requiredFee) {
+		if coinWithBaseDenom.Denom != requiredFee.Denom || !coinWithBaseDenom.IsGTE(requiredFee) {
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
-				feeCoin,
+				coinWithBaseDenom,
 				requiredFee,
 				minGasPrice,
 				gasConsumed,
 			)
+		}
+
+		// convert back to given denom is not base denom
+		if feeCoin.Denom != requiredFee.Denom {
+			requiredFee, err = resolver.ConvertToDenom(ctx, requiredFee, feeCoin.Denom)
+			if err != nil {
+				return sdk.Coin{}, sdk.Coin{}, err
+			}
+
+			if !isCheck {
+				consumedFee, err = resolver.ConvertToDenom(ctx, consumedFee, feeCoin.Denom)
+				if err != nil {
+					return sdk.Coin{}, sdk.Coin{}, err
+				}
+			}
 		}
 
 		if isCheck {

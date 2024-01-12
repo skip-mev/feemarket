@@ -56,13 +56,13 @@ func (k *Keeper) GetAuthority() string {
 	return k.authority
 }
 
-// ResolveToBaseDenom converts the given fee coin to the given base denomination.
-func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, feeCoin sdk.Coin, baseDenom string) (sdk.Coin, error) {
+// ResolveToBaseDenom converts the given coin to the given denomination.
+func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.Coin, denom string) (sdk.Coin, error) {
 	if k.resolver == nil {
 		return sdk.Coin{}, types.ErrResolverNotSet
 	}
 
-	return k.resolver.ConvertToBaseToken(ctx, feeCoin, baseDenom)
+	return k.resolver.ConvertToDenom(ctx, coin, denom)
 }
 
 // SetDenomResolver sets the keeper's denom resolver.
