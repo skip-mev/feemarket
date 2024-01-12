@@ -7,7 +7,7 @@
 > * **`Target Block Size`**: This is the target block gas consumption.
 > * **`Max Block Size`**: This is the maximum block gas consumption.
 
-This plugin implements the AIMD (Additive Increase Multiplicative Decrease) EIP-1559 fee market as described in this [AIMD EIP-1559](https://ieeexplore.ieee.org/document/9680496) research publication.
+This plugin implements the AIMD (Additive Increase Multiplicative Decrease) EIP-1559 fee market as described in this [AIMD EIP-1559](https://arxiv.org/abs/2110.04753) research publication.
 
 The AIMD EIP-1559 fee market is a slight modification to Ethereum's EIP-1559 fee market. Specifically it introduces the notion of a adaptive learning rate which scales the base fee (reserve price to be included in a block) more aggressively when the network is congested and less aggressively when the network is not congested. This is primarily done to address the often cited criticism of EIP-1559 that it's base fee often lags behind the current demand for block space. The learning rate on Ethereum is effectively hard-coded to be 12.5%, which means that between any two blocks the base fee can maximally increase by 12.5% or decrease by 12.5%. Additionally, AIMD EIP-1559 differs from Ethereum's EIP-1559 by considering a configured time window (number of blocks) to consider when calculating and comparing target block utilization and current block utilization.
 
@@ -47,11 +47,11 @@ The calculation for the updated base fee for the next block is as follows:
 blockConsumption := sumBlockSizesInWindow(window) / (window * maxBlockSize)
 
 if blockConsumption < gamma || blockConsumption > 1 - gamma {
-    // MAX_LEARNING_RATE is a constant that configured by the chain developer
-    newLearningRate := min(MaxLearningRate, alpha + currencyLearningRate)
+    // MAX_LEARNING_RATE is a constant that is configured by the chain developer
+    newLearningRate := min(MaxLearningRate, alpha + currentLearningRate)
 } else {
-    // MIN_LEARNING_RATE is a constant that configured by the chain developer
-    newLearningRate := max(MinLearningRate, beta * currencyLearningRate)
+    // MIN_LEARNING_RATE is a constant that is configured by the chain developer
+    newLearningRate := max(MinLearningRate, beta * currentLearningRate)
 }
 
 // netGasDelta returns the net gas difference between every block in the window and the target block size.
@@ -80,7 +80,7 @@ In this example, we expect the learning rate to additively increase and the base
 
 ```golang
 blockConsumption := sumBlockSizesInWindow(1) / (1 * 100) == 0
-maxLearningRate := min(1.0, 0.025 + 0.125) == 0.15
+newLearningRate := min(1.0, 0.025 + 0.125) == 0.15
 newBaseFee := 10 * (1 + 0.15 * (0 - 50) / 50) == 8.5
 ```
 
@@ -92,7 +92,7 @@ In this example, we expect the learning rate to multiplicatively increase and th
 
 ```golang
 blockConsumption := sumBlockSizesInWindow(1) / (1 * 100) == 1
-maxLearningRate := min(1.0, 0.025 + 0.125) == 0.15
+newLearningRate := min(1.0, 0.025 + 0.125) == 0.15
 newBaseFee := 10 * (1 + 0.95 * 0.125) == 11.875
 ```
 
@@ -104,7 +104,7 @@ In this example, we expect the learning rate to decrease and the base fee to rem
 
 ```golang
 blockConsumption := sumBlockSizesInWindow(1) / (1 * 100) == 0.5
-maxLearningRate := max(0.0125, 0.95 * 0.125) == 0.11875
+newLearningRate := max(0.0125, 0.95 * 0.125) == 0.11875
 newBaseFee := 10 * (1 + 0.11875 * (0 - 50) / 50) == 10
 ```
 
