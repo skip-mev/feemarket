@@ -7,7 +7,7 @@
 > * **`Target Block Size`**: This is the target block gas consumption.
 > * **`Max Block Size`**: This is the maximum block gas consumption.
 
-This plugin implements the AIMD (Additive Increase Multiplicative Decrease) EIP-1559 fee market as described in this [AIMD EIP-1559](https://ieeexplore.ieee.org/document/9680496) research publication.
+This plugin implements the AIMD (Additive Increase Multiplicative Decrease) EIP-1559 fee market as described in this [AIMD EIP-1559](https://arxiv.org/abs/2110.04753) research publication.
 
 The AIMD EIP-1559 fee market is a slight modification to Ethereum's EIP-1559 fee market. Specifically it introduces the notion of a adaptive learning rate which scales the base fee (reserve price to be included in a block) more aggressively when the network is congested and less aggressively when the network is not congested. This is primarily done to address the often cited criticism of EIP-1559 that it's base fee often lags behind the current demand for block space. The learning rate on Ethereum is effectively hard-coded to be 12.5%, which means that between any two blocks the base fee can maximally increase by 12.5% or decrease by 12.5%. Additionally, AIMD EIP-1559 differs from Ethereum's EIP-1559 by considering a configured time window (number of blocks) to consider when calculating and comparing target block utilization and current block utilization.
 
