@@ -24,10 +24,11 @@ func TestAIMDLearningRate(t *testing.T) {
 		state.Window = make([]uint64, window)
 
 		params := CreateRandomAIMDParams(t)
+		maxBlockUtilization := rapid.Uint64Range(params.TargetBlockUtilization, params.TargetBlockUtilization*5).Draw(t, "max_block_utilization")
 
 		// Randomly generate the block utilization.
 		numBlocks := rapid.Uint64Range(0, 1000).Draw(t, "num_blocks")
-		gasGen := rapid.Uint64Range(0, params.MaxBlockUtilization)
+		gasGen := rapid.Uint64Range(0, maxBlockUtilization)
 
 		// Update the fee market.
 		for i := uint64(0); i < numBlocks; i++ {
@@ -35,13 +36,13 @@ func TestAIMDLearningRate(t *testing.T) {
 			prevLearningRate := state.LearningRate
 
 			// Update the fee market.
-			if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
+			if err := state.Update(blockUtilization, maxBlockUtilization); err != nil {
 				t.Fatalf("block update errors: %v", err)
 			}
 
 			// Update the learning rate.
-			lr := state.UpdateLearningRate(params)
-			utilization := state.GetAverageUtilization(params)
+			lr := state.UpdateLearningRate(params, maxBlockUtilization)
+			utilization := state.GetAverageUtilization(maxBlockUtilization)
 
 			// Ensure that the learning rate is always bounded.
 			require.True(t, lr.GTE(params.MinLearningRate))
@@ -70,22 +71,23 @@ func TestAIMDBaseFee(t *testing.T) {
 		state.Window = make([]uint64, window)
 
 		params := CreateRandomAIMDParams(t)
+		maxBlockUtilization := rapid.Uint64Range(params.TargetBlockUtilization, params.TargetBlockUtilization*5).Draw(t, "max_block_utilization")
 
 		// Randomly generate the block utilization.
 		numBlocks := rapid.Uint64Range(0, uint64(window)*10).Draw(t, "num_blocks")
-		gasGen := rapid.Uint64Range(0, params.MaxBlockUtilization)
+		gasGen := rapid.Uint64Range(0, maxBlockUtilization)
 
 		// Update the fee market.
 		for i := uint64(0); i < numBlocks; i++ {
 			blockUtilization := gasGen.Draw(t, "gas")
 			prevBaseFee := state.BaseFee
 
-			if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
+			if err := state.Update(blockUtilization, maxBlockUtilization); err != nil {
 				t.Fatalf("block update errors: %v", err)
 			}
 
 			// Update the learning rate.
-			state.UpdateLearningRate(params)
+			state.UpdateLearningRate(params, maxBlockUtilization)
 			// Update the base fee.
 			state.UpdateBaseFee(params)
 
@@ -133,14 +135,12 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	delta := math.LegacyNewDec(int64(d)).Quo(math.LegacyNewDec(1000))
 
 	targetBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "target_block_utilization")
-	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, targetBlockUtilization*5).Draw(t, "max_block_utilization")
 
 	params := types.DefaultAIMDParams()
 	params.Alpha = alpha
 	params.Beta = beta
 	params.Theta = theta
 	params.Delta = delta
-	params.MaxBlockUtilization = maxBlockUtilization
 	params.TargetBlockUtilization = targetBlockUtilization
 
 	return params

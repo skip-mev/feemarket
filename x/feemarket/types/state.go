@@ -94,7 +94,7 @@ func (s *State) UpdateBaseFee(params Params) (fee math.Int) {
 //     when blocks are relatively close to the target block utilization.
 //
 // For more details, please see the EIP-1559 specification.
-func (s *State) UpdateLearningRate(params Params) (lr math.LegacyDec) {
+func (s *State) UpdateLearningRate(params Params, consensusMaxGas uint64) (lr math.LegacyDec) {
 	// Panic catch in case there is an overflow
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -104,7 +104,7 @@ func (s *State) UpdateLearningRate(params Params) (lr math.LegacyDec) {
 	}()
 
 	// Calculate the average utilization of the block window.
-	avg := s.GetAverageUtilization(params)
+	avg := s.GetAverageUtilization(consensusMaxGas)
 
 	// Determine if the average utilization is above or below the target
 	// threshold and adjust the learning rate accordingly.
@@ -140,7 +140,7 @@ func (s *State) GetNetUtilization(params Params) math.Int {
 
 // GetAverageUtilization returns the average utilization of the block
 // window.
-func (s *State) GetAverageUtilization(params Params) math.LegacyDec {
+func (s *State) GetAverageUtilization(consensusMaxGas uint64) math.LegacyDec {
 	var total uint64
 	for _, utilization := range s.Window {
 		total += utilization
@@ -149,7 +149,7 @@ func (s *State) GetAverageUtilization(params Params) math.LegacyDec {
 	sum := math.LegacyNewDecFromInt(math.NewIntFromUint64(total))
 
 	multiple := math.LegacyNewDecFromInt(math.NewIntFromUint64(uint64(len(s.Window))))
-	divisor := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.MaxBlockUtilization)).Mul(multiple)
+	divisor := math.LegacyNewDecFromInt(math.NewIntFromUint64(consensusMaxGas)).Mul(multiple)
 
 	return sum.Quo(divisor)
 }

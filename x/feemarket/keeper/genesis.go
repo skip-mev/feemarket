@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
@@ -16,6 +18,18 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic("genesis state and parameters do not match for window")
 	}
 
+	maxUtilization := uint64(ctx.ConsensusParams().Block.MaxGas)
+	if gs.Params.TargetBlockUtilization > maxUtilization {
+		panic("target block size cannot be greater than max block size")
+	}
+
+	if maxUtilization/gs.Params.TargetBlockUtilization > types.MaxBlockUtilizationRatio {
+		panic(fmt.Sprintf("max block size of %d cannot be greater than target block of %d size times %d",
+			maxUtilization,
+			gs.Params.TargetBlockUtilization,
+			types.MaxBlockUtilizationRatio,
+		))
+	}
 	// Initialize the fee market state and parameters.
 	if err := k.SetParams(ctx, gs.Params); err != nil {
 		panic(err)

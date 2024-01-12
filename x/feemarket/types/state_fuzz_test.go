@@ -33,9 +33,9 @@ func FuzzDefaultFeeMarket(f *testing.F) {
 
 		params.MinBaseFee = math.NewIntFromUint64(100)
 		state.BaseFee = math.NewIntFromUint64(200)
-		err := state.Update(blockGasUsed, params.MaxBlockUtilization)
+		err := state.Update(blockGasUsed, types.DefaultMaxBlockUtilization)
 
-		if blockGasUsed > params.MaxBlockUtilization {
+		if blockGasUsed > types.DefaultMaxBlockUtilization {
 			require.Error(t, err)
 			return
 		}
@@ -46,6 +46,7 @@ func FuzzDefaultFeeMarket(f *testing.F) {
 		// Ensure the learning rate is always the default learning rate.
 		lr := state.UpdateLearningRate(
 			params,
+			types.DefaultMaxBlockUtilization,
 		)
 		require.Equal(t, defaultLR, lr)
 
@@ -82,9 +83,9 @@ func FuzzAIMDFeeMarket(f *testing.F) {
 		params.MinBaseFee = math.NewIntFromUint64(100)
 		state.BaseFee = math.NewIntFromUint64(200)
 		state.Window = make([]uint64, 1)
-		err := state.Update(blockGasUsed, params.MaxBlockUtilization)
+		err := state.Update(blockGasUsed, types.DefaultAIMDMaxBlockSize)
 
-		if blockGasUsed > params.MaxBlockUtilization {
+		if blockGasUsed > types.DefaultAIMDMaxBlockSize {
 			require.Error(t, err)
 			return
 		}

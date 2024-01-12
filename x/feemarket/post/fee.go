@@ -100,16 +100,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	}
 
 	consensusMaxGas := ctx.ConsensusParams().GetBlock().GetMaxGas()
-	maxGas := params.MaxBlockUtilization
 
-	if consensusMaxGas < int64(maxGas) && consensusMaxGas >= 0 {
-		maxGas = uint64(consensusMaxGas)
-		ctx.Logger().Info("using consensus params max gas",
-			"max gas", maxGas,
-		)
-	}
-
-	err = state.Update(gas, maxGas)
+	err = state.Update(gas, uint64(consensusMaxGas))
 	if err != nil {
 		return ctx, errorsmod.Wrapf(sdkerrors.ErrTxTooLarge, err.Error())
 	}

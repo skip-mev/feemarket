@@ -15,105 +15,99 @@ var OneHundred = math.LegacyNewDecFromInt(math.NewInt(100))
 func TestState_Update(t *testing.T) {
 	t.Run("can add to window", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		err := state.Update(100, params.MaxBlockUtilization)
+		err := state.Update(100, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 	})
 
 	t.Run("can add several txs to window", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		err := state.Update(100, params.MaxBlockUtilization)
+		err := state.Update(100, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
-		err = state.Update(200, params.MaxBlockUtilization)
+		err = state.Update(200, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[0])
 	})
 
 	t.Run("errors when it exceeds max block utilization", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		err := state.Update(params.MaxBlockUtilization+1, params.MaxBlockUtilization)
+		err := state.Update(types.DefaultMaxBlockUtilization+1, types.DefaultMaxBlockUtilization)
 		require.Error(t, err)
 	})
 
 	t.Run("can update with several blocks in default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		err := state.Update(100, params.MaxBlockUtilization)
+		err := state.Update(100, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params.MaxBlockUtilization)
+		err = state.Update(200, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[0])
 
-		err = state.Update(300, params.MaxBlockUtilization)
+		err = state.Update(300, types.DefaultMaxBlockUtilization)
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), state.Window[0])
 	})
 
 	t.Run("can update with several blocks in default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
 
-		err := state.Update(100, params.MaxBlockUtilization)
+		err := state.Update(100, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params.MaxBlockUtilization)
+		err = state.Update(200, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[1])
 
 		state.IncrementHeight()
 
-		err = state.Update(300, params.MaxBlockUtilization)
+		err = state.Update(300, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[2])
 
 		state.IncrementHeight()
 
-		err = state.Update(400, params.MaxBlockUtilization)
+		err = state.Update(400, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(400), state.Window[3])
 	})
 
 	t.Run("correctly wraps around with aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
 		state.Window = make([]uint64, 3)
 
-		err := state.Update(100, params.MaxBlockUtilization)
+		err := state.Update(100, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(100), state.Window[0])
 
 		state.IncrementHeight()
 
-		err = state.Update(200, params.MaxBlockUtilization)
+		err = state.Update(200, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(200), state.Window[1])
 
 		state.IncrementHeight()
 
-		err = state.Update(300, params.MaxBlockUtilization)
+		err = state.Update(300, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(300), state.Window[2])
 
 		state.IncrementHeight()
 		require.Equal(t, uint64(0), state.Window[0])
 
-		err = state.Update(400, params.MaxBlockUtilization)
+		err = state.Update(400, types.DefaultAIMDMaxBlockSize)
 		require.NoError(t, err)
 		require.Equal(t, uint64(400), state.Window[0])
 		require.Equal(t, uint64(200), state.Window[1])
@@ -155,7 +149,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.BaseFee = math.NewInt(1000)
 		params.MinBaseFee = math.NewInt(125)
 
-		state.Window[0] = params.MaxBlockUtilization
+		state.Window[0] = types.DefaultMaxBlockUtilization
 
 		newBaseFee := state.UpdateBaseFee(params)
 		expectedBaseFee := math.NewInt(1125)
@@ -170,7 +164,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		params.MinBaseFee = math.NewInt(125)
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		newBaseFee := state.UpdateBaseFee(params)
 
 		expectedBaseFee := math.NewInt(850)
@@ -189,7 +183,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		newBaseFee := state.UpdateBaseFee(params)
 
 		expectedBaseFee := math.NewInt(1000)
@@ -205,10 +199,10 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		newBaseFee := state.UpdateBaseFee(params)
 
 		expectedBaseFee := math.NewInt(1150)
@@ -246,12 +240,12 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		// Empty blocks
 		state := types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
-		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta, types.DefaultAIMDMaxBlockSize)
 		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
 
 		// Ensure that the learning rate is the same.
@@ -273,19 +267,19 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
-		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta, types.DefaultAIMDMaxBlockSize)
 		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
 
 		// Ensure that the learning rate is the same.
@@ -310,7 +304,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
@@ -319,13 +313,13 @@ func TestState_UpdateBaseFee(t *testing.T) {
 			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
+		lrWithDelta := state.UpdateLearningRate(paramsWithDelta, types.DefaultAIMDMaxBlockSize)
 		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
 
 		// Ensure that the learning rate is the same.
 		require.Equal(t, lr, lrWithDelta)
 
-		// Ensure that the base fee's are equal.
+		// Ensure that the base fees are equal.
 		require.Equal(t, bf, bfWithDelta)
 	})
 
@@ -344,7 +338,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.Window[0] = params.TargetBlockUtilization / 2
 
 		prevLR := state.LearningRate
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		bf := state.UpdateBaseFee(params)
 
 		expectedUtilization := math.LegacyMustNewDecFromStr("-0.5")
@@ -371,17 +365,17 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		params.Delta = math.LegacyNewDec(10)
 
 		// 1/4th of the window is full.
-		state.Window[0] = params.MaxBlockUtilization / 4 * 3
+		state.Window[0] = types.DefaultAIMDMaxBlockSize / 4 * 3
 
 		prevLR := state.LearningRate
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		bf := state.UpdateBaseFee(params)
 
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
 		expectedLR := prevLR.Add(params.Alpha)
 		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
 
-		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4)
+		expectedNetUtilization := math.LegacyNewDec(int64(types.DefaultAIMDMaxBlockSize) / 4)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
 		expectedFee := (math.LegacyNewDecFromInt(prevBF).Mul(expectedLRAdjustment)).Add(deltaDiff).TruncateInt()
 
@@ -398,13 +392,13 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		params.Window = 50
 		// This should overflow the base fee after a few iterations.
 		params.TargetBlockUtilization = 1
-		params.MaxBlockUtilization = 9_999_999_999_999_999_999
+		maxUtilization := uint64(9_999_999_999_999_999_999)
 
 		for {
 			var baseFee math.Int
 			require.NotPanics(t, func() {
-				state.Update(params.MaxBlockUtilization, params.MaxBlockUtilization)
-				state.UpdateLearningRate(params)
+				state.Update(maxUtilization, maxUtilization)
+				state.UpdateLearningRate(params, maxUtilization)
 				baseFee = state.UpdateBaseFee(params)
 			})
 
@@ -424,7 +418,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -435,7 +429,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 
 		state.Window[0] = params.TargetBlockUtilization
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -444,9 +438,9 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.MaxBlockUtilization
+		state.Window[0] = types.DefaultMaxBlockUtilization
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -457,7 +451,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 
 		state.Window[0] = 50000
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -468,7 +462,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 
 		state.Window[0] = params.TargetBlockUtilization + 50000
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -480,7 +474,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		randomValue := rand.Int63n(1000000000)
 		state.Window[0] = uint64(randomValue)
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultMaxBlockUtilization)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -489,7 +483,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		state := types.DefaultAIMDState()
 		params := types.DefaultAIMDParams()
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		expectedLearningRate := params.MinLearningRate.Add(params.Alpha)
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -505,7 +499,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		expectedLearningRate := defaultLR.Mul(params.Beta)
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -518,10 +512,10 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		expectedLearningRate := defaultLR.Add(params.Alpha)
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -535,13 +529,13 @@ func TestState_UpdateLearningRate(t *testing.T) {
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = 0
 			}
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		expectedLearningRate := defaultLR.Mul(params.Beta)
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -555,13 +549,13 @@ func TestState_UpdateLearningRate(t *testing.T) {
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = params.TargetBlockUtilization + 1
 			}
 		}
 
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, types.DefaultAIMDMaxBlockSize)
 		expectedLearningRate := defaultLR.Add(params.Alpha)
 		require.True(t, expectedLearningRate.Equal(state.LearningRate))
 	})
@@ -592,10 +586,10 @@ func TestState_GetNetUtilization(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.MaxBlockUtilization
+		state.Window[0] = types.DefaultMaxBlockUtilization
 
 		netUtilization := state.GetNetUtilization(params)
-		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization - params.TargetBlockUtilization)
+		expectedUtilization := math.NewIntFromUint64(types.DefaultMaxBlockUtilization - params.TargetBlockUtilization)
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -615,13 +609,13 @@ func TestState_GetNetUtilization(t *testing.T) {
 		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
 		netUtilization := state.GetNetUtilization(params)
 
 		multiple := math.NewIntFromUint64(uint64(len(state.Window)))
-		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization).Sub(math.NewIntFromUint64(params.TargetBlockUtilization)).Mul(multiple)
+		expectedUtilization := math.NewIntFromUint64(types.DefaultAIMDMaxBlockSize).Sub(math.NewIntFromUint64(params.TargetBlockUtilization)).Mul(multiple)
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -631,7 +625,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = 0
 			}
@@ -648,14 +642,14 @@ func TestState_GetNetUtilization(t *testing.T) {
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = params.TargetBlockUtilization
 			}
 		}
 
 		netUtilization := state.GetNetUtilization(params)
-		first := math.NewIntFromUint64(params.MaxBlockUtilization).Mul(math.NewIntFromUint64(params.Window / 2))
+		first := math.NewIntFromUint64(types.DefaultAIMDMaxBlockSize).Mul(math.NewIntFromUint64(params.Window / 2))
 		second := math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window / 2))
 		expectedUtilization := first.Add(second).Sub(math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window)))
 		require.True(t, expectedUtilization.Equal(netUtilization))
@@ -667,7 +661,6 @@ func TestState_GetNetUtilization(t *testing.T) {
 
 		params := types.DefaultAIMDParams()
 		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 100
 		state.Window[1] = 200
@@ -685,7 +678,6 @@ func TestState_GetNetUtilization(t *testing.T) {
 
 		params := types.DefaultAIMDParams()
 		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 0
 		state.Window[1] = 25
@@ -701,9 +693,8 @@ func TestState_GetNetUtilization(t *testing.T) {
 func TestState_GetAverageUtilization(t *testing.T) {
 	t.Run("empty block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultMaxBlockUtilization)
 		expectedUtilization := math.LegacyZeroDec()
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
@@ -714,27 +705,25 @@ func TestState_GetAverageUtilization(t *testing.T) {
 
 		state.Window[0] = params.TargetBlockUtilization
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultMaxBlockUtilization)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
 
 	t.Run("full block with default eip-1559", func(t *testing.T) {
 		state := types.DefaultState()
-		params := types.DefaultParams()
 
-		state.Window[0] = params.MaxBlockUtilization
+		state.Window[0] = types.DefaultMaxBlockUtilization
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultMaxBlockUtilization)
 		expectedUtilization := math.LegacyMustNewDecFromStr("1.0")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
 
 	t.Run("empty block with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultAIMDMaxBlockSize)
 		expectedUtilization := math.LegacyZeroDec()
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
@@ -747,37 +736,35 @@ func TestState_GetAverageUtilization(t *testing.T) {
 			state.Window[i] = params.TargetBlockUtilization
 		}
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultAIMDMaxBlockSize)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
 
 	t.Run("full blocks with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.MaxBlockUtilization
+			state.Window[i] = types.DefaultAIMDMaxBlockSize
 		}
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultAIMDMaxBlockSize)
 		expectedUtilization := math.LegacyMustNewDecFromStr("1.0")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
 
 	t.Run("varying blocks with default aimd eip-1559", func(t *testing.T) {
 		state := types.DefaultAIMDState()
-		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = 0
 			}
 		}
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultAIMDMaxBlockSize)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
@@ -788,13 +775,13 @@ func TestState_GetAverageUtilization(t *testing.T) {
 
 		for i := 0; i < len(state.Window); i++ {
 			if i%2 == 0 {
-				state.Window[i] = params.MaxBlockUtilization
+				state.Window[i] = types.DefaultAIMDMaxBlockSize
 			} else {
 				state.Window[i] = params.TargetBlockUtilization
 			}
 		}
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(types.DefaultAIMDMaxBlockSize)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.75")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
@@ -805,14 +792,14 @@ func TestState_GetAverageUtilization(t *testing.T) {
 
 		params := types.DefaultAIMDParams()
 		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
+		maxUtilization := uint64(200)
 
 		state.Window[0] = 100
 		state.Window[1] = 200
 		state.Window[2] = 0
 		state.Window[3] = 50
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(maxUtilization)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.4375")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})
@@ -824,14 +811,14 @@ func TestState_GetAverageUtilization(t *testing.T) {
 		params := types.DefaultAIMDParams()
 		params.Window = 4
 		params.TargetBlockUtilization = 100
-		params.MaxBlockUtilization = 200
+		maxUtilization := uint64(200)
 
 		state.Window[0] = 0
 		state.Window[1] = 25
 		state.Window[2] = 50
 		state.Window[3] = 75
 
-		avgUtilization := state.GetAverageUtilization(params)
+		avgUtilization := state.GetAverageUtilization(maxUtilization)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.1875")
 		require.True(t, expectedUtilization.Equal(avgUtilization))
 	})

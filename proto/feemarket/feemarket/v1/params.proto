@@ -66,20 +66,18 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // TargetBlockUtilization is the target block utilization (in units of gas).
+  // TargetBlockUtilization is the target block utilization (in units of gas).  This value MUST
+  // be lower than the consensus max gas parameter.
   uint64 target_block_utilization = 8;
-
-  // MaxBlockUtilization is the maximum block utilization (in units of gas).
-  uint64 max_block_utilization = 9;
 
   // Window defines the window size for calculating an adaptive learning rate
   // over a moving window of blocks.
-  uint64 window = 10;
+  uint64 window = 9;
 
   // FeeDenom is the denom that will be used for all fee payments.
-  string fee_denom = 11;
+  string fee_denom = 10;
 
   // Enabled is a boolean that determines whether the EIP1559 fee market is
   // enabled.
-  bool enabled = 12;
+  bool enabled = 11;
 }

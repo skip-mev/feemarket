@@ -20,7 +20,6 @@ func NewParams(
 	theta math.LegacyDec,
 	delta math.LegacyDec,
 	targetBlockSize uint64,
-	maxBlockSize uint64,
 	minBaseFee math.Int,
 	minLearingRate math.LegacyDec,
 	maxLearningRate math.LegacyDec,
@@ -36,7 +35,6 @@ func NewParams(
 		MinLearningRate:        minLearingRate,
 		MaxLearningRate:        maxLearningRate,
 		TargetBlockUtilization: targetBlockSize,
-		MaxBlockUtilization:    maxBlockSize,
 		Window:                 window,
 		FeeDenom:               feeDenom,
 		Enabled:                enabled,
@@ -67,14 +65,6 @@ func (p *Params) ValidateBasic() error {
 
 	if p.TargetBlockUtilization == 0 {
 		return fmt.Errorf("target block size cannot be zero")
-	}
-
-	if p.TargetBlockUtilization > p.MaxBlockUtilization {
-		return fmt.Errorf("target block size cannot be greater than max block size")
-	}
-
-	if p.MaxBlockUtilization/p.TargetBlockUtilization > MaxBlockUtilizationRatio {
-		return fmt.Errorf("max block size cannot be greater than target block size times %d", MaxBlockUtilizationRatio)
 	}
 
 	if p.MinBaseFee.IsNil() || !p.MinBaseFee.GTE(math.ZeroInt()) {

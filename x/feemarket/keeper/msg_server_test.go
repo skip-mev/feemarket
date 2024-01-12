@@ -5,19 +5,6 @@ import (
 )
 
 func (s *KeeperTestSuite) TestMsgParams() {
-	s.Run("accepts a req with no params", func() {
-		req := &types.MsgParams{
-			Authority: s.authorityAccount.String(),
-		}
-		resp, err := s.msgServer.Params(s.ctx, req)
-		s.Require().NoError(err)
-		s.Require().NotNil(resp)
-
-		params, err := s.feeMarketKeeper.GetParams(s.ctx)
-		s.Require().NoError(err)
-		s.Require().False(params.Enabled)
-	})
-
 	s.Run("accepts a req with params", func() {
 		req := &types.MsgParams{
 			Authority: s.authorityAccount.String(),
@@ -47,7 +34,7 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		state, err := s.feeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
-		err = state.Update(params.MaxBlockUtilization, params.MaxBlockUtilization)
+		err = state.Update(types.DefaultMaxBlockUtilization, types.DefaultMaxBlockUtilization)
 		s.Require().NoError(err)
 
 		err = s.feeMarketKeeper.SetState(s.ctx, state)

@@ -2,6 +2,7 @@
 package networksuite
 
 import (
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"math/rand"
 
 	tmdb "github.com/cometbft/cometbft-db"
@@ -69,5 +70,10 @@ func (nts *NetworkTestSuite) SetupSuite() {
 
 func populateFeeMarket(_ *rand.Rand, feeMarketState feemarkettypes.GenesisState) feemarkettypes.GenesisState {
 	// TODO intercept and populate state randomly if desired
+	return feeMarketState
+}
+
+func populateConsensus(_ *rand.Rand, consensusParams tmproto.ConsensusParams) tmproto.ConsensusParams {
+
 	return feeMarketState
 }

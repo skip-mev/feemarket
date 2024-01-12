@@ -20,16 +20,17 @@ func TestLearningRate(t *testing.T) {
 		// Randomly generate alpha and beta.
 		prevLearningRate := state.LearningRate
 
+		maxBlockUtilization := rapid.Uint64Range(params.TargetBlockUtilization, params.TargetBlockUtilization*5).Draw(t, "max_block_utilization")
+
 		// Randomly generate the block utilization.
-		blockUtilization := rapid.Uint64Range(0, params.MaxBlockUtilization).Draw(t, "gas")
+		blockUtilization := rapid.Uint64Range(0, maxBlockUtilization).Draw(t, "gas")
 
 		// Update the fee market.
-		if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
+		if err := state.Update(blockUtilization, maxBlockUtilization); err != nil {
 			t.Fatalf("block update errors: %v", err)
 		}
-
 		// Update the learning rate.
-		lr := state.UpdateLearningRate(params)
+		lr := state.UpdateLearningRate(params, maxBlockUtilization)
 		require.Equal(t, types.DefaultMinLearningRate, lr)
 		require.Equal(t, prevLearningRate, state.LearningRate)
 	})
@@ -46,16 +47,18 @@ func TestBaseFee(t *testing.T) {
 		prevBaseFee := state.BaseFee.Mul(math.NewInt(11)).Quo(math.NewInt(10))
 		state.BaseFee = prevBaseFee
 
+		maxBlockUtilization := rapid.Uint64Range(params.TargetBlockUtilization, params.TargetBlockUtilization*5).Draw(t, "max_block_utilization")
+
 		// Randomly generate the block utilization.
-		blockUtilization := rapid.Uint64Range(0, params.MaxBlockUtilization).Draw(t, "gas")
+		blockUtilization := rapid.Uint64Range(0, maxBlockUtilization).Draw(t, "gas")
 
 		// Update the fee market.
-		if err := state.Update(blockUtilization, params.MaxBlockUtilization); err != nil {
+		if err := state.Update(blockUtilization, maxBlockUtilization); err != nil {
 			t.Fatalf("block update errors: %v", err)
 		}
 
 		// Update the learning rate.
-		state.UpdateLearningRate(params)
+		state.UpdateLearningRate(params, maxBlockUtilization)
 		// Update the base fee.
 		state.UpdateBaseFee(params)
 
@@ -86,13 +89,11 @@ func CreateRandomParams(t *rapid.T) types.Params {
 	theta := math.LegacyNewDec(int64(th)).Quo(math.LegacyNewDec(100))
 
 	targetBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "target_block_utilization")
-	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, targetBlockUtilization*5).Draw(t, "max_block_utilization")
 
 	params := types.DefaultParams()
 	params.Alpha = alpha
 	params.Beta = beta
 	params.Theta = theta
-	params.MaxBlockUtilization = maxBlockUtilization
 	params.TargetBlockUtilization = targetBlockUtilization
 
 	return params

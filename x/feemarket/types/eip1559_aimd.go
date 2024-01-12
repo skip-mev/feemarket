@@ -70,7 +70,6 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDTheta,
 		DefaultAIMDDelta,
 		DefaultAIMDTargetBlockSize,
-		DefaultAIMDMaxBlockSize,
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDMaxLearningRate,

@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -43,7 +45,15 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
 	ctx, tk, tm := testkeeper.NewTestSetup(s.T())
 
-	s.ctx = ctx
+	s.ctx = ctx.WithConsensusParams(&tmproto.ConsensusParams{
+		Block: &tmproto.BlockParams{
+			MaxBytes: 0,
+			MaxGas:   int64(types.DefaultMaxBlockUtilization),
+		},
+		Evidence:  nil,
+		Validator: nil,
+		Version:   nil,
+	})
 	s.feeMarketKeeper = tk.FeeMarketKeeper
 	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
@@ -98,7 +108,6 @@ func (s *KeeperTestSuite) TestParams() {
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,
-			MaxBlockUtilization:    10,
 			Window:                 1,
 			Enabled:                true,
 		}
