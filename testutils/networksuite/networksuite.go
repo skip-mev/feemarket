@@ -2,8 +2,10 @@
 package networksuite
 
 import (
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"math/rand"
+
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
@@ -45,6 +47,7 @@ type NetworkTestSuite struct {
 
 	Network        *network.Network
 	FeeMarketState feemarkettypes.GenesisState
+	ConsensusState *tmproto.ConsensusParams
 }
 
 // SetupSuite setups the local network with a genesis state.
@@ -65,6 +68,10 @@ func (nts *NetworkTestSuite) SetupSuite() {
 	nts.FeeMarketState = populateFeeMarket(r, nts.FeeMarketState)
 	updateGenesisConfigState(feemarkettypes.ModuleName, &nts.FeeMarketState)
 
+	require.NoError(nts.T(), cfg.Codec.UnmarshalJSON(cfg.GenesisState[consensustypes.ModuleName], nts.ConsensusState))
+	nts.ConsensusState = populateConsensus(r, nts.ConsensusState)
+	updateGenesisConfigState(consensustypes.ModuleName, nts.ConsensusState)
+
 	nts.Network = network.New(nts.T(), cfg)
 }
 
@@ -73,7 +80,11 @@ func populateFeeMarket(_ *rand.Rand, feeMarketState feemarkettypes.GenesisState)
 	return feeMarketState
 }
 
-func populateConsensus(_ *rand.Rand, consensusParams tmproto.ConsensusParams) tmproto.ConsensusParams {
+func populateConsensus(_ *rand.Rand, consensusParams *tmproto.ConsensusParams) *tmproto.ConsensusParams {
+	consensusParams.Block = &tmproto.BlockParams{
+		MaxBytes: consensusParams.Block.MaxBytes,
+		MaxGas:   int64(feemarkettypes.DefaultMaxBlockUtilization),
+	}
 
-	return feeMarketState
+	return consensusParams
 }
