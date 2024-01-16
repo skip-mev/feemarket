@@ -18,13 +18,18 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic("genesis state and parameters do not match for window")
 	}
 
-	maxUtilization := uint64(ctx.ConsensusParams().Block.MaxGas)
+	maxGas, err := k.GetMaxGasUtilization(ctx)
+	if err != nil {
+		panic("unable to get consensus params. ensure that the feemarket module is initialized after the consensus params module")
+	}
+
+	maxUtilization := uint64(maxGas)
 	if gs.Params.TargetBlockUtilization > maxUtilization {
-		k.Logger(ctx).Error("target block size cannot be greater than max block size")
+		panic(fmt.Sprintf("target block size of %d cannot be greater than max block size of %d", gs.Params.TargetBlockUtilization, maxUtilization))
 	}
 
 	if maxUtilization/gs.Params.TargetBlockUtilization > types.MaxBlockUtilizationRatio {
-		k.Logger(ctx).Error(fmt.Sprintf("max block size of %d cannot be greater than target block of %d size times %d",
+		panic(fmt.Sprintf("max block size of %d cannot be greater than target block of %d size times %d",
 			maxUtilization,
 			gs.Params.TargetBlockUtilization,
 			types.MaxBlockUtilizationRatio,

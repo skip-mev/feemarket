@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
@@ -146,33 +144,6 @@ func TestPostHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrInvalidGasLimit,
-		},
-		{
-			Name: "using consensus params for invalid gas limit (exceeds max gas)",
-			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
-				s.Ctx = s.Ctx.WithConsensusParams(&tmproto.ConsensusParams{
-					Block: &tmproto.BlockParams{
-						MaxBytes: 0,
-						MaxGas:   10,
-					},
-					Evidence:  nil,
-					Validator: nil,
-					Version:   nil,
-				})
-
-				return antesuite.TestCaseArgs{
-					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
-					GasLimit:  gasLimit,
-					FeeAmount: validFee,
-				}
-			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrTxTooLarge,
 		},
 		{
 			Name: "using consensus params for max gas override - valid)",

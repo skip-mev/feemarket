@@ -3,7 +3,6 @@ package feemarket
 import (
 	"context"
 	"encoding/json"
-
 	abci "github.com/cometbft/cometbft/abci/types"
 
 	"cosmossdk.io/core/appmodule"
@@ -81,16 +80,25 @@ func (amb AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	k keeper.Keeper
+	k                     keeper.Keeper
+	accountKeeper         types.AccountKeeper
+	consensusParamsKeeper types.ConsensusKeeper
 }
 
 // NewAppModule returns an application module for the x/feemarket module.
-func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
+func NewAppModule(
+	cdc codec.Codec,
+	k keeper.Keeper,
+	accountKeeper types.AccountKeeper,
+	consensusParamsKeeper types.ConsensusKeeper,
+) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{
 			cdc: cdc,
 		},
-		k: k,
+		k:                     k,
+		accountKeeper:         accountKeeper,
+		consensusParamsKeeper: consensusParamsKeeper,
 	}
 }
 
@@ -158,10 +166,11 @@ func init() {
 type Inputs struct {
 	depinject.In
 
-	Config        *modulev1.Module
-	Cdc           codec.Codec
-	Key           *store.KVStoreKey
-	AccountKeeper types.AccountKeeper
+	Config          *modulev1.Module
+	Cdc             codec.Codec
+	Key             *store.KVStoreKey
+	AccountKeeper   types.AccountKeeper
+	ConsensusKeeper types.ConsensusKeeper
 }
 
 type Outputs struct {
@@ -189,10 +198,11 @@ func ProvideModule(in Inputs) Outputs {
 		in.Cdc,
 		in.Key,
 		in.AccountKeeper,
+		in.ConsensusKeeper,
 		authority.String(),
 	)
 
-	m := NewAppModule(in.Cdc, *Keeper)
+	m := NewAppModule(in.Cdc, *Keeper, in.AccountKeeper, in.ConsensusKeeper)
 
 	return Outputs{Keeper: *Keeper, Module: m}
 }

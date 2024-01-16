@@ -58,6 +58,20 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+types.ModuleName)
 }
 
+// GetMaxGasUtilization returns the MaxGas parameter from the consensus params keeper.
+func (k *Keeper) GetMaxGasUtilization(ctx sdk.Context) (int64, error) {
+	consensusParams, err := k.cpk.Get(ctx)
+	if err != nil {
+		return -1, fmt.Errorf("unable to get consensus params. ensure that the feemarket module is initialized after the consensus params module: %w", err)
+	}
+
+	if consensusParams == nil {
+		return -1, fmt.Errorf("got nil consensus params")
+	}
+
+	return consensusParams.Block.MaxGas, nil
+}
+
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority

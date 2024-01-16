@@ -30,13 +30,18 @@ func (ms MsgServer) Params(goCtx context.Context, msg *types.MsgParams) (*types.
 		return nil, fmt.Errorf("invalid authority to execute message")
 	}
 
-	maxUtilization := uint64(ctx.ConsensusParams().Block.MaxGas)
+	maxGas, err := ms.k.GetMaxGasUtilization(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get consensus params: %w", err)
+	}
+
+	maxUtilization := uint64(maxGas)
 	if msg.Params.TargetBlockUtilization > maxUtilization {
-		panic("target block size cannot be greater than max block size")
+		return nil, fmt.Errorf("target block size of %d cannot be greater than max block size of %d", msg.Params.TargetBlockUtilization, maxUtilization)
 	}
 
 	if maxUtilization/msg.Params.TargetBlockUtilization > types.MaxBlockUtilizationRatio {
-		panic(fmt.Sprintf("max block size cannot be greater than target block size times %d", types.MaxBlockUtilizationRatio))
+		return nil, fmt.Errorf(fmt.Sprintf("max block size cannot be greater than target block size times %d", types.MaxBlockUtilizationRatio))
 	}
 
 	params := msg.Params

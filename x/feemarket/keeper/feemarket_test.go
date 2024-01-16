@@ -171,10 +171,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between min and target block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
-		maxUtilization := uint64(s.ctx.ConsensusParams().Block.MaxGas)
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
+
+		maxUtilization := uint64(maxGas)
 		params.TargetBlockUtilization = maxUtilization / 2
 
-		err := state.Update(maxUtilization/4, maxUtilization)
+		err = state.Update(maxUtilization/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -194,12 +197,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between min and target block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
 
 		params := types.DefaultParams()
-		maxUtilization := uint64(s.ctx.ConsensusParams().Block.MaxGas)
+		maxUtilization := uint64(maxGas)
 		params.TargetBlockUtilization = maxUtilization / 2
-		err := state.Update(maxUtilization/4, maxUtilization)
-
+		err = state.Update(maxUtilization/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -222,10 +226,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between target and max block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
-		maxUtilization := uint64(s.ctx.ConsensusParams().Block.MaxGas)
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
+		maxUtilization := uint64(maxGas)
+
 		params.TargetBlockUtilization = maxUtilization / 2
 
-		err := state.Update((maxUtilization*3)/4, maxUtilization)
+		err = state.Update((maxUtilization*3)/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -249,10 +256,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		params := types.DefaultParams()
-		maxUtilization := uint64(s.ctx.ConsensusParams().Block.MaxGas)
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
+		maxUtilization := uint64(maxGas)
+
 		params.TargetBlockUtilization = maxUtilization / 2
 
-		err := state.Update((maxUtilization*3)/4, maxUtilization)
+		err = state.Update((maxUtilization*3)/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)

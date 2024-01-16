@@ -42,7 +42,7 @@ var additionalMaccPerms = map[string][]string{
 var ConsensusParams = &tmproto.ConsensusParams{
 	Block: &tmproto.BlockParams{
 		MaxBytes: 1_000_000,
-		MaxGas:   1_000_000,
+		MaxGas:   int64(feemarkettypes.DefaultMaxBlockUtilization),
 	},
 	Evidence:  nil,
 	Validator: nil,
@@ -56,8 +56,8 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	_, tk, tms := testkeeper.NewTestSetup(t, options...)
 
 	// initialize extra keeper
-	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper)
 	consensusKeeper := Consensus(tk.Initializer)
+	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper, consensusKeeper)
 	require.NoError(t, tk.Initializer.LoadLatest())
 
 	// initialize msg servers
@@ -110,6 +110,7 @@ func Consensus(
 func FeeMarket(
 	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,
+	consensusKeeper feemarkettypes.ConsensusKeeper,
 ) *feemarketkeeper.Keeper {
 	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
 	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
@@ -118,6 +119,7 @@ func FeeMarket(
 		initializer.Codec,
 		storeKey,
 		authKeeper,
+		consensusKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 }
