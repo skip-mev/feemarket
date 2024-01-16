@@ -108,7 +108,7 @@ func (s *KeeperTestSuite) TestParams() {
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,
-			Window:                 1,
+			WindowSize:             1,
 			Enabled:                true,
 		}
 

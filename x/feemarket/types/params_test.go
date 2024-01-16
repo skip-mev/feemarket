@@ -33,120 +33,120 @@ func TestParams(t *testing.T) {
 		{
 			name: "nil alpha",
 			p: types.Params{
-				Window:   1,
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "negative alpha",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("-0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("-0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "beta is nil",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "beta is negative",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("-0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("-0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "beta is greater than 1",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("1.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("1.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "theta is nil",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "theta is negative",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				Theta:    math.LegacyMustNewDecFromStr("-0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				Theta:      math.LegacyMustNewDecFromStr("-0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "theta is greater than 1",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				Theta:    math.LegacyMustNewDecFromStr("1.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				Theta:      math.LegacyMustNewDecFromStr("1.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "delta is nil",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				Theta:    math.LegacyMustNewDecFromStr("0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				Theta:      math.LegacyMustNewDecFromStr("0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "delta is negative",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				Theta:    math.LegacyMustNewDecFromStr("0.1"),
-				Delta:    math.LegacyMustNewDecFromStr("-0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				Theta:      math.LegacyMustNewDecFromStr("0.1"),
+				Delta:      math.LegacyMustNewDecFromStr("-0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "target block size is zero",
 			p: types.Params{
-				Window:   1,
-				Alpha:    math.LegacyMustNewDecFromStr("0.1"),
-				Beta:     math.LegacyMustNewDecFromStr("0.1"),
-				Theta:    math.LegacyMustNewDecFromStr("0.1"),
-				Delta:    math.LegacyMustNewDecFromStr("0.1"),
-				FeeDenom: types.DefaultFeeDenom,
+				WindowSize: 1,
+				Alpha:      math.LegacyMustNewDecFromStr("0.1"),
+				Beta:       math.LegacyMustNewDecFromStr("0.1"),
+				Theta:      math.LegacyMustNewDecFromStr("0.1"),
+				Delta:      math.LegacyMustNewDecFromStr("0.1"),
+				FeeDenom:   types.DefaultFeeDenom,
 			},
 			expectedErr: true,
 		},
 		{
 			name: "max block size is zero",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -159,7 +159,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "target block size is greater than max block size",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -172,7 +172,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "min base fee is nil",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -185,7 +185,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "min base fee is negative",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -199,7 +199,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "min learning rate is nil",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -213,7 +213,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "min learning rate is negative",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -228,7 +228,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "max learning rate is nil",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -243,7 +243,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "max learning rate is negative",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -259,7 +259,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "min learning rate is greater than max learning rate",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),
@@ -275,7 +275,7 @@ func TestParams(t *testing.T) {
 		{
 			name: "fee denom is empty",
 			p: types.Params{
-				Window:                 1,
+				WindowSize:             1,
 				Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 				Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 				Theta:                  math.LegacyMustNewDecFromStr("0.1"),

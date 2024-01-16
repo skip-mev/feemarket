@@ -14,7 +14,7 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 		panic(err)
 	}
 
-	if gs.Params.Window != uint64(len(gs.State.Window)) {
+	if gs.Params.WindowSize != uint64(len(gs.State.Window)) {
 		panic("genesis state and parameters do not match for window")
 	}
 

@@ -19,7 +19,7 @@ func (s *KeeperTestSuite) TestInitGenesis() {
 
 	s.Run("bad genesis state should panic", func() {
 		gs := types.DefaultGenesisState()
-		gs.Params.Window = 0
+		gs.Params.WindowSize = 0
 		s.Require().Panics(func() {
 			s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 		})
@@ -27,7 +27,7 @@ func (s *KeeperTestSuite) TestInitGenesis() {
 
 	s.Run("mismatch in params and state for window should panic", func() {
 		gs := types.DefaultAIMDGenesisState()
-		gs.Params.Window = 1
+		gs.Params.WindowSize = 1
 
 		s.Require().Panics(func() {
 			s.feeMarketKeeper.InitGenesis(s.ctx, *gs)

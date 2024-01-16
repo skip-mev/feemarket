@@ -331,7 +331,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		// Instantiate the params with a delta.
 		params := types.DefaultAIMDParams()
-		params.Window = 1
+		params.WindowSize = 1
 		params.Delta = math.LegacyNewDec(10)
 
 		// 1/4th of the window is full.
@@ -361,7 +361,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		// Instantiate the params with a delta.
 		params := types.DefaultAIMDParams()
-		params.Window = 1
+		params.WindowSize = 1
 		params.Delta = math.LegacyNewDec(10)
 
 		// 1/4th of the window is full.
@@ -389,7 +389,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
 
 		params := types.DefaultAIMDParams()
-		params.Window = 50
+		params.WindowSize = 50
 		// This should overflow the base fee after a few iterations.
 		params.TargetBlockUtilization = 1
 		maxUtilization := uint64(9_999_999_999_999_999_999)
@@ -649,9 +649,9 @@ func TestState_GetNetUtilization(t *testing.T) {
 		}
 
 		netUtilization := state.GetNetUtilization(params)
-		first := math.NewIntFromUint64(types.DefaultAIMDMaxBlockSize).Mul(math.NewIntFromUint64(params.Window / 2))
-		second := math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window / 2))
-		expectedUtilization := first.Add(second).Sub(math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window)))
+		first := math.NewIntFromUint64(types.DefaultAIMDMaxBlockSize).Mul(math.NewIntFromUint64(params.WindowSize / 2))
+		second := math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.WindowSize / 2))
+		expectedUtilization := first.Add(second).Sub(math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.WindowSize)))
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -809,7 +809,7 @@ func TestState_GetAverageUtilization(t *testing.T) {
 		state.Window = make([]uint64, 4)
 
 		params := types.DefaultAIMDParams()
-		params.Window = 4
+		params.WindowSize = 4
 		params.TargetBlockUtilization = 100
 		maxUtilization := uint64(200)
 
