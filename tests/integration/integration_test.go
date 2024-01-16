@@ -28,7 +28,6 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.encCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
-
 	s.ctx, s.TestKeepers, s.TestMsgServers = testkeeper.NewTestSetup(s.T())
 }
 
@@ -81,8 +80,7 @@ func (s *IntegrationTestSuite) TestParams() {
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,
-			MaxBlockUtilization:    10,
-			Window:                 1,
+			WindowSize:             1,
 			Enabled:                true,
 		}
 

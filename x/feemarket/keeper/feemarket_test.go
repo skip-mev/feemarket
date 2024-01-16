@@ -74,7 +74,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(params.TargetBlockUtilization, params)
+		err := state.Update(params.TargetBlockUtilization, types.DefaultMaxBlockUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -98,7 +98,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(params.TargetBlockUtilization, params)
+		err := state.Update(params.TargetBlockUtilization, types.DefaultMaxBlockUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -121,7 +121,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(params.MaxBlockUtilization, params)
+		err := state.Update(types.DefaultMaxBlockUtilization, types.DefaultMaxBlockUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -148,7 +148,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
-		err := state.Update(params.MaxBlockUtilization, params)
+		err := state.Update(types.DefaultMaxBlockUtilization, types.DefaultMaxBlockUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -171,10 +171,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between min and target block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
-		params.MaxBlockUtilization = 100
-		params.TargetBlockUtilization = 50
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
 
-		err := state.Update(25, params)
+		maxUtilization := uint64(maxGas)
+		params.TargetBlockUtilization = maxUtilization / 2
+
+		err = state.Update(maxUtilization/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -194,12 +197,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between min and target block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
 
 		params := types.DefaultParams()
-		params.MaxBlockUtilization = 100
-		params.TargetBlockUtilization = 50
-		err := state.Update(25, params)
-
+		maxUtilization := uint64(maxGas)
+		params.TargetBlockUtilization = maxUtilization / 2
+		err = state.Update(maxUtilization/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -222,10 +226,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 	s.Run("in-between target and max block with default eip1559 at min base fee", func() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
-		params.MaxBlockUtilization = 100
-		params.TargetBlockUtilization = 50
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
+		maxUtilization := uint64(maxGas)
 
-		err := state.Update(75, params)
+		params.TargetBlockUtilization = maxUtilization / 2
+
+		err = state.Update((maxUtilization*3)/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)
@@ -249,10 +256,13 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state := types.DefaultState()
 		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
 		params := types.DefaultParams()
-		params.MaxBlockUtilization = 100
-		params.TargetBlockUtilization = 50
+		maxGas, err := s.feeMarketKeeper.GetMaxGasUtilization(s.ctx)
+		s.Require().NoError(err)
+		maxUtilization := uint64(maxGas)
 
-		err := state.Update(75, params)
+		params.TargetBlockUtilization = maxUtilization / 2
+
+		err = state.Update((maxUtilization*3)/4, maxUtilization)
 		s.Require().NoError(err)
 
 		s.setGenesisState(params, state)

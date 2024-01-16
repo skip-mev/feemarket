@@ -61,7 +61,6 @@ func DefaultParams() Params {
 		DefaultTheta,
 		DefaultDelta,
 		DefaultTargetBlockUtilization,
-		DefaultMaxBlockUtilization,
 		DefaultMinBaseFee,
 		DefaultMinLearningRate,
 		DefaultMaxLearningRate,

@@ -4,6 +4,9 @@ package networksuite
 import (
 	"math/rand"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
+
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -44,6 +47,7 @@ type NetworkTestSuite struct {
 
 	Network        *network.Network
 	FeeMarketState feemarkettypes.GenesisState
+	ConsensusState *tmproto.ConsensusParams
 }
 
 // SetupSuite setups the local network with a genesis state.
@@ -64,10 +68,24 @@ func (nts *NetworkTestSuite) SetupSuite() {
 	nts.FeeMarketState = populateFeeMarket(r, nts.FeeMarketState)
 	updateGenesisConfigState(feemarkettypes.ModuleName, &nts.FeeMarketState)
 
+	nts.ConsensusState = populateConsensus(r)
+	updateGenesisConfigState(consensustypes.ModuleName, nts.ConsensusState)
+
 	nts.Network = network.New(nts.T(), cfg)
 }
 
 func populateFeeMarket(_ *rand.Rand, feeMarketState feemarkettypes.GenesisState) feemarkettypes.GenesisState {
 	// TODO intercept and populate state randomly if desired
 	return feeMarketState
+}
+
+func populateConsensus(_ *rand.Rand) *tmproto.ConsensusParams {
+	consensusParams := new(tmproto.ConsensusParams)
+
+	consensusParams.Block = &tmproto.BlockParams{
+		MaxBytes: 1_000_000_000,
+		MaxGas:   int64(feemarkettypes.DefaultMaxBlockUtilization),
+	}
+
+	return consensusParams
 }

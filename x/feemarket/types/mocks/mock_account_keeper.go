@@ -68,8 +68,7 @@ func (_m *AccountKeeper) GetModuleAddress(name string) types.AccAddress {
 func NewAccountKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *AccountKeeper {
+}) *AccountKeeper {
 	mock := &AccountKeeper{}
 	mock.Mock.Test(t)
 

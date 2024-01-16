@@ -99,9 +99,14 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, err
 	}
 
-	err = state.Update(gas, params)
+	maxGas, err := dfd.feemarketKeeper.GetMaxGasUtilization(ctx)
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
+		return ctx, errorsmod.Wrapf(err, "unable to get max gas parameter")
+	}
+
+	err = state.Update(gas, uint64(maxGas))
+	if err != nil {
+		return ctx, errorsmod.Wrapf(sdkerrors.ErrTxTooLarge, err.Error())
 	}
 
 	err = dfd.feemarketKeeper.SetState(ctx, state)

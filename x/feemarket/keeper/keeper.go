@@ -15,6 +15,7 @@ type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
 	ak       types.AccountKeeper
+	cpk      types.ConsensusKeeper
 
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
@@ -26,16 +27,26 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	authKeeper types.AccountKeeper,
+	consensusKeeper types.ConsensusKeeper,
 	authority string,
 ) *Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
 	}
 
+	if authKeeper == nil {
+		panic("authkeeper cannot be nil")
+	}
+
+	if consensusKeeper == nil {
+		panic("consensuskeeper cannot be nil")
+	}
+
 	k := &Keeper{
 		cdc,
 		storeKey,
 		authKeeper,
+		consensusKeeper,
 		authority,
 	}
 
@@ -45,6 +56,20 @@ func NewKeeper(
 // Logger returns a feemarket module-specific logger.
 func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+types.ModuleName)
+}
+
+// GetMaxGasUtilization returns the MaxGas parameter from the consensus params keeper.
+func (k *Keeper) GetMaxGasUtilization(ctx sdk.Context) (int64, error) {
+	consensusParams, err := k.cpk.Get(ctx)
+	if err != nil {
+		return -1, fmt.Errorf("unable to get consensus params. ensure that the feemarket module is initialized after the consensus params module: %w", err)
+	}
+
+	if consensusParams == nil {
+		return -1, fmt.Errorf("got nil consensus params")
+	}
+
+	return consensusParams.Block.MaxGas, nil
 }
 
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
