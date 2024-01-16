@@ -15,6 +15,7 @@ type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
 	ak       types.AccountKeeper
+	cpk      types.ConsensusKeeper
 
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
@@ -26,16 +27,26 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	authKeeper types.AccountKeeper,
+	consensusKeeper types.ConsensusKeeper,
 	authority string,
 ) *Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
 	}
 
+	if authKeeper == nil {
+		panic("authkeeper cannot be nil")
+	}
+
+	if consensusKeeper == nil {
+		panic("consensuskeeper cannot be nil")
+	}
+
 	k := &Keeper{
 		cdc,
 		storeKey,
 		authKeeper,
+		consensusKeeper,
 		authority,
 	}
 
