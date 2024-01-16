@@ -24,8 +24,7 @@ var (
 	fd_Params_min_learning_rate        protoreflect.FieldDescriptor
 	fd_Params_max_learning_rate        protoreflect.FieldDescriptor
 	fd_Params_target_block_utilization protoreflect.FieldDescriptor
-	fd_Params_max_block_utilization    protoreflect.FieldDescriptor
-	fd_Params_window                   protoreflect.FieldDescriptor
+	fd_Params_window_size              protoreflect.FieldDescriptor
 	fd_Params_fee_denom                protoreflect.FieldDescriptor
 	fd_Params_enabled                  protoreflect.FieldDescriptor
 )
@@ -41,8 +40,7 @@ func init() {
 	fd_Params_min_learning_rate = md_Params.Fields().ByName("min_learning_rate")
 	fd_Params_max_learning_rate = md_Params.Fields().ByName("max_learning_rate")
 	fd_Params_target_block_utilization = md_Params.Fields().ByName("target_block_utilization")
-	fd_Params_max_block_utilization = md_Params.Fields().ByName("max_block_utilization")
-	fd_Params_window = md_Params.Fields().ByName("window")
+	fd_Params_window_size = md_Params.Fields().ByName("window_size")
 	fd_Params_fee_denom = md_Params.Fields().ByName("fee_denom")
 	fd_Params_enabled = md_Params.Fields().ByName("enabled")
 }
@@ -160,15 +158,9 @@ func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, proto
 			return
 		}
 	}
-	if x.MaxBlockUtilization != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.MaxBlockUtilization)
-		if !f(fd_Params_max_block_utilization, value) {
-			return
-		}
-	}
-	if x.Window != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.Window)
-		if !f(fd_Params_window, value) {
+	if x.WindowSize != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.WindowSize)
+		if !f(fd_Params_window_size, value) {
 			return
 		}
 	}
@@ -215,10 +207,8 @@ func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.MaxLearningRate != ""
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		return x.TargetBlockUtilization != uint64(0)
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		return x.MaxBlockUtilization != uint64(0)
-	case "feemarket.feemarket.v1.Params.window":
-		return x.Window != uint64(0)
+	case "feemarket.feemarket.v1.Params.window_size":
+		return x.WindowSize != uint64(0)
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		return x.FeeDenom != ""
 	case "feemarket.feemarket.v1.Params.enabled":
@@ -255,10 +245,8 @@ func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 		x.MaxLearningRate = ""
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		x.TargetBlockUtilization = uint64(0)
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		x.MaxBlockUtilization = uint64(0)
-	case "feemarket.feemarket.v1.Params.window":
-		x.Window = uint64(0)
+	case "feemarket.feemarket.v1.Params.window_size":
+		x.WindowSize = uint64(0)
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		x.FeeDenom = ""
 	case "feemarket.feemarket.v1.Params.enabled":
@@ -303,11 +291,8 @@ func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) pro
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		value := x.TargetBlockUtilization
 		return protoreflect.ValueOfUint64(value)
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		value := x.MaxBlockUtilization
-		return protoreflect.ValueOfUint64(value)
-	case "feemarket.feemarket.v1.Params.window":
-		value := x.Window
+	case "feemarket.feemarket.v1.Params.window_size":
+		value := x.WindowSize
 		return protoreflect.ValueOfUint64(value)
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		value := x.FeeDenom
@@ -351,10 +336,8 @@ func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value proto
 		x.MaxLearningRate = value.Interface().(string)
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		x.TargetBlockUtilization = value.Uint()
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		x.MaxBlockUtilization = value.Uint()
-	case "feemarket.feemarket.v1.Params.window":
-		x.Window = value.Uint()
+	case "feemarket.feemarket.v1.Params.window_size":
+		x.WindowSize = value.Uint()
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		x.FeeDenom = value.Interface().(string)
 	case "feemarket.feemarket.v1.Params.enabled":
@@ -395,10 +378,8 @@ func (x *fastReflection_Params) Mutable(fd protoreflect.FieldDescriptor) protore
 		panic(fmt.Errorf("field max_learning_rate of message feemarket.feemarket.v1.Params is not mutable"))
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		panic(fmt.Errorf("field target_block_utilization of message feemarket.feemarket.v1.Params is not mutable"))
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		panic(fmt.Errorf("field max_block_utilization of message feemarket.feemarket.v1.Params is not mutable"))
-	case "feemarket.feemarket.v1.Params.window":
-		panic(fmt.Errorf("field window of message feemarket.feemarket.v1.Params is not mutable"))
+	case "feemarket.feemarket.v1.Params.window_size":
+		panic(fmt.Errorf("field window_size of message feemarket.feemarket.v1.Params is not mutable"))
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		panic(fmt.Errorf("field fee_denom of message feemarket.feemarket.v1.Params is not mutable"))
 	case "feemarket.feemarket.v1.Params.enabled":
@@ -432,9 +413,7 @@ func (x *fastReflection_Params) NewField(fd protoreflect.FieldDescriptor) protor
 		return protoreflect.ValueOfString("")
 	case "feemarket.feemarket.v1.Params.target_block_utilization":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "feemarket.feemarket.v1.Params.max_block_utilization":
-		return protoreflect.ValueOfUint64(uint64(0))
-	case "feemarket.feemarket.v1.Params.window":
+	case "feemarket.feemarket.v1.Params.window_size":
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "feemarket.feemarket.v1.Params.fee_denom":
 		return protoreflect.ValueOfString("")
@@ -540,11 +519,8 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		if x.TargetBlockUtilization != 0 {
 			n += 1 + runtime.Sov(uint64(x.TargetBlockUtilization))
 		}
-		if x.MaxBlockUtilization != 0 {
-			n += 1 + runtime.Sov(uint64(x.MaxBlockUtilization))
-		}
-		if x.Window != 0 {
-			n += 1 + runtime.Sov(uint64(x.Window))
+		if x.WindowSize != 0 {
+			n += 1 + runtime.Sov(uint64(x.WindowSize))
 		}
 		l = len(x.FeeDenom)
 		if l > 0 {
@@ -590,22 +566,17 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 				dAtA[i] = 0
 			}
 			i--
-			dAtA[i] = 0x60
+			dAtA[i] = 0x58
 		}
 		if len(x.FeeDenom) > 0 {
 			i -= len(x.FeeDenom)
 			copy(dAtA[i:], x.FeeDenom)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.FeeDenom)))
 			i--
-			dAtA[i] = 0x5a
+			dAtA[i] = 0x52
 		}
-		if x.Window != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.Window))
-			i--
-			dAtA[i] = 0x50
-		}
-		if x.MaxBlockUtilization != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.MaxBlockUtilization))
+		if x.WindowSize != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.WindowSize))
 			i--
 			dAtA[i] = 0x48
 		}
@@ -957,9 +928,9 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 				}
 			case 9:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field MaxBlockUtilization", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field WindowSize", wireType)
 				}
-				x.MaxBlockUtilization = 0
+				x.WindowSize = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -969,31 +940,12 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.MaxBlockUtilization |= uint64(b&0x7F) << shift
+					x.WindowSize |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
 			case 10:
-				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Window", wireType)
-				}
-				x.Window = 0
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					x.Window |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-			case 11:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field FeeDenom", wireType)
 				}
@@ -1025,7 +977,7 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 				}
 				x.FeeDenom = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 12:
+			case 11:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
 				}
@@ -1100,7 +1052,7 @@ type Params struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// Alpha is the amount we additively increase the learninig rate
+	// Alpha is the amount we additively increase the learning rate
 	// when it is above or below the target +/- threshold.
 	Alpha string `protobuf:"bytes,1,opt,name=alpha,proto3" json:"alpha,omitempty"`
 	// Beta is the amount we multiplicatively decrease the learning rate
@@ -1116,25 +1068,23 @@ type Params struct {
 	// utilization.
 	Delta string `protobuf:"bytes,4,opt,name=delta,proto3" json:"delta,omitempty"`
 	// MinBaseFee determines the initial base fee of the module and the global
-	// minimum
-	// for the network. This is denominated in fee per gas unit.
+	// minimum for the network. This is denominated in fee per gas unit.
 	MinBaseFee string `protobuf:"bytes,5,opt,name=min_base_fee,json=minBaseFee,proto3" json:"min_base_fee,omitempty"`
 	// MinLearningRate is the lower bound for the learning rate.
 	MinLearningRate string `protobuf:"bytes,6,opt,name=min_learning_rate,json=minLearningRate,proto3" json:"min_learning_rate,omitempty"`
 	// MaxLearningRate is the upper bound for the learning rate.
 	MaxLearningRate string `protobuf:"bytes,7,opt,name=max_learning_rate,json=maxLearningRate,proto3" json:"max_learning_rate,omitempty"`
-	// TargetBlockUtilization is the target block utilization.
+	// TargetBlockUtilization is the target block utilization (in units of gas).
+	// This value MUST be lower than the consensus max gas parameter.
 	TargetBlockUtilization uint64 `protobuf:"varint,8,opt,name=target_block_utilization,json=targetBlockUtilization,proto3" json:"target_block_utilization,omitempty"`
-	// MaxBlockUtilization is the maximum block utilization.
-	MaxBlockUtilization uint64 `protobuf:"varint,9,opt,name=max_block_utilization,json=maxBlockUtilization,proto3" json:"max_block_utilization,omitempty"`
-	// Window defines the window size for calculating an adaptive learning rate
-	// over a moving window of blocks.
-	Window uint64 `protobuf:"varint,10,opt,name=window,proto3" json:"window,omitempty"`
+	// WindowSize defines the window size for calculating an adaptive learning
+	// rate over a moving window of blocks.
+	WindowSize uint64 `protobuf:"varint,9,opt,name=window_size,json=windowSize,proto3" json:"window_size,omitempty"`
 	// FeeDenom is the denom that will be used for all fee payments.
-	FeeDenom string `protobuf:"bytes,11,opt,name=fee_denom,json=feeDenom,proto3" json:"fee_denom,omitempty"`
+	FeeDenom string `protobuf:"bytes,10,opt,name=fee_denom,json=feeDenom,proto3" json:"fee_denom,omitempty"`
 	// Enabled is a boolean that determines whether the EIP1559 fee market is
 	// enabled.
-	Enabled bool `protobuf:"varint,12,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Enabled bool `protobuf:"varint,11,opt,name=enabled,proto3" json:"enabled,omitempty"`
 }
 
 func (x *Params) Reset() {
@@ -1213,16 +1163,9 @@ func (x *Params) GetTargetBlockUtilization() uint64 {
 	return 0
 }
 
-func (x *Params) GetMaxBlockUtilization() uint64 {
+func (x *Params) GetWindowSize() uint64 {
 	if x != nil {
-		return x.MaxBlockUtilization
-	}
-	return 0
-}
-
-func (x *Params) GetWindow() uint64 {
-	if x != nil {
-		return x.Window
+		return x.WindowSize
 	}
 	return 0
 }
@@ -1250,7 +1193,7 @@ var file_feemarket_feemarket_v1_params_proto_rawDesc = []byte{
 	0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x76, 0x31, 0x1a, 0x19, 0x63,
 	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f, 0x73, 0x6d,
 	0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x14, 0x67, 0x6f, 0x67, 0x6f, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xf4,
+	0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xc9,
 	0x05, 0x0a, 0x06, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x47, 0x0a, 0x05, 0x61, 0x6c, 0x70,
 	0x68, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde,
 	0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d,
@@ -1290,29 +1233,26 @@ var file_feemarket_feemarket_v1_params_proto_rawDesc = []byte{
 	0x65, 0x74, 0x5f, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x75, 0x74, 0x69, 0x6c, 0x69, 0x7a, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x08, 0x20, 0x01, 0x28, 0x04, 0x52, 0x16, 0x74, 0x61, 0x72, 0x67,
 	0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x55, 0x74, 0x69, 0x6c, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x12, 0x32, 0x0a, 0x15, 0x6d, 0x61, 0x78, 0x5f, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f,
-	0x75, 0x74, 0x69, 0x6c, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x13, 0x6d, 0x61, 0x78, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x55, 0x74, 0x69, 0x6c, 0x69,
-	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77,
-	0x18, 0x0a, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x12, 0x1b,
-	0x0a, 0x09, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x65, 0x6e, 0x6f, 0x6d, 0x18, 0x0b, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x08, 0x66, 0x65, 0x65, 0x44, 0x65, 0x6e, 0x6f, 0x6d, 0x12, 0x18, 0x0a, 0x07, 0x65,
-	0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x65, 0x6e,
-	0x61, 0x62, 0x6c, 0x65, 0x64, 0x42, 0xd8, 0x01, 0x0a, 0x1a, 0x63, 0x6f, 0x6d, 0x2e, 0x66, 0x65,
-	0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65,
-	0x74, 0x2e, 0x76, 0x31, 0x42, 0x0b, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x50, 0x72, 0x6f, 0x74,
-	0x6f, 0x50, 0x01, 0x5a, 0x33, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69,
-	0x6f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f,
-	0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x76, 0x31, 0x3b, 0x66, 0x65, 0x65,
-	0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x46, 0x46, 0x58, 0xaa, 0x02,
-	0x16, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x46, 0x65, 0x65, 0x6d, 0x61,
-	0x72, 0x6b, 0x65, 0x74, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x16, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72,
-	0x6b, 0x65, 0x74, 0x5c, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x56, 0x31,
-	0xe2, 0x02, 0x22, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x46, 0x65, 0x65,
-	0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74,
-	0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x18, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65,
-	0x74, 0x3a, 0x3a, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x3a, 0x3a, 0x56, 0x31,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x12, 0x1f, 0x0a, 0x0b, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x5f, 0x73, 0x69, 0x7a,
+	0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0a, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53,
+	0x69, 0x7a, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x65, 0x6e, 0x6f, 0x6d,
+	0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x65, 0x65, 0x44, 0x65, 0x6e, 0x6f, 0x6d,
+	0x12, 0x18, 0x0a, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x0b, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x42, 0xd8, 0x01, 0x0a, 0x1a, 0x63,
+	0x6f, 0x6d, 0x2e, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x66, 0x65, 0x65,
+	0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x76, 0x31, 0x42, 0x0b, 0x50, 0x61, 0x72, 0x61, 0x6d,
+	0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x66, 0x65, 0x65, 0x6d, 0x61,
+	0x72, 0x6b, 0x65, 0x74, 0x2f, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2f, 0x76,
+	0x31, 0x3b, 0x66, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x76, 0x31, 0xa2, 0x02, 0x03,
+	0x46, 0x46, 0x58, 0xaa, 0x02, 0x16, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e,
+	0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x16, 0x46,
+	0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b,
+	0x65, 0x74, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x22, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65,
+	0x74, 0x5c, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x5c, 0x56, 0x31, 0x5c, 0x47,
+	0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x18, 0x46, 0x65, 0x65,
+	0x6d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x3a, 0x3a, 0x46, 0x65, 0x65, 0x6d, 0x61, 0x72, 0x6b, 0x65,
+	0x74, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (

@@ -66,13 +66,13 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // TargetBlockUtilization is the target block utilization (in units of gas).  This value MUST
-  // be lower than the consensus max gas parameter.
+  // TargetBlockUtilization is the target block utilization (in units of gas).
+  // This value MUST be lower than the consensus max gas parameter.
   uint64 target_block_utilization = 8;
 
-  // Window defines the window size for calculating an adaptive learning rate
-  // over a moving window of blocks.
-  uint64 window = 9;
+  // WindowSize defines the window size for calculating an adaptive learning
+  // rate over a moving window of blocks.
+  uint64 window_size = 9;
 
   // FeeDenom is the denom that will be used for all fee payments.
   string fee_denom = 10;

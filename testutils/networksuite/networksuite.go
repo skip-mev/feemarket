@@ -68,8 +68,7 @@ func (nts *NetworkTestSuite) SetupSuite() {
 	nts.FeeMarketState = populateFeeMarket(r, nts.FeeMarketState)
 	updateGenesisConfigState(feemarkettypes.ModuleName, &nts.FeeMarketState)
 
-	require.NoError(nts.T(), cfg.Codec.UnmarshalJSON(cfg.GenesisState[consensustypes.ModuleName], nts.ConsensusState))
-	nts.ConsensusState = populateConsensus(r, nts.ConsensusState)
+	nts.ConsensusState = populateConsensus(r)
 	updateGenesisConfigState(consensustypes.ModuleName, nts.ConsensusState)
 
 	nts.Network = network.New(nts.T(), cfg)
@@ -80,9 +79,11 @@ func populateFeeMarket(_ *rand.Rand, feeMarketState feemarkettypes.GenesisState)
 	return feeMarketState
 }
 
-func populateConsensus(_ *rand.Rand, consensusParams *tmproto.ConsensusParams) *tmproto.ConsensusParams {
+func populateConsensus(_ *rand.Rand) *tmproto.ConsensusParams {
+	consensusParams := new(tmproto.ConsensusParams)
+
 	consensusParams.Block = &tmproto.BlockParams{
-		MaxBytes: consensusParams.Block.MaxBytes,
+		MaxBytes: 1_000_000_000,
 		MaxGas:   int64(feemarkettypes.DefaultMaxBlockUtilization),
 	}
 
