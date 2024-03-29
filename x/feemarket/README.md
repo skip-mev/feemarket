@@ -71,7 +71,7 @@ newBaseFee := currentBaseFee * (1 + newLearningRate * (currentBlockSize - target
 > * `MAX_LEARNING_RATE = 1.0`
 > * `MIN_LEARNING_RATE = 0.0125`
 > * `Current Learning Rate = 0.125`
-> * `Previous Base Fee = 10`
+> * `Previous Base Fee = 10.0`
 > * `Delta = 0`
 
 ### Block is Completely Empty
