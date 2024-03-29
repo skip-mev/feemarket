@@ -1,0 +1,177 @@
+# 2024/03/29 14:35:35.694839 [TestAIMDBaseFee] [rapid] draw window: 5
+# 2024/03/29 14:35:35.694855 [TestAIMDBaseFee] [rapid] draw alpha: 0x2
+# 2024/03/29 14:35:35.694869 [TestAIMDBaseFee] [rapid] draw beta: 0x32
+# 2024/03/29 14:35:35.694883 [TestAIMDBaseFee] [rapid] draw theta: 0xa
+# 2024/03/29 14:35:35.694895 [TestAIMDBaseFee] [rapid] draw delta: 0x1
+# 2024/03/29 14:35:35.694907 [TestAIMDBaseFee] [rapid] draw target_block_utilization: 0x515c5
+# 2024/03/29 14:35:35.694915 [TestAIMDBaseFee] [rapid] draw max_block_utilization: 0x515da
+# 2024/03/29 14:35:35.694922 [TestAIMDBaseFee] [rapid] draw num_blocks: 0x2f
+# 2024/03/29 14:35:35.694930 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.694964 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.694990 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695014 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695037 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695061 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695083 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695107 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695129 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695151 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695172 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695200 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695224 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695246 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695268 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695290 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695314 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695339 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695371 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695393 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695420 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695441 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695463 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695484 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695507 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695528 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695553 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695575 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695598 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695619 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695640 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695662 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695699 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695720 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695743 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695764 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695787 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695810 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695832 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695854 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695877 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695899 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695921 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695942 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695965 [TestAIMDBaseFee] [rapid] draw gas: 0x0
+# 2024/03/29 14:35:35.695991 [TestAIMDBaseFee] [rapid] draw gas: 0x515da
+# 2024/03/29 14:35:35.696020 [TestAIMDBaseFee] [rapid] draw gas: 0x515d2
+# 2024/03/29 14:35:35.696120 [TestAIMDBaseFee] 
+# 	Error Trace:	/Users/msalopek/informal/feemarket/x/feemarket/fuzz/aimd_eip1559_test.go:97
+# 	            				/Users/msalopek/go/pkg/mod/pgregory.net/rapid@v1.1.0/engine.go:368
+# 	            				/Users/msalopek/go/pkg/mod/pgregory.net/rapid@v1.1.0/engine.go:377
+# 	            				/Users/msalopek/go/pkg/mod/pgregory.net/rapid@v1.1.0/engine.go:203
+# 	            				/Users/msalopek/go/pkg/mod/pgregory.net/rapid@v1.1.0/engine.go:118
+# 	            				/Users/msalopek/informal/feemarket/x/feemarket/fuzz/aimd_eip1559_test.go:67
+# 	Error:      	Should be true
+# 	Test:       	TestAIMDBaseFee
+# 
+v0.4.8#4785844941982255966
+0x0
+0x6b74f03291620
+0x4
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x19d7e85c04c166
+0x515c4
+0xa4224f535ac3a
+0x15
+0xe3e05a098777c
+0x2f
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1aa67d413f849d
+0x515da
+0x1aa67d413f849d
+0x515d2
