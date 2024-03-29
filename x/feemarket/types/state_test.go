@@ -10,7 +10,7 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-var OneHundred = math.LegacyNewDecFromInt(math.NewInt(100))
+var OneHundred = math.LegacyMustNewDecFromStr("100")
 
 func TestState_Update(t *testing.T) {
 	t.Run("can add to window", func(t *testing.T) {
@@ -126,11 +126,11 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 
 		newBaseFee := state.UpdateBaseFee(params)
-		expectedBaseFee := math.NewInt(875)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("875")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -138,13 +138,13 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 
 		state.Window[0] = params.TargetBlockUtilization
 
 		newBaseFee := state.UpdateBaseFee(params)
-		expectedBaseFee := math.NewInt(1000)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("1000")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -152,13 +152,13 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 
 		state.Window[0] = params.MaxBlockUtilization
 
 		newBaseFee := state.UpdateBaseFee(params)
-		expectedBaseFee := math.NewInt(1125)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("1125")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -166,14 +166,14 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultAIMDState()
 		params := types.DefaultAIMDParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		state.UpdateLearningRate(params)
 		newBaseFee := state.UpdateBaseFee(params)
 
-		expectedBaseFee := math.NewInt(850)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("850")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -181,8 +181,8 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultAIMDState()
 		params := types.DefaultAIMDParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		for i := 0; i < len(state.Window); i++ {
@@ -192,7 +192,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.UpdateLearningRate(params)
 		newBaseFee := state.UpdateBaseFee(params)
 
-		expectedBaseFee := math.NewInt(1000)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("1000")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -200,8 +200,8 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state := types.DefaultAIMDState()
 		params := types.DefaultAIMDParams()
 
-		state.BaseFee = math.NewInt(1000)
-		params.MinBaseFee = math.NewInt(125)
+		state.BaseFee = math.LegacyMustNewDecFromStr("1000")
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("125")
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		for i := 0; i < len(state.Window); i++ {
@@ -211,7 +211,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		state.UpdateLearningRate(params)
 		newBaseFee := state.UpdateBaseFee(params)
 
-		expectedBaseFee := math.NewInt(1150)
+		expectedBaseFee := math.LegacyMustNewDecFromStr("1150")
 		require.True(t, expectedBaseFee.Equal(newBaseFee))
 	})
 
@@ -245,12 +245,12 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		// Empty blocks
 		state := types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		lr := state.UpdateLearningRate(params)
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
 		bfWithDelta := state.UpdateBaseFee(paramsWithDelta)
 
@@ -271,7 +271,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		// Empty blocks
 		state := types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
 			state.Window[i] = params.MaxBlockUtilization
 		}
@@ -280,7 +280,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
 			state.Window[i] = params.MaxBlockUtilization
 		}
@@ -305,7 +305,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		// Empty blocks
 		state := types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
 			state.Window[i] = params.TargetBlockUtilization
 		}
@@ -314,7 +314,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		bf := state.UpdateBaseFee(params)
 
 		state = types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
 			state.Window[i] = params.TargetBlockUtilization
 		}
@@ -332,7 +332,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("half target block size with aimd eip1559 with a delta", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.Window = make([]uint64, 1)
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		prevBF := state.BaseFee
 
 		// Instantiate the params with a delta.
@@ -353,7 +353,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization) / 2)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
-		expectedFee := (math.LegacyNewDecFromInt(prevBF).Mul(expectedLRAdjustment)).Add(deltaDiff).TruncateInt()
+		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff).TruncateInt()
 
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedFee, bf)
@@ -362,7 +362,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("3/4 max block size with aimd eip1559 with a delta", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.Window = make([]uint64, 1)
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 		prevBF := state.BaseFee
 
 		// Instantiate the params with a delta.
@@ -383,7 +383,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
-		expectedFee := (math.LegacyNewDecFromInt(prevBF).Mul(expectedLRAdjustment)).Add(deltaDiff).TruncateInt()
+		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff).TruncateInt()
 
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedFee, bf)
@@ -392,7 +392,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 	t.Run("recovers from overflow with large max block utilization ratio", func(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.Window = make([]uint64, 50)
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(10))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyMustNewDecFromStr("10"))
 
 		params := types.DefaultAIMDParams()
 		params.Window = 50
@@ -401,7 +401,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 		params.MaxBlockUtilization = 9_999_999_999_999_999_999
 
 		for {
-			var baseFee math.Int
+			var baseFee math.LegacyDec
 			require.NotPanics(t, func() {
 				state.Update(params.MaxBlockUtilization, params)
 				state.UpdateLearningRate(params)
@@ -862,7 +862,7 @@ func TestState_ValidateBasic(t *testing.T) {
 			name: "invalid negative base fee",
 			state: types.State{
 				Window:  make([]uint64, 1),
-				BaseFee: math.NewInt(-1),
+				BaseFee: math.LegacyMustNewDecFromStr("-1"),
 			},
 			expectErr: true,
 		},
@@ -870,7 +870,7 @@ func TestState_ValidateBasic(t *testing.T) {
 			name: "invalid learning rate",
 			state: types.State{
 				Window:       make([]uint64, 1),
-				BaseFee:      math.NewInt(1),
+				BaseFee:      math.LegacyMustNewDecFromStr("1"),
 				LearningRate: math.LegacyMustNewDecFromStr("-1.0"),
 			},
 			expectErr: true,
@@ -879,7 +879,7 @@ func TestState_ValidateBasic(t *testing.T) {
 			name: "valid other state",
 			state: types.State{
 				Window:       make([]uint64, 1),
-				BaseFee:      math.NewInt(1),
+				BaseFee:      math.LegacyMustNewDecFromStr("1"),
 				LearningRate: math.LegacyMustNewDecFromStr("0.5"),
 			},
 			expectErr: false,
@@ -888,7 +888,7 @@ func TestState_ValidateBasic(t *testing.T) {
 			name: "invalid zero base fee",
 			state: types.State{
 				Window:       make([]uint64, 1),
-				BaseFee:      math.ZeroInt(),
+				BaseFee:      math.LegacyZeroDec(),
 				LearningRate: math.LegacyMustNewDecFromStr("0.5"),
 			},
 			expectErr: true,
@@ -897,7 +897,7 @@ func TestState_ValidateBasic(t *testing.T) {
 			name: "invalid zero learning rate",
 			state: types.State{
 				Window:       make([]uint64, 1),
-				BaseFee:      math.NewInt(1),
+				BaseFee:      math.LegacyMustNewDecFromStr("1"),
 				LearningRate: math.LegacyZeroDec(),
 			},
 			expectErr: true,

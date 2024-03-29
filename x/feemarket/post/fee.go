@@ -72,7 +72,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
-	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee)
+	// Note: not sure about the TruncateInt() method call
+	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee.TruncateInt())
 	minGasPrices := sdk.NewCoins(baseFee)
 
 	fee := feeTx.GetFee()

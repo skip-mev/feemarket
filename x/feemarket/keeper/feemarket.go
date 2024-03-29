@@ -49,10 +49,10 @@ func (k *Keeper) UpdateFeeMarket(ctx sdk.Context) error {
 }
 
 // GetBaseFee returns the base fee from the fee market state.
-func (k *Keeper) GetBaseFee(ctx sdk.Context) (math.Int, error) {
+func (k *Keeper) GetBaseFee(ctx sdk.Context) (math.LegacyDec, error) {
 	state, err := k.GetState(ctx)
 	if err != nil {
-		return math.Int{}, err
+		return math.LegacyDec{}, err
 	}
 
 	return state.BaseFee, nil
@@ -80,7 +80,8 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error) {
 		return sdk.NewCoins(), err
 	}
 
-	fee := sdk.NewCoin(params.FeeDenom, baseFee)
+	// Note: not sure about the TruncateInt() method call
+	fee := sdk.NewCoin(params.FeeDenom, baseFee.TruncateInt())
 	minGasPrices := sdk.NewCoins(fee)
 
 	return minGasPrices, nil
