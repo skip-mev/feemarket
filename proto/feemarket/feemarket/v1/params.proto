@@ -47,8 +47,8 @@ message Params {
   // MinBaseFee determines the initial base fee of the module and the global
   // minimum for the network. This is denominated in fee per gas unit.
   string min_base_fee = 5 [
-    (cosmos_proto.scalar) = "cosmos.Int",
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 

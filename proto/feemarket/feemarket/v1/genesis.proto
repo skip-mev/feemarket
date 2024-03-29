@@ -25,8 +25,8 @@ message State {
   // BaseFee is the current base fee. This is denominated in the fee per gas
   // unit.
   string base_fee = 1 [
-    (cosmos_proto.scalar) = "cosmos.Int",
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (cosmos_proto.scalar) = "cosmos.Legacy",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
