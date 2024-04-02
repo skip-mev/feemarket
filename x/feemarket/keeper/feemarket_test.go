@@ -47,8 +47,12 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("empty block with default eip1559 with preset base fee < 1", func() {
 		state := types.DefaultState()
-		state.BaseFee = math.LegacyMustNewDecFromStr("0.5")
+		// this value should be ignored -> 0.5 should be used instead
+		state.BaseFee = math.LegacyMustNewDecFromStr("0.25")
+
+		// change MinBaseFee value < 1
 		params := types.DefaultParams()
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("0.5")
 		s.setGenesisState(params, state)
 
 		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
