@@ -50,8 +50,8 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		// should default to the minimum base fee.
 		state := types.DefaultState()
 		factor := math.LegacyMustNewDecFromStr("0.125")
-		increase := state.BaseFee.Mul(factor).TruncateInt()
-		state.BaseFee = types.DefaultMinBaseFee.Add(math.LegacyNewDecFromInt(increase)).Sub(math.LegacyNewDec(1))
+		increase := state.BaseFee.Mul(factor)
+		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.LegacyNewDec(1))
 
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)

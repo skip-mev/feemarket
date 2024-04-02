@@ -37,7 +37,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 		malleate func(*antesuite.TestSuite) (signer antesuite.TestAccount, feeAcc sdk.AccAddress)
 	}{
 		"paying with insufficient fee": {
-			fee:   50,
+			fee:   1,
 			valid: false,
 			err:   sdkerrors.ErrInsufficientFee,
 			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
