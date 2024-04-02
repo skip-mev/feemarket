@@ -37,7 +37,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.875")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -133,7 +133,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -160,7 +160,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -211,7 +211,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.9375")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -237,7 +237,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -264,7 +264,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -307,7 +307,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		factor := math.LegacyOneDec().Add(math.LegacyMustNewDecFromStr("-1.0").Mul(lr))
-		expectedFee := state.BaseFee.Mul(factor).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 	})
 

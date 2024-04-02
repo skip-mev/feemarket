@@ -127,4 +127,28 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 
 		s.Require().Equal(resp.Fees, fees)
 	})
+
+	s.Run("can get updated base fee < 1", func() {
+		state := types.State{
+			BaseFee: math.LegacyMustNewDecFromStr("0.005"),
+		}
+		err := s.feeMarketKeeper.SetState(s.ctx, state)
+		s.Require().NoError(err)
+
+		params := types.Params{
+			FeeDenom: "test",
+		}
+		err = s.feeMarketKeeper.SetParams(s.ctx, params)
+		s.Require().NoError(err)
+
+		req := &types.BaseFeeRequest{}
+		resp, err := s.queryServer.BaseFee(s.ctx, req)
+		s.Require().NoError(err)
+		s.Require().NotNil(resp)
+
+		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(resp.Fees, fees)
+	})
 }

@@ -353,7 +353,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization) / 2)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
-		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff).TruncateDec() // Note: not sure about the TruncateDec() method call here
+		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff)
 
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedFee, bf)
@@ -383,8 +383,7 @@ func TestState_UpdateBaseFee(t *testing.T) {
 
 		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
-		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff).TruncateDec() // Note: not sure about the TruncateDec() method call here
-
+		expectedFee := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff)
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedFee, bf)
 	})

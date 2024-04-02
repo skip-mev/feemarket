@@ -80,7 +80,6 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 		return sdk.NewDecCoins(), err
 	}
 
-	// Note: not sure about the TruncateInt() method call
 	fee := sdk.NewDecCoinFromDec(params.FeeDenom, baseFee)
 	minGasPrices := sdk.NewDecCoins(fee)
 

@@ -69,9 +69,8 @@ func (s *State) UpdateBaseFee(params Params) (fee math.LegacyDec) {
 	// Calculate the delta adjustment.
 	net := math.LegacyNewDecFromInt(s.GetNetUtilization(params)).Mul(params.Delta)
 
-	// NOTE: not sure about the TruncateDec() method call here
 	// Update the base fee.
-	fee = s.BaseFee.Mul(learningRateAdjustment).Add(net).TruncateDec()
+	fee = s.BaseFee.Mul(learningRateAdjustment).Add(net)
 
 	// Ensure the base fee is greater than the minimum base fee.
 	if fee.LT(params.MinBaseFee) {
