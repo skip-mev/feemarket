@@ -79,14 +79,14 @@ message State {
   // BaseFee is the current base fee. This is denominated in the fee per gas
   // unit.
   string base_fee = 1 [
-    (cosmos_proto.scalar) = "cosmos.Legacy",
+    (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
   // LearningRate is the current learning rate.
   string learning_rate = 2 [
-    (cosmos_proto.scalar) = "cosmos.Legacy",
+    (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];

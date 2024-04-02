@@ -69,20 +69,20 @@ func (k *Keeper) GetLearningRate(ctx sdk.Context) (math.LegacyDec, error) {
 }
 
 // GetMinGasPrices returns the mininum gas prices as sdk.Coins from the fee market state.
-func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error) {
+func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 	baseFee, err := k.GetBaseFee(ctx)
 	if err != nil {
-		return sdk.NewCoins(), err
+		return sdk.NewDecCoins(), err
 	}
 
 	params, err := k.GetParams(ctx)
 	if err != nil {
-		return sdk.NewCoins(), err
+		return sdk.NewDecCoins(), err
 	}
 
 	// Note: not sure about the TruncateInt() method call
-	fee := sdk.NewCoin(params.FeeDenom, baseFee.TruncateInt())
-	minGasPrices := sdk.NewCoins(fee)
+	fee := sdk.NewDecCoinFromDec(params.FeeDenom, baseFee)
+	minGasPrices := sdk.NewDecCoins(fee)
 
 	return minGasPrices, nil
 }

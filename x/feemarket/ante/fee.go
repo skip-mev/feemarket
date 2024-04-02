@@ -62,15 +62,13 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		}
 	}
 
-	minGasPricesDecCoins := sdk.NewDecCoinsFromCoins(minGasPrices...)
-	newCtx := ctx.WithPriority(getTxPriority(fee, int64(gas))).WithMinGasPrices(minGasPricesDecCoins)
+	newCtx := ctx.WithPriority(getTxPriority(fee, int64(gas))).WithMinGasPrices(minGasPrices)
 	return next(newCtx, tx, simulate)
 }
 
 // CheckTxFees implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFees(ctx sdk.Context, minFees sdk.Coins, feeTx sdk.FeeTx, isCheck bool) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
-	minFeesDecCoins := sdk.NewDecCoinsFromCoins(minFees...)
+func CheckTxFees(ctx sdk.Context, minFeesDecCoins sdk.DecCoins, feeTx sdk.FeeTx, isCheck bool) (feeCoins sdk.Coins, tip sdk.Coins, err error) {
 	feeCoins = feeTx.GetFee()
 
 	// Ensure that the provided fees meet the minimum

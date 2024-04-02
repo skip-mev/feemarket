@@ -73,8 +73,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	}
 
 	// Note: not sure about the TruncateInt() method call
-	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee.TruncateInt())
-	minGasPrices := sdk.NewCoins(baseFee)
+	baseFee := sdk.NewDecCoinFromDec(params.FeeDenom, state.BaseFee)
+	minGasPrices := sdk.NewDecCoins(baseFee)
 
 	fee := feeTx.GetFee()
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
