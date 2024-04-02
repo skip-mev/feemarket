@@ -45,13 +45,31 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
 	})
 
+	s.Run("empty block with default eip1559 with preset base fee < 1", func() {
+		state := types.DefaultState()
+		state.BaseFee = math.LegacyMustNewDecFromStr("0.5")
+		params := types.DefaultParams()
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
+
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(fee, math.LegacyMustNewDecFromStr("0.5"))
+
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
 	s.Run("empty block default eip1559 with preset base fee that should default to min", func() {
 		// Set the base fee to just below the expected threshold decrease of 1/8th. This means it
 		// should default to the minimum base fee.
 		state := types.DefaultState()
 		factor := math.LegacyMustNewDecFromStr("0.125")
-		increase := state.BaseFee.Mul(factor)
-		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.LegacyNewDec(1))
+		change := state.BaseFee.Mul(factor)
+		state.BaseFee = types.DefaultMinBaseFee.Sub(change)
 
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
