@@ -62,6 +62,9 @@ type Params struct {
 	// Enabled is a boolean that determines whether the EIP1559 fee market is
 	// enabled.
 	Enabled bool `protobuf:"varint,12,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// DistributeFees is a boolean that determines whether the fees are burned or
+	// distributed to all stakers.
+	DistributeFees bool `protobuf:"varint,13,opt,name=distribute_fees,json=distributeFees,proto3" json:"distribute_fees,omitempty"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -132,6 +135,13 @@ func (m *Params) GetEnabled() bool {
 	return false
 }
 
+func (m *Params) GetDistributeFees() bool {
+	if m != nil {
+		return m.DistributeFees
+	}
+	return false
+}
+
 func init() {
 	proto.RegisterType((*Params)(nil), "feemarket.feemarket.v1.Params")
 }
@@ -192,6 +202,16 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.DistributeFees {
+		i--
+		if m.DistributeFees {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x68
+	}
 	if m.Enabled {
 		i--
 		if m.Enabled {
@@ -342,6 +362,9 @@ func (m *Params) Size() (n int) {
 		n += 1 + l + sovParams(uint64(l))
 	}
 	if m.Enabled {
+		n += 2
+	}
+	if m.DistributeFees {
 		n += 2
 	}
 	return n
@@ -729,6 +752,26 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Enabled = bool(v != 0)
+		case 13:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DistributeFees", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.DistributeFees = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipParams(dAtA[iNdEx:])

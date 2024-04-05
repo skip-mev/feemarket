@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/mock"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -54,7 +55,52 @@ func TestDeductCoins(t *testing.T) {
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
 			}
 
-			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins); (err != nil) != tc.wantErr {
+			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins, false); (err != nil) != tc.wantErr {
+				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestDeductCoinsAndDistribute(t *testing.T) {
+	tests := []struct {
+		name        string
+		coins       sdk.Coins
+		wantErr     bool
+		invalidCoin bool
+	}{
+		{
+			name:    "valid",
+			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			wantErr: false,
+		},
+		{
+			name:    "valid no coins",
+			coins:   sdk.NewCoins(),
+			wantErr: false,
+		},
+		{
+			name:        "invalid coins negative amount",
+			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
+			wantErr:     true,
+			invalidCoin: true,
+		},
+		{
+			name:        "invalid coins invalid denom",
+			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
+			wantErr:     true,
+			invalidCoin: true,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
+			s := antesuite.SetupTestSuite(t, true)
+			acc := s.CreateTestAccounts(1)[0]
+			if !tc.invalidCoin {
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), authtypes.FeeCollectorName, tc.coins).Return(nil).Once()
+			}
+
+			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins, true); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
