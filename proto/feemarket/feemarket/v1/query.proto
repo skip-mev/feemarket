@@ -51,10 +51,9 @@ message BaseFeeRequest {}
 
 // StateResponse is the response type for the Query/BaseFee RPC method.
 message BaseFeeResponse {
-  repeated cosmos.base.v1beta1.Coin fees = 1 [
+  repeated cosmos.base.v1beta1.DecCoin fees = 1 [
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true,
-    (amino.encoding) = "legacy_coins",
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
 }

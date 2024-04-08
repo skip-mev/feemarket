@@ -44,5 +44,5 @@ type FeeMarketKeeper interface {
 	GetParams(ctx sdk.Context) (feemarkettypes.Params, error)
 	SetParams(ctx sdk.Context, params feemarkettypes.Params) error
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
-	GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
+	GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error)
 }

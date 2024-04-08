@@ -79,14 +79,14 @@ message State {
   // BaseFee is the current base fee. This is denominated in the fee per gas
   // unit.
   string base_fee = 1 [
-    (cosmos_proto.scalar) = "cosmos.Int",
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
   // LearningRate is the current learning rate.
   string learning_rate = 2 [
-    (cosmos_proto.scalar) = "cosmos.Legacy",
+    (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
@@ -309,8 +309,8 @@ message Params {
   // minimum
   // for the network. This is denominated in fee per gas unit.
   string min_base_fee = 5 [
-    (cosmos_proto.scalar) = "cosmos.Int",
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
@@ -385,7 +385,7 @@ enabled: true
 fee_denom: stake
 max_block_utilization: "30000000"
 max_learning_rate: "0.125000000000000000"
-min_base_fee: "1000000"
+min_base_fee: "1.000000000000000000"
 min_learning_rate: "0.125000000000000000"
 target_block_utilization: "15000000"
 theta: "0.000000000000000000"
@@ -409,7 +409,7 @@ feemarketd query feemarket state
 Example Output:
 
 ```yml
-base_fee: "1000000"
+base_fee: "1.000000000000000000"
 index: "0"
 learning_rate: "0.125000000000000000"
 window:

@@ -12,7 +12,7 @@ import (
 // both the minimum and current base fee to the same value.
 func NewState(
 	windowSize uint64,
-	baseFee math.Int,
+	baseFee math.LegacyDec,
 	learningRate math.LegacyDec,
 ) State {
 	return State{
@@ -46,7 +46,7 @@ func (s *State) IncrementHeight() {
 // based on the average utilization of the block window. The base fee is
 // update using the new learning rate and the delta adjustment. Please
 // see the EIP-1559 specification for more details.
-func (s *State) UpdateBaseFee(params Params) (fee math.Int) {
+func (s *State) UpdateBaseFee(params Params) (fee math.LegacyDec) {
 	// Panic catch in case there is an overflow
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -70,7 +70,7 @@ func (s *State) UpdateBaseFee(params Params) (fee math.Int) {
 	net := math.LegacyNewDecFromInt(s.GetNetUtilization(params)).Mul(params.Delta)
 
 	// Update the base fee.
-	fee = (math.LegacyNewDecFromInt(s.BaseFee).Mul(learningRateAdjustment)).Add(net).TruncateInt()
+	fee = s.BaseFee.Mul(learningRateAdjustment).Add(net)
 
 	// Ensure the base fee is greater than the minimum base fee.
 	if fee.LT(params.MinBaseFee) {
@@ -160,7 +160,7 @@ func (s *State) ValidateBasic() error {
 		return fmt.Errorf("block utilization window cannot be nil or empty")
 	}
 
-	if s.BaseFee.IsNil() || s.BaseFee.LTE(math.ZeroInt()) {
+	if s.BaseFee.IsNil() || s.BaseFee.LTE(math.LegacyZeroDec()) {
 		return fmt.Errorf("base fee must be positive")
 	}
 

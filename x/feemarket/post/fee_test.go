@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -148,10 +149,10 @@ func TestSendTip(t *testing.T) {
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
-	validFeeAmount := types.DefaultMinBaseFee.MulRaw(int64(gasLimit))
-	validFeeAmountWithTip := validFeeAmount.Add(sdk.NewInt(100))
-	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount))
-	validFeeWithTip := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmountWithTip))
+	validFeeAmount := types.DefaultMinBaseFee.MulInt64(int64(gasLimit))
+	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyMustNewDecFromStr("100"))
+	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount.TruncateInt()))
+	validFeeWithTip := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmountWithTip.TruncateInt()))
 
 	testCases := []antesuite.TestCase{
 		{
