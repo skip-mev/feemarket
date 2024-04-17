@@ -37,6 +37,24 @@ func TestAnteHandle(t *testing.T) {
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrInvalidGasLimit,
 		},
+		// test --gas=auto flag settings
+		// when --gas=auto is set, cosmos-sdk sets gas=0 and simulate=true
+		{
+			Name: "--gas=auto behaviour test",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: true,
+			ExpPass:  true,
+		},
 		{
 			Name: "signer has enough funds, should pass",
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
