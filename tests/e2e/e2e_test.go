@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -42,7 +43,7 @@ var (
 				feemarkettypes.DefaultDelta,
 				feemarkettypes.DefaultTargetBlockUtilization,
 				feemarkettypes.DefaultMaxBlockUtilization,
-				sdk.NewInt(1000),
+				sdkmath.LegacyNewDec(1000),
 				feemarkettypes.DefaultMinLearningRate,
 				feemarkettypes.DefaultMaxLearningRate,
 				feemarkettypes.DefaultFeeDenom,
@@ -53,7 +54,7 @@ var (
 			Key: "app_state.feemarket.state",
 			Value: feemarkettypes.NewState(
 				feemarkettypes.DefaultWindow,
-				sdk.NewInt(1000),
+				sdkmath.LegacyNewDec(1000),
 				feemarkettypes.DefaultMaxLearningRate,
 			),
 		},

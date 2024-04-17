@@ -41,7 +41,7 @@ type BankKeeper interface {
 //go:generate mockery --name FeeMarketKeeper --filename mock_feemarket_keeper.go
 type FeeMarketKeeper interface {
 	GetState(ctx sdk.Context) (feemarkettypes.State, error)
-	GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
+	GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error)
 	GetParams(ctx sdk.Context) (feemarkettypes.Params, error)
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
 	SetParams(ctx sdk.Context, params feemarkettypes.Params) error

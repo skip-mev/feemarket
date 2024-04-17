@@ -72,8 +72,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
-	baseFee := sdk.NewCoin(params.FeeDenom, state.BaseFee)
-	minGasPrices := sdk.NewCoins(baseFee)
+	baseFee := sdk.NewDecCoinFromDec(params.FeeDenom, state.BaseFee)
+	minGasPrices := sdk.NewDecCoins(baseFee)
 
 	fee := feeTx.GetFee()
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
@@ -124,9 +124,19 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		return fmt.Errorf("fee collector module account (%s) has not been set", feemarkettypes.FeeCollectorName)
 	}
 
+	if addr := dfd.accountKeeper.GetModuleAddress(authtypes.FeeCollectorName); addr == nil {
+		return fmt.Errorf("default fee collector module account (%s) has not been set", authtypes.FeeCollectorName)
+	}
+
+	params, err := dfd.feemarketKeeper.GetParams(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting feemarket params: %v", err)
+	}
+
 	feePayer := feeTx.FeePayer()
 	feeGranter := feeTx.FeeGranter()
 	deductFeesFrom := feePayer
+	distributeFees := params.DistributeFees
 
 	// if feegranter set deduct fee from feegranter account.
 	// this works with only when feegrant enabled.
@@ -152,7 +162,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 	// deduct the fees and tip
 	if !fee.IsZero() {
-		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee)
+		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, fee, distributeFees)
 		if err != nil {
 			return err
 		}
@@ -183,13 +193,19 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	return nil
 }
 
-// DeductCoins deducts coins from the given account.  Coins are sent to the feemarket fee collector account.
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins) error {
+// DeductCoins deducts coins from the given account.
+// Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
 	if !coins.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
 	}
 
-	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), feemarkettypes.FeeCollectorName, coins)
+	targetModuleAcc := feemarkettypes.FeeCollectorName
+	if distributeFees {
+		targetModuleAcc = authtypes.FeeCollectorName
+	}
+
+	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
 	}

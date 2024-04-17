@@ -46,7 +46,7 @@ var (
 	// DefaultAIMDMinBaseFee is the default minimum base fee. This is the
 	// default on Ethereum. Note that ethereum is denominated in 1e18 wei.
 	// Cosmos chains will likely want to change this to 1e6.
-	DefaultAIMDMinBaseFee = math.NewInt(1_000_000_000)
+	DefaultAIMDMinBaseFee = math.LegacyMustNewDecFromStr("1000000000")
 
 	// DefaultAIMDMinLearningRate is the default minimum learning rate.
 	DefaultAIMDMinLearningRate = math.LegacyMustNewDecFromStr("0.01")
