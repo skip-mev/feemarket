@@ -9,6 +9,9 @@ feemarket. More information about the implementation can be found [here](./x/fee
 
 This module is planned to be used in the Cosmos Hub.
 
+## Status
+The team has not yet completed acceptance testing of the feemarket. We do not recommend integrating it until final testing has been completed (expected May 2024), and we have removed this warning from the readme.
+
 ## Contents
 
 * [State](#state)
