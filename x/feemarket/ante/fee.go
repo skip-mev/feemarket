@@ -53,16 +53,8 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
 
-	if len(feeCoins) > 1 {
+	if len(feeCoins) != 1 {
 		return ctx, feemarkettypes.ErrTooManyFeeCoins
-	}
-
-	// If there is a fee attached to the tx, make sure the fee denom is a denom accepted by the chain
-	if len(feeCoins) == 1 {
-		feeDenom := feeCoins.GetDenomByIndex(0)
-		if feeDenom != minFee.Denom {
-			return ctx, err
-		}
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
