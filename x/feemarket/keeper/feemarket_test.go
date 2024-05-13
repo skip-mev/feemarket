@@ -26,7 +26,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("empty block with default eip1559 with preset base fee", func() {
 		state := types.DefaultState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
 
@@ -37,8 +37,30 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.875")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
+
+		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.125"), lr)
+	})
+
+	s.Run("empty block with default eip1559 with preset base fee < 1", func() {
+		state := types.DefaultState()
+		// this value should be ignored -> 0.5 should be used instead
+		state.BaseFee = math.LegacyMustNewDecFromStr("0.25")
+
+		// change MinBaseFee value < 1
+		params := types.DefaultParams()
+		params.MinBaseFee = math.LegacyMustNewDecFromStr("0.5")
+		s.setGenesisState(params, state)
+
+		s.Require().NoError(s.feeMarketKeeper.UpdateFeeMarket(s.ctx))
+
+		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(fee, math.LegacyMustNewDecFromStr("0.5"))
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
 		s.Require().NoError(err)
@@ -50,8 +72,8 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		// should default to the minimum base fee.
 		state := types.DefaultState()
 		factor := math.LegacyMustNewDecFromStr("0.125")
-		increase := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
-		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.NewInt(1))
+		change := state.BaseFee.Mul(factor)
+		state.BaseFee = types.DefaultMinBaseFee.Sub(change)
 
 		params := types.DefaultParams()
 		s.setGenesisState(params, state)
@@ -95,7 +117,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
 		err := state.Update(params.TargetBlockUtilization, params)
@@ -133,7 +155,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -145,7 +167,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		// Reaching the target block size means that we expect this to not
 		// increase.
 		err := state.Update(params.MaxBlockUtilization, params)
@@ -160,7 +182,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.125")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -193,7 +215,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("in-between min and target block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
@@ -211,7 +233,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("0.9375")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -237,7 +259,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -247,7 +269,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("in-between target and max block with default eip1559 at preset base fee", func() {
 		state := types.DefaultState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		params := types.DefaultParams()
 		params.MaxBlockUtilization = 100
 		params.TargetBlockUtilization = 50
@@ -264,7 +286,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		s.Require().NoError(err)
 
 		factor := math.LegacyMustNewDecFromStr("1.0625")
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 
 		lr, err := s.feeMarketKeeper.GetLearningRate(s.ctx)
@@ -291,7 +313,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("empty blocks with aimd eip1559 with preset base fee", func() {
 		state := types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		params := types.DefaultAIMDParams()
 		s.setGenesisState(params, state)
 
@@ -307,7 +329,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 		fee, err := s.feeMarketKeeper.GetBaseFee(s.ctx)
 		s.Require().NoError(err)
 		factor := math.LegacyOneDec().Add(math.LegacyMustNewDecFromStr("-1.0").Mul(lr))
-		expectedFee := state.BaseFee.ToLegacyDec().Mul(factor).TruncateInt()
+		expectedFee := state.BaseFee.Mul(factor)
 		s.Require().Equal(fee, expectedFee)
 	})
 
@@ -316,9 +338,9 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 		state := types.DefaultAIMDState()
 		lr := math.LegacyMustNewDecFromStr("0.125")
-		increase := state.BaseFee.ToLegacyDec().Mul(lr).TruncateInt()
+		increase := state.BaseFee.Mul(lr).TruncateInt()
 
-		state.BaseFee = types.DefaultMinBaseFee.Add(increase).Sub(math.NewInt(1))
+		state.BaseFee = types.DefaultMinBaseFee.Add(math.LegacyNewDecFromInt(increase)).Sub(math.LegacyNewDec(1))
 		state.LearningRate = lr
 
 		s.setGenesisState(params, state)
@@ -364,7 +386,7 @@ func (s *KeeperTestSuite) TestUpdateFeeMarket() {
 
 	s.Run("target block with aimd eip1559 at preset base fee + LR", func() {
 		state := types.DefaultAIMDState()
-		state.BaseFee = state.BaseFee.Mul(math.NewInt(2))
+		state.BaseFee = state.BaseFee.Mul(math.LegacyNewDec(2))
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 		params := types.DefaultAIMDParams()
 
@@ -436,9 +458,9 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		gs := types.DefaultGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		expected := sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee)
+		expected := sdk.NewDecCoins(sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, gs.State.BaseFee))
 
-		mgp, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})
@@ -447,9 +469,9 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		gs := types.DefaultAIMDGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		expected := sdk.NewCoin(sdk.DefaultBondDenom, gs.State.BaseFee)
+		expected := sdk.NewDecCoins(sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, gs.State.BaseFee))
 
-		mgp, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx)
+		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 		s.Require().Equal(expected, mgp)
 	})

@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	"cosmossdk.io/math"
 	"fmt"
 	"testing"
 
@@ -16,9 +17,10 @@ import (
 func TestAnteHandle(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
-	validFeeAmount := types.DefaultMinBaseFee.MulRaw(int64(gasLimit))
-	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount))
-	validFeeDifferentDenom := sdk.NewCoins(sdk.NewCoin("atom", validFeeAmount))
+
+	validFeeAmount := types.DefaultMinBaseFee.MulInt64(int64(gasLimit))
+	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount.TruncateInt()))
+	validFeeDifferentDenom := sdk.NewCoins(sdk.NewCoin("atom", math.Int(validFeeAmount)))
 
 	testCases := []antesuite.TestCase{
 		{
@@ -37,6 +39,24 @@ func TestAnteHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+		},
+		// test --gas=auto flag settings
+		// when --gas=auto is set, cosmos-sdk sets gas=0 and simulate=true
+		{
+			Name: "--gas=auto behaviour test",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: true,
+			ExpPass:  true,
 		},
 		{
 			Name: "0 gas given should fail with resolvable denom",

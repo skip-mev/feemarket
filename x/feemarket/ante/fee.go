@@ -29,8 +29,6 @@ func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper) FeeMarketCheckDecorator {
 
 // AnteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
 func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
-	var feeCoin sdk.Coin
-
 	// GenTx consume no fee
 	if ctx.BlockHeight() == 0 {
 		return next(ctx, tx, simulate)
@@ -45,10 +43,12 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, sdkerrors.ErrInvalidGasLimit.Wrapf("must provide positive gas")
 	}
 
-	requiredBaseFee, err := dfd.feemarketKeeper.GetMinGasPrice(ctx)
+	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
+
+	minFee := minGasPrices[0]
 
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
@@ -60,48 +60,50 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	// If there is a fee attached to the tx, make sure the fee denom is a denom accepted by the chain
 	if len(feeCoins) == 1 {
 		feeDenom := feeCoins.GetDenomByIndex(0)
-		if feeDenom != requiredBaseFee.Denom {
+		if feeDenom != minFee.Denom {
 			return ctx, err
 		}
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
-		"min gas prices", requiredBaseFee,
+		"min gas prices", minFee,
 		"fee", feeCoins,
 		"gas limit", gas,
 	)
 
 	if !simulate {
-		feeCoin, _, err = CheckTxFee(ctx, requiredBaseFee, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
+		fee, _, err := CheckTxFee(ctx, minGasPrices, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
+		priorityCtx := ctx.WithPriority(getTxPriority(fee, int64(gas))).WithMinGasPrices(minGasPrices)
+		return next(priorityCtx, tx, simulate)
 	}
 
-	minGasPricesDecCoin := sdk.NewDecCoinFromCoin(requiredBaseFee)
-	newCtx := ctx.WithPriority(getTxPriority(feeCoin, int64(gas))).WithMinGasPrices(sdk.NewDecCoins(minGasPricesDecCoin))
-	return next(newCtx, tx, simulate)
+	ctx = ctx.WithMinGasPrices(minGasPrices)
+	return next(ctx, tx, simulate)
 }
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minFee sdk.Coin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
-	minFeesDecCoin := sdk.NewDecCoinFromCoin(minFee)
+func CheckTxFee(ctx sdk.Context, minFeesDecCoins sdk.DecCoins, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	if len(feeTx.GetFee()) != 1 {
 		return sdk.Coin{}, sdk.Coin{}, feemarkettypes.ErrTooManyFeeCoins
 	}
 
+	feeDenom := minFeesDecCoins.GetDenomByIndex(0)
 	feeCoin := feeTx.GetFee()[0]
+
 	coinWithBaseDenom := feeCoin
-	if feeCoin.Denom != minFee.Denom {
-		coinWithBaseDenom, err = resolver.ConvertToDenom(ctx, feeCoin, minFee.Denom)
+	if feeCoin.Denom != feeDenom {
+		coinWithBaseDenom, err = resolver.ConvertToDenom(ctx, feeCoin, feeDenom)
 		if err != nil {
 			return sdk.Coin{}, sdk.Coin{}, err
 		}
 	}
 
 	// Ensure that the provided fees meet the minimum
-	minGasPrice := minFeesDecCoin
+	minGasPrice := minFeesDecCoins[0]
 	if !minGasPrice.IsZero() {
 		var (
 			requiredFee sdk.Coin
