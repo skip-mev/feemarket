@@ -34,34 +34,6 @@ func (_m *FeeMarketKeeper) GetDenomResolver() types.DenomResolver {
 	return r0
 }
 
-// GetMinGasPrice provides a mock function with given fields: ctx
-func (_m *FeeMarketKeeper) GetMinGasPrice(ctx cosmos_sdktypes.Context) (cosmos_sdktypes.Coin, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetMinGasPrice")
-	}
-
-	var r0 cosmos_sdktypes.Coin
-	var r1 error
-	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context) (cosmos_sdktypes.Coin, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context) cosmos_sdktypes.Coin); ok {
-		r0 = rf(ctx)
-	} else {
-		r0 = ret.Get(0).(cosmos_sdktypes.Coin)
-	}
-
-	if rf, ok := ret.Get(1).(func(cosmos_sdktypes.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetMinGasPrices provides a mock function with given fields: ctx
 func (_m *FeeMarketKeeper) GetMinGasPrices(ctx cosmos_sdktypes.Context) (cosmos_sdktypes.DecCoins, error) {
 	ret := _m.Called(ctx)
@@ -189,7 +161,8 @@ func (_m *FeeMarketKeeper) SetState(ctx cosmos_sdktypes.Context, state types.Sta
 func NewFeeMarketKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *FeeMarketKeeper {
+},
+) *FeeMarketKeeper {
 	mock := &FeeMarketKeeper{}
 	mock.Mock.Test(t)
 
