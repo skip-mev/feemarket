@@ -54,7 +54,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	gas := feeTx.GetGas() // use provided gas limit
 
 	if len(feeCoins) != 1 {
-		return ctx, feemarkettypes.ErrTooManyFeeCoins
+		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
@@ -64,7 +64,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	)
 
 	if !simulate {
-		fee, _, err := CheckTxFee(ctx, minGasPrices, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
+		fee, _, err := CheckTxFee(ctx, minGasPrices[0], feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
@@ -78,12 +78,12 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minFeesDecCoins sdk.DecCoins, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
+func CheckTxFee(ctx sdk.Context, minFeesDecCoin sdk.DecCoin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	if len(feeTx.GetFee()) != 1 {
 		return sdk.Coin{}, sdk.Coin{}, feemarkettypes.ErrTooManyFeeCoins
 	}
 
-	feeDenom := minFeesDecCoins.GetDenomByIndex(0)
+	feeDenom := minFeesDecCoin.Denom
 	feeCoin := feeTx.GetFee()[0]
 
 	coinWithBaseDenom := feeCoin
@@ -95,8 +95,7 @@ func CheckTxFee(ctx sdk.Context, minFeesDecCoins sdk.DecCoins, feeTx sdk.FeeTx, 
 	}
 
 	// Ensure that the provided fees meet the minimum
-	minGasPrice := minFeesDecCoins[0]
-	if !minGasPrice.IsZero() {
+	if !minFeesDecCoin.IsZero() {
 		var (
 			requiredFee sdk.Coin
 			consumedFee sdk.Coin
@@ -108,17 +107,17 @@ func CheckTxFee(ctx sdk.Context, minFeesDecCoins sdk.DecCoins, feeTx sdk.FeeTx, 
 		gcDec := sdkmath.LegacyNewDec(gasConsumed)
 		glDec := sdkmath.LegacyNewDec(int64(feeTx.GetGas()))
 
-		consumedFeeAmount := minGasPrice.Amount.Mul(gcDec)
-		limitFee := minGasPrice.Amount.Mul(glDec)
-		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
-		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
+		consumedFeeAmount := minFeesDecCoin.Amount.Mul(gcDec)
+		limitFee := minFeesDecCoin.Amount.Mul(glDec)
+		consumedFee = sdk.NewCoin(minFeesDecCoin.Denom, consumedFeeAmount.Ceil().RoundInt())
+		requiredFee = sdk.NewCoin(minFeesDecCoin.Denom, limitFee.Ceil().RoundInt())
 
 		if coinWithBaseDenom.Denom != requiredFee.Denom || !coinWithBaseDenom.IsGTE(requiredFee) {
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
 				coinWithBaseDenom,
 				requiredFee,
-				minGasPrice,
+				minFeesDecCoin,
 				gasConsumed,
 			)
 		}

@@ -81,8 +81,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	feeCoins := feeTx.GetFee()
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
 
-	if len(feeCoins) > 1 {
-		return ctx, feemarkettypes.ErrTooManyFeeCoins
+	if len(feeCoins) != 1 {
+		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
@@ -91,7 +91,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	)
 
 	if !simulate {
-		feeCoin, tip, err = ante.CheckTxFee(ctx, minGasPrices, feeTx, false, dfd.feemarketKeeper.GetDenomResolver())
+		feeCoin, tip, err = ante.CheckTxFee(ctx, minGasPrices[0], feeTx, false, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, err
 		}
