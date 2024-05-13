@@ -162,23 +162,26 @@ func (s *TestSuite) TestSendTxUpdating() {
 	s.Require().True(len(nodes) > 0)
 
 	s.Run("expect fee market state to update", func() {
-		baseFee := s.QueryBaseFee()
+		for _ = range 10 {
 
-		gas := int64(1000000)
-		minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
+			baseFee := s.QueryBaseFee()
 
-		// send with the exact expected fee
-		txResp, err := s.SendCoins(
-			ctx,
-			cosmosChain,
-			s.user1.KeyName(),
-			s.user1.FormattedAddress(),
-			s.user2.FormattedAddress(),
-			sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
-			minBaseFee,
-			gas,
-		)
-		s.Require().NoError(err, txResp)
-		s.T().Log(txResp)
+			gas := int64(1000000)
+			minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
+
+			// send with the exact expected fee
+			txResp, err := s.SendCoins(
+				ctx,
+				cosmosChain,
+				s.user1.KeyName(),
+				s.user1.FormattedAddress(),
+				s.user2.FormattedAddress(),
+				sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+				minBaseFee,
+				gas,
+			)
+			s.Require().NoError(err, txResp)
+			s.T().Log(txResp)
+		}
 	})
 }

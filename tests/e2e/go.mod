@@ -1,6 +1,6 @@
 module github.com/skip-mev/feemarket/tests/e2e
 
-go 1.21.4
+go 1.22
 
 replace (
 	cosmossdk.io/api => cosmossdk.io/api v0.3.1
