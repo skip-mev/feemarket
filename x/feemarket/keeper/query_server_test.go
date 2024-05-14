@@ -98,10 +98,10 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fees)
+		s.Require().Equal(resp.Fees, fee)
 	})
 
 	s.Run("can get updated base fee", func() {
@@ -146,9 +146,9 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fees)
+		s.Require().Equal(resp.Fees, fee)
 	})
 }

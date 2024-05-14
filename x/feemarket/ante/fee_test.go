@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -16,8 +18,10 @@ import (
 func TestAnteHandle(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
+
 	validFeeAmount := types.DefaultMinBaseFee.MulInt64(int64(gasLimit))
 	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount.TruncateInt()))
+	validFeeDifferentDenom := sdk.NewCoins(sdk.NewCoin("atom", math.Int(validFeeAmount)))
 
 	testCases := []antesuite.TestCase{
 		{
@@ -56,6 +60,23 @@ func TestAnteHandle(t *testing.T) {
 			ExpPass:  true,
 		},
 		{
+			Name: "0 gas given should fail with resolvable denom",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFeeDifferentDenom,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+		},
+		{
 			Name: "signer has enough funds, should pass",
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
@@ -63,6 +84,22 @@ func TestAnteHandle(t *testing.T) {
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
 					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
+			Name: "signer has enough funds in resolvable denom, should pass",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeDifferentDenom,
 				}
 			},
 			RunAnte:  true,

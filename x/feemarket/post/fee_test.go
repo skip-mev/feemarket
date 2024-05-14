@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -148,11 +149,18 @@ func TestSendTip(t *testing.T) {
 
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
+	const (
+		baseDenom       = "stake"
+		resolvableDenom = "atom"
+	)
+
 	gasLimit := antesuite.NewTestGasLimit()
 	validFeeAmount := types.DefaultMinBaseFee.MulInt64(int64(gasLimit))
-	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyMustNewDecFromStr("100"))
-	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount.TruncateInt()))
-	validFeeWithTip := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmountWithTip.TruncateInt()))
+	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
+	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
+	validFeeWithTip := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmountWithTip.TruncateInt()))
+	validResolvableFee := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmount.TruncateInt()))
+	validResolvableFeeWithTip := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmountWithTip.TruncateInt()))
 
 	testCases := []antesuite.TestCase{
 		{
@@ -228,7 +236,25 @@ func TestPostHandle(t *testing.T) {
 			ExpErr:   nil,
 		},
 		{
-			Name: "signer has enough funds, should pass with tip",
+			Name: "signer has enough funds, should pass, no tip - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip - resolvable denom",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil)
@@ -237,7 +263,7 @@ func TestPostHandle(t *testing.T) {
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
-					FeeAmount: validFeeWithTip,
+					FeeAmount: validResolvableFeeWithTip,
 				}
 			},
 			RunAnte:  true,
