@@ -2,8 +2,9 @@ package e2e
 
 import (
 	"context"
-	"cosmossdk.io/math"
 	"math/rand"
+
+	"cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"

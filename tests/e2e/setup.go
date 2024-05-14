@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
-	"cosmossdk.io/math"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"cosmossdk.io/math"
 
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"

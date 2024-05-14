@@ -27,7 +27,7 @@ var (
 	chainID = "chain-" + tmrand.NewRand().Str(6)
 
 	DefaultAppConstructor = func(val network.ValidatorI) servertypes.Application {
-		return app.New(
+		return app.NewSimApp(
 			log.NewNopLogger(),
 			tmdb.NewMemDB(),
 			nil,

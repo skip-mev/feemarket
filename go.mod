@@ -12,6 +12,7 @@ require (
 	cosmossdk.io/math v1.3.0
 	cosmossdk.io/store v1.1.0
 	cosmossdk.io/tools/confix v0.1.1
+	cosmossdk.io/x/circuit v0.1.1
 	cosmossdk.io/x/feegrant v0.1.1
 	cosmossdk.io/x/upgrade v0.1.2
 	github.com/client9/misspell v0.3.4
@@ -340,7 +341,7 @@ require (
 )
 
 replace (
-	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.0.0-20230719143845-dff6b0e26aa4
+	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.0.0-beta.1.0.20240124105859-5ad1805d0e79
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )
