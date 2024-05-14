@@ -2,8 +2,9 @@
 package networksuite
 
 import (
-	log2 "github.com/cometbft/cometbft/libs/log"
 	"math/rand"
+
+	log2 "github.com/cometbft/cometbft/libs/log"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	tmdb "github.com/cometbft/cometbft-db"
