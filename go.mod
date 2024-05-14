@@ -24,7 +24,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/golangci/golangci-lint v1.58.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/skip-mev/chaintestutil v0.0.0-20240514144753-fd76dfcdb4d7
+	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.9.0
