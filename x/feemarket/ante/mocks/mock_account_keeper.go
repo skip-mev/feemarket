@@ -147,7 +147,8 @@ func (_m *AccountKeeper) SetAccount(ctx context.Context, acc types.AccountI) {
 func NewAccountKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *AccountKeeper {
+},
+) *AccountKeeper {
 	mock := &AccountKeeper{}
 	mock.Mock.Test(t)
 

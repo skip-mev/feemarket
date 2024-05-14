@@ -39,7 +39,8 @@ func (_m *FeeGrantKeeper) UseGrantedFees(ctx context.Context, granter types.AccA
 func NewFeeGrantKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *FeeGrantKeeper {
+},
+) *FeeGrantKeeper {
 	mock := &FeeGrantKeeper{}
 	mock.Mock.Test(t)
 

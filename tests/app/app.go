@@ -2,12 +2,13 @@ package app
 
 //nolint:revive
 import (
-	"cosmossdk.io/log"
 	_ "embed"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"cosmossdk.io/log"
 
 	"cosmossdk.io/depinject"
 	storetypes "cosmossdk.io/store/types"
