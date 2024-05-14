@@ -1,6 +1,7 @@
 package post
 
 import (
+	"context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -12,12 +13,12 @@ import (
 //
 //go:generate mockery --name AccountKeeper --filename mock_account_keeper.go
 type AccountKeeper interface {
-	GetParams(ctx sdk.Context) (params authtypes.Params)
-	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
-	SetAccount(ctx sdk.Context, acc authtypes.AccountI)
+	GetParams(ctx context.Context) (params authtypes.Params)
+	GetAccount(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
+	SetAccount(ctx context.Context, acc sdk.AccountI)
 	GetModuleAddress(moduleName string) sdk.AccAddress
-	GetModuleAccount(ctx sdk.Context, name string) authtypes.ModuleAccountI
-	NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
+	GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI
+	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 }
 
 // FeeGrantKeeper defines the expected feegrant keeper.

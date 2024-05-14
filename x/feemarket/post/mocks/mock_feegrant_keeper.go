@@ -5,6 +5,8 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
+	proto "github.com/cosmos/gogoproto/proto"
+
 	types "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -14,7 +16,7 @@ type FeeGrantKeeper struct {
 }
 
 // UseGrantedFees provides a mock function with given fields: ctx, granter, grantee, fee, msgs
-func (_m *FeeGrantKeeper) UseGrantedFees(ctx types.Context, granter types.AccAddress, grantee types.AccAddress, fee types.Coins, msgs []types.Msg) error {
+func (_m *FeeGrantKeeper) UseGrantedFees(ctx types.Context, granter types.AccAddress, grantee types.AccAddress, fee types.Coins, msgs []proto.Message) error {
 	ret := _m.Called(ctx, granter, grantee, fee, msgs)
 
 	if len(ret) == 0 {
@@ -22,7 +24,7 @@ func (_m *FeeGrantKeeper) UseGrantedFees(ctx types.Context, granter types.AccAdd
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress, types.AccAddress, types.Coins, []types.Msg) error); ok {
+	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress, types.AccAddress, types.Coins, []proto.Message) error); ok {
 		r0 = rf(ctx, granter, grantee, fee, msgs)
 	} else {
 		r0 = ret.Error(0)
@@ -36,8 +38,7 @@ func (_m *FeeGrantKeeper) UseGrantedFees(ctx types.Context, granter types.AccAdd
 func NewFeeGrantKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *FeeGrantKeeper {
+}) *FeeGrantKeeper {
 	mock := &FeeGrantKeeper{}
 	mock.Mock.Test(t)
 

@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/cosmos/cosmos-sdk/types"
@@ -15,19 +18,19 @@ type AccountKeeper struct {
 }
 
 // GetAccount provides a mock function with given fields: ctx, addr
-func (_m *AccountKeeper) GetAccount(ctx types.Context, addr types.AccAddress) authtypes.AccountI {
+func (_m *AccountKeeper) GetAccount(ctx context.Context, addr types.AccAddress) types.AccountI {
 	ret := _m.Called(ctx, addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAccount")
 	}
 
-	var r0 authtypes.AccountI
-	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress) authtypes.AccountI); ok {
+	var r0 types.AccountI
+	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress) types.AccountI); ok {
 		r0 = rf(ctx, addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(authtypes.AccountI)
+			r0 = ret.Get(0).(types.AccountI)
 		}
 	}
 
@@ -35,19 +38,19 @@ func (_m *AccountKeeper) GetAccount(ctx types.Context, addr types.AccAddress) au
 }
 
 // GetModuleAccount provides a mock function with given fields: ctx, name
-func (_m *AccountKeeper) GetModuleAccount(ctx types.Context, name string) authtypes.ModuleAccountI {
+func (_m *AccountKeeper) GetModuleAccount(ctx context.Context, name string) types.ModuleAccountI {
 	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetModuleAccount")
 	}
 
-	var r0 authtypes.ModuleAccountI
-	if rf, ok := ret.Get(0).(func(types.Context, string) authtypes.ModuleAccountI); ok {
+	var r0 types.ModuleAccountI
+	if rf, ok := ret.Get(0).(func(context.Context, string) types.ModuleAccountI); ok {
 		r0 = rf(ctx, name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(authtypes.ModuleAccountI)
+			r0 = ret.Get(0).(types.ModuleAccountI)
 		}
 	}
 
@@ -75,7 +78,7 @@ func (_m *AccountKeeper) GetModuleAddress(moduleName string) types.AccAddress {
 }
 
 // GetParams provides a mock function with given fields: ctx
-func (_m *AccountKeeper) GetParams(ctx types.Context) authtypes.Params {
+func (_m *AccountKeeper) GetParams(ctx context.Context) authtypes.Params {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
@@ -83,7 +86,7 @@ func (_m *AccountKeeper) GetParams(ctx types.Context) authtypes.Params {
 	}
 
 	var r0 authtypes.Params
-	if rf, ok := ret.Get(0).(func(types.Context) authtypes.Params); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) authtypes.Params); ok {
 		r0 = rf(ctx)
 	} else {
 		r0 = ret.Get(0).(authtypes.Params)
@@ -93,19 +96,19 @@ func (_m *AccountKeeper) GetParams(ctx types.Context) authtypes.Params {
 }
 
 // NewAccountWithAddress provides a mock function with given fields: ctx, addr
-func (_m *AccountKeeper) NewAccountWithAddress(ctx types.Context, addr types.AccAddress) authtypes.AccountI {
+func (_m *AccountKeeper) NewAccountWithAddress(ctx context.Context, addr types.AccAddress) types.AccountI {
 	ret := _m.Called(ctx, addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for NewAccountWithAddress")
 	}
 
-	var r0 authtypes.AccountI
-	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress) authtypes.AccountI); ok {
+	var r0 types.AccountI
+	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress) types.AccountI); ok {
 		r0 = rf(ctx, addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(authtypes.AccountI)
+			r0 = ret.Get(0).(types.AccountI)
 		}
 	}
 
@@ -113,7 +116,7 @@ func (_m *AccountKeeper) NewAccountWithAddress(ctx types.Context, addr types.Acc
 }
 
 // SetAccount provides a mock function with given fields: ctx, acc
-func (_m *AccountKeeper) SetAccount(ctx types.Context, acc authtypes.AccountI) {
+func (_m *AccountKeeper) SetAccount(ctx context.Context, acc types.AccountI) {
 	_m.Called(ctx, acc)
 }
 
@@ -122,8 +125,7 @@ func (_m *AccountKeeper) SetAccount(ctx types.Context, acc authtypes.AccountI) {
 func NewAccountKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *AccountKeeper {
+}) *AccountKeeper {
 	mock := &AccountKeeper{}
 	mock.Mock.Test(t)
 
