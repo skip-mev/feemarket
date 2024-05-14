@@ -52,7 +52,7 @@ type NetworkTestSuite struct {
 func (nts *NetworkTestSuite) SetupSuite() {
 	var (
 		r   = sample.Rand()
-		cfg = network.NewConfig(DefaultAppConstructor, app.ModuleBasics, chainID)
+		cfg = network.NewConfig(app.AppConfig)
 	)
 
 	updateGenesisConfigState := func(moduleName string, moduleState proto.Message) {

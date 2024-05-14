@@ -1,6 +1,7 @@
 package post_test
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 	"time"
@@ -17,11 +18,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 
 	"cosmossdk.io/x/feegrant"
+	"cosmossdk.io/x/tx/signing"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
-	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -156,7 +156,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 	}
 }
 
-func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,
+func genTxWithFeeGranter(ctx context.Context, gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,
 	accSeqs []uint64, feeGranter sdk.AccAddress, priv ...cryptotypes.PrivKey,
 ) (sdk.Tx, error) {
 	sigs := make([]signing.SignatureV2, len(priv))
@@ -196,12 +196,12 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 
 	// 2nd round: once all signer infos are set, every signer can sign.
 	for i, p := range priv {
-		signerData := authsign.SignerData{
+		signerData := signing.SignerData{
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
 		}
-		signBytes, err := gen.SignModeHandler().GetSignBytes(signMode, signerData, tx.GetTx())
+		signBytes, err := gen.SignModeHandler().GetSignBytes(ctx, signMode, signerData, tx.GetTx())
 		if err != nil {
 			panic(err)
 		}
