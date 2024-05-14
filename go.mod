@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	cosmossdk.io/api v0.7.4
+	cosmossdk.io/client/v2 v2.0.0-00010101000000-000000000000
 	cosmossdk.io/core v0.11.0
 	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.1

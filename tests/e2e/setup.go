@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"cosmossdk.io/math"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -250,7 +251,7 @@ func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.Res
 }
 
 // WaitForHeight waits for the chain to reach the given height
-func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
+func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height int64) {
 	s.T().Helper()
 
 	// wait for next height
@@ -414,8 +415,8 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		interchaintest.FaucetAccountKeyName,
 		interchaintest.FaucetAccountKeyName,
 		user.FormattedAddress(),
-		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount))),
-		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(1000000000000))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(amount))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1000000000000))),
 		1000000,
 	)
 	s.Require().NoError(err, "failed to get funds from faucet")

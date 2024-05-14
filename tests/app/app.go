@@ -11,6 +11,7 @@ import (
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
+	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	"cosmossdk.io/x/upgrade"
@@ -131,6 +132,7 @@ type TestApp struct {
 	AuthzKeeper           authzkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	ConsensusParamsKeeper consensuskeeper.Keeper
+	CircuitBreakerKeeper  circuitkeeper.Keeper
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	FeeMarketKeeper       feemarketkeeper.Keeper
 }
@@ -145,7 +147,7 @@ func init() {
 }
 
 func New(
-	_ log.Logger,
+	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	loadLatest bool,
@@ -162,6 +164,8 @@ func New(
 			depinject.Supply(
 				// supply the application options
 				appOpts,
+				// supply the logger
+				logger,
 
 				// ADVANCED CONFIGURATION
 
@@ -209,6 +213,7 @@ func New(
 		&app.FeeGrantKeeper,
 		&app.GroupKeeper,
 		&app.ConsensusParamsKeeper,
+		&app.CircuitBreakerKeeper,
 		&app.FeeMarketKeeper,
 	); err != nil {
 		panic(err)
@@ -287,6 +292,11 @@ func New(
 	/****  Module Options ****/
 
 	app.ModuleManager.RegisterInvariants(app.CrisisKeeper)
+
+	// register streaming services
+	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {
+		panic(err)
+	}
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// app.RegisterUpgradeHandlers()
@@ -410,4 +420,15 @@ func BlockedAddresses() map[string]bool {
 	}
 
 	return result
+}
+
+func (app *TestApp) kvStoreKeys() map[string]*storetypes.KVStoreKey {
+	keys := make(map[string]*storetypes.KVStoreKey)
+	for _, k := range app.GetStoreKeys() {
+		if kv, ok := k.(*storetypes.KVStoreKey); ok {
+			keys[kv.Name()] = kv
+		}
+	}
+
+	return keys
 }
