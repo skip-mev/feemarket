@@ -4,8 +4,8 @@ package keeper
 import (
 	"testing"
 
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -76,7 +76,7 @@ func FeeMarket(
 	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,
 ) *feemarketkeeper.Keeper {
-	storeKey := sdk.NewKVStoreKey(feemarkettypes.StoreKey)
+	storeKey := storetypes.NewKVStoreKey(feemarkettypes.StoreKey)
 	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
 
 	return feemarketkeeper.NewKeeper(

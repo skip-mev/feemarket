@@ -161,8 +161,7 @@ func (_m *FeeMarketKeeper) SetState(ctx cosmos_sdktypes.Context, state types.Sta
 func NewFeeMarketKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *FeeMarketKeeper {
+}) *FeeMarketKeeper {
 	mock := &FeeMarketKeeper{}
 	mock.Mock.Test(t)
 

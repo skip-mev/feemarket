@@ -227,7 +227,8 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 			Sequence:      accSeqs[i],
 		}
 		sigV2, err := tx.SignWithPrivKey(
-			s.ClientCtx.TxConfig.SignModeHandler().DefaultMode(), signerData,
+			s.Ctx,
+			signing.SignMode(s.ClientCtx.TxConfig.SignModeHandler().DefaultMode()), signerData,
 			s.TxBuilder, priv, s.ClientCtx.TxConfig, accSeqs[i])
 		if err != nil {
 			return nil, err

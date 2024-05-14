@@ -174,7 +174,7 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 		sigs[i] = signing.SignatureV2{
 			PubKey: p.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode: signMode,
+				SignMode: signing.SignMode(signMode),
 			},
 			Sequence: accSeqs[i],
 		}

@@ -2,6 +2,7 @@ package app
 
 //nolint:revive
 import (
+	"cosmossdk.io/log"
 	_ "embed"
 	"io"
 	"os"
@@ -14,8 +15,7 @@ import (
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	"cosmossdk.io/x/upgrade"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
-	dbm "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -145,7 +145,7 @@ func init() {
 }
 
 func New(
-	logger log.Logger,
+	_ log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	loadLatest bool,
