@@ -152,7 +152,6 @@ func (s *TestSuite) TestQueryBaseFee() {
 }
 
 func (s *TestSuite) TestSendTxUpdating() {
-	ctx := context.Background()
 
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
@@ -161,27 +160,56 @@ func (s *TestSuite) TestSendTxUpdating() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
+	baseFee := s.QueryBaseFee()
+	gas := int64(1000000)
+	minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
+
 	s.Run("expect fee market state to update", func() {
 		for _ = range 10 {
-
-			baseFee := s.QueryBaseFee()
-
-			gas := int64(1000000)
-			minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
-
+			s.T().Log("sending coins")
 			// send with the exact expected fee
-			txResp, err := s.SendCoins(
-				ctx,
-				cosmosChain,
-				s.user1.KeyName(),
-				s.user1.FormattedAddress(),
-				s.user2.FormattedAddress(),
-				sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
-				minBaseFee,
-				gas,
-			)
-			s.Require().NoError(err, txResp)
-			s.T().Log(txResp)
+			go func() {
+				txResp, err := s.SendCoins(
+					context.Background(),
+					nodes[0],
+					cosmosChain,
+					s.user1.KeyName(),
+					s.user1.FormattedAddress(),
+					s.user2.FormattedAddress(),
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+					minBaseFee,
+					gas,
+				)
+				s.Require().NoError(err, txResp)
+				s.T().Log(txResp)
+			}()
+
+			go func() {
+				txResp, err := s.SendCoins(
+					context.Background(),
+					nodes[1],
+					cosmosChain,
+					s.user2.KeyName(),
+					s.user2.FormattedAddress(),
+					s.user1.FormattedAddress(),
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+					minBaseFee,
+					gas,
+				)
+				s.Require().NoError(err, txResp)
+				s.T().Log(txResp)
+			}()
+
 		}
 	})
+
+	// wait for 1 block height
+	// query height
+	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+	s.Require().NoError(err)
+	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+
+	state := s.QueryState()
+
+	s.T().Log("state at block height", height+1, ":", state.String())
 }

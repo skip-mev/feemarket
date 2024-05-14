@@ -373,11 +373,13 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+func (s *TestSuite) SendCoins(ctx context.Context, node *cosmos.ChainNode, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
 	resp, err := s.ExecTx(
 		ctx,
+		node,
 		chain,
 		keyName,
+		false,
 		"bank",
 		"send",
 		sender,
@@ -410,6 +412,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 
 	_, err = s.SendCoins(
 		ctx,
+		chain.Ge(),
 		chain,
 		interchaintest.FaucetAccountKeyName,
 		interchaintest.FaucetAccountKeyName,
@@ -454,11 +457,13 @@ func (s *TestSuite) GetAndFundTestUsers(
 }
 
 // ExecTx executes a cli command on a node, waits a block and queries the Tx to verify it was included on chain.
-func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
-	node := chain.FullNodes[0]
-
+func (s *TestSuite) ExecTx(ctx context.Context, node *cosmos.ChainNode, chain *cosmos.CosmosChain, keyName string, blocking bool, command ...string) (string, error) {
 	resp, err := node.ExecTx(ctx, keyName, command...)
 	s.Require().NoError(err)
+
+	if !blocking {
+		return resp, nil
+	}
 
 	height, err := chain.Height(context.Background())
 	s.Require().NoError(err)
