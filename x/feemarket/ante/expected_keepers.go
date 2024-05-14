@@ -3,6 +3,8 @@ package ante
 import (
 	"context"
 
+	"cosmossdk.io/core/address"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -20,6 +22,7 @@ type AccountKeeper interface {
 	GetModuleAddress(moduleName string) sdk.AccAddress
 	GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI
 	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
+	AddressCodec() address.Codec
 }
 
 // FeeGrantKeeper defines the expected feegrant keeper.

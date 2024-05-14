@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	abci "github.com/cometbft/cometbft/abci/types"
-
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 	store "cosmossdk.io/store/types"
@@ -30,11 +28,14 @@ import (
 const ConsensusVersion = 1
 
 var (
-	_ module.AppModuleBasic = AppModule{}
+	_ module.HasName        = AppModule{}
 	_ module.HasGenesis     = AppModule{}
+	_ module.AppModuleBasic = AppModule{}
 	_ module.HasServices    = AppModule{}
 
-	_ appmodule.AppModule = AppModule{}
+	_ appmodule.AppModule       = AppModule{}
+	_ appmodule.HasBeginBlocker = AppModule{}
+	_ appmodule.HasEndBlocker   = AppModule{}
 )
 
 // AppModuleBasic defines the base interface that the x/feemarket module exposes to the application.
@@ -84,6 +85,10 @@ type AppModule struct {
 	k keeper.Keeper
 }
 
+func (am AppModule) BeginBlock(_ context.Context) error {
+	return nil
+}
+
 // NewAppModule returns an application module for the x/feemarket module.
 func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 	return AppModule{
@@ -95,8 +100,9 @@ func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 }
 
 // EndBlock returns an endblocker for the x/feemarket module.
-func (am AppModule) EndBlock(ctx sdk.Context, req abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return am.k.EndBlock(ctx, req)
+func (am AppModule) EndBlock(ctx context.Context) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return am.k.EndBlock(sdkCtx)
 }
 
 // IsAppModule implements the appmodule.AppModule interface.
