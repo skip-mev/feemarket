@@ -27,7 +27,7 @@ func TestDeductCoins(t *testing.T) {
 	}{
 		{
 			name:    "valid",
-			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			coins:   sdk.NewCoins(sdk.NewCoin("test", math.NewInt(10))),
 			wantErr: false,
 		},
 		{
@@ -37,13 +37,13 @@ func TestDeductCoins(t *testing.T) {
 		},
 		{
 			name:        "invalid coins negative amount",
-			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
+			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: math.NewInt(-1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
 		{
 			name:        "invalid coins invalid denom",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
+			coins:       sdk.Coins{sdk.Coin{Amount: math.NewInt(1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
@@ -72,7 +72,7 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 	}{
 		{
 			name:    "valid",
-			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			coins:   sdk.NewCoins(sdk.NewCoin("test", math.NewInt(10))),
 			wantErr: false,
 		},
 		{
@@ -82,13 +82,13 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 		},
 		{
 			name:        "invalid coins negative amount",
-			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
+			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: math.NewInt(-1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
 		{
 			name:        "invalid coins invalid denom",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
+			coins:       sdk.Coins{sdk.Coin{Amount: math.NewInt(1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
@@ -117,7 +117,7 @@ func TestSendTip(t *testing.T) {
 	}{
 		{
 			name:    "valid",
-			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
+			coins:   sdk.NewCoins(sdk.NewCoin("test", math.NewInt(10))),
 			wantErr: false,
 		},
 		{
@@ -127,7 +127,7 @@ func TestSendTip(t *testing.T) {
 		},
 		{
 			name:        "invalid coins",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
+			coins:       sdk.Coins{sdk.Coin{Amount: math.NewInt(-1)}},
 			wantErr:     true,
 			invalidCoin: true,
 		},
