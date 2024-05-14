@@ -1,13 +1,11 @@
-//go:build !app_v1
-
 package cmd
 
 import (
 	"os"
 
-	"github.com/skip-mev/feemarket/tests/app"
-
 	"github.com/spf13/cobra"
+
+	"github.com/skip-mev/feemarket/tests/app"
 
 	"cosmossdk.io/client/v2/autocli"
 	clientv2keyring "cosmossdk.io/client/v2/autocli/keyring"
