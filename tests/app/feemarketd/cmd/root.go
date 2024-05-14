@@ -3,54 +3,46 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
-
-	"github.com/skip-mev/feemarket/tests/app"
-
-	"cosmossdk.io/client/v2/autocli"
-	clientv2keyring "cosmossdk.io/client/v2/autocli/keyring"
-	"cosmossdk.io/core/address"
-	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
+	dbm "github.com/cosmos/cosmos-db"
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
-	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/server"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	"github.com/skip-mev/feemarket/tests/app"
+	"github.com/skip-mev/feemarket/tests/app/params"
 )
 
-// NewRootCmd creates a new root command for simd. It is called once in the main function.
+// NewRootCmd creates a new root command for simd. It is called once in the
+// main function.
 func NewRootCmd() *cobra.Command {
-	var (
-		autoCliOpts        autocli.AppOptions
-		moduleBasicManager module.BasicManager
-		clientCtx          client.Context
-	)
-
-	if err := depinject.Inject(
-		depinject.Configs(app.AppConfig,
-			depinject.Supply(
-				log.NewNopLogger(),
-				simtestutil.NewAppOptionsWithFlagHome(tempDir()),
-			),
-			depinject.Provide(
-				ProvideClientContext,
-				ProvideKeyring,
-			),
-		),
-		&autoCliOpts,
-		&moduleBasicManager,
-		&clientCtx,
-	); err != nil {
-		panic(err)
+	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
+	// note, this is not necessary when using app wiring, as depinject can be directly used (see root_v2.go)
+	tempApp := app.NewSimApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(tempDir()))
+	encodingConfig := params.EncodingConfig{
+		InterfaceRegistry: tempApp.InterfaceRegistry(),
+		Codec:             tempApp.AppCodec(),
+		TxConfig:          tempApp.TxConfig(),
+		Amino:             tempApp.LegacyAmino(),
 	}
+
+	initClientCtx := client.Context{}.
+		WithCodec(encodingConfig.Codec).
+		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
+		WithTxConfig(encodingConfig.TxConfig).
+		WithLegacyAmino(encodingConfig.Amino).
+		WithInput(os.Stdin).
+		WithAccountRetriever(types.AccountRetriever{}).
+		WithHomeDir(app.DefaultNodeHome).
+		WithViper("") // In simapp, we don't use any prefix for env variables.
 
 	rootCmd := &cobra.Command{
 		Use:           "simd",
@@ -61,18 +53,39 @@ func NewRootCmd() *cobra.Command {
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
 
-			clientCtx = clientCtx.WithCmdContext(cmd.Context()).WithViper("")
-			clientCtx, err := client.ReadPersistentCommandFlags(clientCtx, cmd.Flags())
+			initClientCtx = initClientCtx.WithCmdContext(cmd.Context())
+			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
 			}
 
-			clientCtx, err = config.ReadFromClientConfig(clientCtx)
+			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
 			if err != nil {
 				return err
 			}
 
-			if err := client.SetCmdClientContextHandler(clientCtx, cmd); err != nil {
+			// This needs to go after ReadFromClientConfig, as that function
+			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
+			// is only available if the client is online.
+			if !initClientCtx.Offline {
+				//nolint:gocritic
+				enabledSignModes := append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL)
+				txConfigOpts := tx.ConfigOptions{
+					EnabledSignModes:           enabledSignModes,
+					TextualCoinMetadataQueryFn: authtxconfig.NewGRPCCoinMetadataQueryFn(initClientCtx),
+				}
+				txConfig, err := tx.NewTxConfigWithOptions(
+					initClientCtx.Codec,
+					txConfigOpts,
+				)
+				if err != nil {
+					return err
+				}
+
+				initClientCtx = initClientCtx.WithTxConfig(txConfig)
+			}
+
+			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
@@ -83,49 +96,17 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
-	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
+	initRootCmd(rootCmd, encodingConfig.TxConfig, tempApp.BasicModuleManager)
+
+	// add keyring to autocli opts
+	autoCliOpts := tempApp.AutoCliOpts()
+	initClientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	autoCliOpts.ClientCtx = initClientCtx
 
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
 	}
 
 	return rootCmd
-}
-
-func ProvideClientContext(
-	appCodec codec.Codec,
-	interfaceRegistry codectypes.InterfaceRegistry,
-	txConfigOpts tx.ConfigOptions,
-	legacyAmino *codec.LegacyAmino,
-) client.Context {
-	clientCtx := client.Context{}.
-		WithCodec(appCodec).
-		WithInterfaceRegistry(interfaceRegistry).
-		WithLegacyAmino(legacyAmino).
-		WithInput(os.Stdin).
-		WithAccountRetriever(types.AccountRetriever{}).
-		WithHomeDir(app.DefaultNodeHome).
-		WithViper("") // In simapp, we don't use any prefix for env variables.
-
-	// Read the config again to overwrite the default values with the values from the config file
-	clientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(clientCtx)
-
-	// textual is enabled by default, we need to re-create the tx config grpc instead of bank keeper.
-	txConfigOpts.TextualCoinMetadataQueryFn = authtxconfig.NewGRPCCoinMetadataQueryFn(clientCtx)
-	txConfig, err := tx.NewTxConfigWithOptions(clientCtx.Codec, txConfigOpts)
-	if err != nil {
-		panic(err)
-	}
-	clientCtx = clientCtx.WithTxConfig(txConfig)
-
-	return clientCtx
-}
-
-func ProvideKeyring(clientCtx client.Context, _ address.Codec) (clientv2keyring.Keyring, error) {
-	kb, err := client.NewKeyringFromBackend(clientCtx, clientCtx.Keyring.Backend())
-	if err != nil {
-		return nil, err
-	}
-
-	return keyring.NewAutoCLIKeyring(kb)
 }
