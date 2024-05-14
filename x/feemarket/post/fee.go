@@ -203,7 +203,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 // DeductCoins deducts coins from the given account.
 // Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins, distributeFees bool) error {
 	if !coins.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
 	}

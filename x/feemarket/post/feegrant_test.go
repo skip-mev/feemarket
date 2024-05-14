@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/mock"
+	"cosmossdk.io/x/feegrant"
 
-	"github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/stretchr/testify/require"
 
@@ -16,17 +16,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
-
-	"cosmossdk.io/x/feegrant"
-	"cosmossdk.io/x/tx/signing"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 func TestDeductFeesNoDelegation(t *testing.T) {
@@ -156,7 +156,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 	}
 }
 
-func genTxWithFeeGranter(ctx context.Context, gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,
+func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, gas uint64, chainID string, accNums,
 	accSeqs []uint64, feeGranter sdk.AccAddress, priv ...cryptotypes.PrivKey,
 ) (sdk.Tx, error) {
 	sigs := make([]signing.SignatureV2, len(priv))
@@ -166,7 +166,7 @@ func genTxWithFeeGranter(ctx context.Context, gen client.TxConfig, msgs []sdk.Ms
 
 	memo := simulation.RandStringOfLength(r, simulation.RandIntBetween(r, 0, 100))
 
-	signMode := gen.SignModeHandler().DefaultMode()
+	signMode := signing.SignMode_SIGN_MODE_DIRECT
 
 	// 1st round: set SignatureV2 with empty signatures, to set correct
 	// signer infos.
@@ -174,7 +174,7 @@ func genTxWithFeeGranter(ctx context.Context, gen client.TxConfig, msgs []sdk.Ms
 		sigs[i] = signing.SignatureV2{
 			PubKey: p.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode: signing.SignMode(signMode),
+				SignMode: signMode,
 			},
 			Sequence: accSeqs[i],
 		}
@@ -196,12 +196,14 @@ func genTxWithFeeGranter(ctx context.Context, gen client.TxConfig, msgs []sdk.Ms
 
 	// 2nd round: once all signer infos are set, every signer can sign.
 	for i, p := range priv {
-		signerData := signing.SignerData{
+		signerData := authsign.SignerData{
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
+			PubKey:        p.PubKey(),
 		}
-		signBytes, err := gen.SignModeHandler().GetSignBytes(ctx, signMode, signerData, tx.GetTx())
+		signBytes, err := authsign.GetSignBytesAdapter(
+			context.Background(), gen.SignModeHandler(), signMode, signerData, tx.GetTx())
 		if err != nil {
 			panic(err)
 		}

@@ -4,11 +4,11 @@ package networksuite
 import (
 	"math/rand"
 
-	log2 "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
-	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmdb "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -28,7 +28,7 @@ var (
 
 	DefaultAppConstructor = func(val network.ValidatorI) servertypes.Application {
 		return app.New(
-			log2.Logger(),
+			log.NewNopLogger(),
 			tmdb.NewMemDB(),
 			nil,
 			true,

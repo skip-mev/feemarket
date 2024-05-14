@@ -8,9 +8,8 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"cosmossdk.io/log"
-
 	"cosmossdk.io/depinject"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
