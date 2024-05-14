@@ -37,7 +37,7 @@ func GetParamsCmd() *cobra.Command {
 		Use:   "params",
 		Short: "Query for the current feemarket parameters",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -64,7 +64,7 @@ func GetStateCmd() *cobra.Command {
 		Use:   "state",
 		Short: "Query for the current feemarket state",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -91,7 +91,7 @@ func GetBaseFeeCmd() *cobra.Command {
 		Use:   "base-fee",
 		Short: "Query for the current feemarket base fee",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err

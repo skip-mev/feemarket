@@ -11,10 +11,12 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
+// Keeper is the x/feemarket keeper.
 type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
 	ak       types.AccountKeeper
+	resolver types.DenomResolver
 
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
@@ -26,6 +28,7 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	authKeeper types.AccountKeeper,
+	resolver types.DenomResolver,
 	authority string,
 ) *Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
@@ -33,10 +36,11 @@ func NewKeeper(
 	}
 
 	k := &Keeper{
-		cdc,
-		storeKey,
-		authKeeper,
-		authority,
+		cdc:       cdc,
+		storeKey:  storeKey,
+		ak:        authKeeper,
+		resolver:  resolver,
+		authority: authority,
 	}
 
 	return k
@@ -50,6 +54,25 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority
+}
+
+// ResolveToBaseDenom converts the given coin to the given denomination.
+func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.Coin, denom string) (sdk.Coin, error) {
+	if k.resolver == nil {
+		return sdk.Coin{}, types.ErrResolverNotSet
+	}
+
+	return k.resolver.ConvertToDenom(ctx, coin, denom)
+}
+
+// SetDenomResolver sets the keeper's denom resolver.
+func (k *Keeper) SetDenomResolver(resolver types.DenomResolver) {
+	k.resolver = resolver
+}
+
+// GetDenomResolver gets the keeper's denom resolver.
+func (k *Keeper) GetDenomResolver() types.DenomResolver {
+	return k.resolver
 }
 
 // GetState returns the feemarket module's state.

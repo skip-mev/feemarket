@@ -45,4 +45,5 @@ type FeeMarketKeeper interface {
 	GetParams(ctx sdk.Context) (feemarkettypes.Params, error)
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
 	SetParams(ctx sdk.Context, params feemarkettypes.Params) error
+	GetDenomResolver() feemarkettypes.DenomResolver
 }

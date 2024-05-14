@@ -60,7 +60,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			fee:   24497000000,
 			valid: false,
 			err:   sdkerrors.ErrUnknownAddress,
-			malleate: func(suite *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
+			malleate: func(_ *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				// Do not register the account
 				priv, _, addr := testdata.KeyTestPubAddr()
 				return antesuite.TestAccount{
