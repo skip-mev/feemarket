@@ -2,9 +2,9 @@ package e2e
 
 import (
 	"context"
-	"math/rand"
-
 	"cosmossdk.io/math"
+	"math/rand"
+	"sync"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -163,50 +163,78 @@ func (s *TestSuite) TestSendTxUpdating() {
 
 	baseFee := s.QueryBaseFee()
 	gas := int64(1000000)
-	minBaseFee := baseFee.MulInt(math.NewInt(gas))
+	minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
+	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
+	sendAmt := int64(100000)
+	numSends := int64(100)
 
 	s.Run("expect fee market state to update", func() {
-		for range 10 {
-			s.T().Log("sending coins")
+		s.T().Log("performing sends")
+		for range numSends {
 			// send with the exact expected fee
+
+			wg := sync.WaitGroup{}
 			go func() {
-				txResp, err := s.SendCoins(
+				wg.Add(1)
+				defer wg.Done()
+				txResp, err := s.SendCoins2(
 					context.Background(),
-					s.user1.KeyName(),
-					s.user1.FormattedAddress(),
-					s.user2.FormattedAddress(),
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(10000))),
-					minBaseFee,
+					s.user1,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
 					gas,
 				)
 				s.Require().NoError(err, txResp)
-				s.T().Log(txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp)
 			}()
 
 			go func() {
-				txResp, err := s.SendCoins(
+				wg.Add(1)
+				defer wg.Done()
+				txResp, err := s.SendCoins2(
 					context.Background(),
-					s.user2.KeyName(),
-					s.user2.FormattedAddress(),
-					s.user1.FormattedAddress(),
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(10000))),
-					minBaseFee,
+					s.user3,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
 					gas,
 				)
 				s.Require().NoError(err, txResp)
-				s.T().Log(txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp)
 			}()
+
+			txResp, err := s.SendCoins2(
+				context.Background(),
+				s.user2,
+				s.user1,
+				sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+				minBaseFeeCoins,
+				gas,
+			)
+			s.Require().NoError(err, txResp)
+			s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp)
+			s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp)
+
+			wg.Wait()
 
 		}
+
+		state := s.QueryState()
+		s.T().Log("state:", state.String())
+
+		// wait for 1 block height
+		// query height
+		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		s.Require().NoError(err)
+		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+
+		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), minBaseFee.Denom)
+		s.Require().NoError(err)
+		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
+
+		s.T().Log("balance:", amt.String())
 	})
-
-	// wait for 1 block height
-	// query height
-	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
-	s.Require().NoError(err)
-	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
-
-	state := s.QueryState()
-
-	s.T().Log("state at block height", height+1, ":", state.String())
 }
