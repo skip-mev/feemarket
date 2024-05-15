@@ -1,13 +1,14 @@
 package post_test
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/mock"
+	"cosmossdk.io/x/feegrant"
 
-	"github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/stretchr/testify/require"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
@@ -23,10 +23,10 @@ import (
 	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/feegrant"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 func TestDeductFeesNoDelegation(t *testing.T) {
@@ -166,7 +166,7 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 
 	memo := simulation.RandStringOfLength(r, simulation.RandIntBetween(r, 0, 100))
 
-	signMode := gen.SignModeHandler().DefaultMode()
+	signMode := signing.SignMode_SIGN_MODE_DIRECT
 
 	// 1st round: set SignatureV2 with empty signatures, to set correct
 	// signer infos.
@@ -200,8 +200,10 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
+			PubKey:        p.PubKey(),
 		}
-		signBytes, err := gen.SignModeHandler().GetSignBytes(signMode, signerData, tx.GetTx())
+		signBytes, err := authsign.GetSignBytesAdapter(
+			context.Background(), gen.SignModeHandler(), signMode, signerData, tx.GetTx())
 		if err != nil {
 			panic(err)
 		}
