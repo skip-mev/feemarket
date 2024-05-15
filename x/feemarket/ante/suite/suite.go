@@ -3,20 +3,28 @@ package suite
 import (
 	"testing"
 
+	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/address"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/skip-mev/chaintestutil/encoding"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/feemarket/tests/app"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
@@ -39,12 +47,12 @@ type TestSuite struct {
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-	EncCfg             encoding.TestEncodingConfig
+	EncCfg             TestEncodingConfig
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
 type TestAccount struct {
-	Account authtypes.AccountI
+	Account sdk.AccountI
 	Priv    cryptotypes.PrivKey
 }
 
@@ -69,7 +77,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = encoding.MakeTestEncodingConfig(app.ModuleBasics.RegisterInterfaces)
+	s.EncCfg = MakeTestEncodingConfig()
 	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
 	s.Ctx = ctx
 
@@ -205,7 +213,7 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 		sigV2 := signing.SignatureV2{
 			PubKey: priv.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode:  s.ClientCtx.TxConfig.SignModeHandler().DefaultMode(),
+				SignMode:  signing.SignMode(s.ClientCtx.TxConfig.SignModeHandler().DefaultMode()),
 				Signature: nil,
 			},
 			Sequence: accSeqs[i],
@@ -227,7 +235,8 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 			Sequence:      accSeqs[i],
 		}
 		sigV2, err := tx.SignWithPrivKey(
-			s.ClientCtx.TxConfig.SignModeHandler().DefaultMode(), signerData,
+			s.Ctx,
+			signing.SignMode(s.ClientCtx.TxConfig.SignModeHandler().DefaultMode()), signerData,
 			s.TxBuilder, priv, s.ClientCtx.TxConfig, accSeqs[i])
 		if err != nil {
 			return nil, err
@@ -251,4 +260,58 @@ func NewTestFeeAmount() sdk.Coins {
 // NewTestGasLimit is a test fee gas limit.
 func NewTestGasLimit() uint64 {
 	return 200000
+}
+
+// TestEncodingConfig specifies the concrete encoding types to use for a given app.
+// This is provided for compatibility between protobuf and amino implementations.
+type TestEncodingConfig struct {
+	InterfaceRegistry codectypes.InterfaceRegistry
+	Codec             codec.Codec
+	TxConfig          client.TxConfig
+	Amino             *codec.LegacyAmino
+}
+
+// MakeTestEncodingConfig creates a test EncodingConfig for a test configuration.
+func MakeTestEncodingConfig() TestEncodingConfig {
+	amino := codec.NewLegacyAmino()
+
+	interfaceRegistry := InterfaceRegistry()
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+
+	std.RegisterLegacyAminoCodec(amino)
+	std.RegisterInterfaces(interfaceRegistry)
+
+	return TestEncodingConfig{
+		InterfaceRegistry: interfaceRegistry,
+		Codec:             cdc,
+		TxConfig:          txCfg,
+		Amino:             amino,
+	}
+}
+
+func InterfaceRegistry() codectypes.InterfaceRegistry {
+	interfaceRegistry, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
+		ProtoFiles: proto.HybridResolver,
+		SigningOptions: txsigning.Options{
+			AddressCodec: address.Bech32Codec{
+				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
+			},
+			ValidatorAddressCodec: address.Bech32Codec{
+				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// always register
+	cryptocodec.RegisterInterfaces(interfaceRegistry)
+	authtypes.RegisterInterfaces(interfaceRegistry)
+
+	// call extra registry functions
+	feemarkettypes.RegisterInterfaces(interfaceRegistry)
+
+	return interfaceRegistry
 }
