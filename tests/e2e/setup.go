@@ -34,7 +34,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -375,10 +374,14 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+func (s *TestSuite) SendCoins(ctx context.Context, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
 	resp, err := s.ExecTx(
 		ctx,
-		chain,
+		cc,
 		keyName,
 		"bank",
 		"send",
@@ -401,7 +404,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	ctx context.Context,
 	keyNamePrefix, mnemonic string,
 	amount int64,
-	chain *cosmos.CosmosChain,
+	chain ibc.Chain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
 	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, sample.AlphaString(r, 3))
@@ -412,7 +415,6 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 
 	_, err = s.SendCoins(
 		ctx,
-		chain,
 		interchaintest.FaucetAccountKeyName,
 		interchaintest.FaucetAccountKeyName,
 		user.FormattedAddress(),
@@ -430,34 +432,17 @@ func (s *TestSuite) GetAndFundTestUsers(
 	ctx context.Context,
 	keyNamePrefix string,
 	amount int64,
-	chains ...*cosmos.CosmosChain,
-) []ibc.Wallet {
-	users := make([]ibc.Wallet, len(chains))
-	var eg errgroup.Group
-	for i, chain := range chains {
-		i := i
-		chain := chain
-		eg.Go(func() error {
-			user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
-			if err != nil {
-				return err
-			}
-			users[i] = user
-			return nil
-		})
-	}
-	s.Require().NoError(eg.Wait())
+	chain ibc.Chain,
+) ibc.Wallet {
+	user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
+	s.Require().NoError(err)
 
-	chainHeights := make([]testutil.ChainHeighter, len(chains))
-	for i := range chains {
-		chainHeights[i] = chains[i]
-	}
-	return users
+	return user
 }
 
 // ExecTx executes a cli command on a node, waits a block and queries the Tx to verify it was included on chain.
 func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
-	node := chain.FullNodes[0]
+	node := chain.Validators[0]
 
 	resp, err := node.ExecTx(ctx, keyName, command...)
 	s.Require().NoError(err)

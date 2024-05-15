@@ -97,9 +97,9 @@ func (s *TestSuite) SetupSuite() {
 	s.cdc = s.chain.Config().EncodingConfig.Codec
 
 	// get the users
-	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
@@ -172,7 +172,6 @@ func (s *TestSuite) TestSendTxUpdating() {
 		// send with the exact expected fee
 		txResp, err := s.SendCoins(
 			ctx,
-			cosmosChain,
 			s.user1.KeyName(),
 			s.user1.FormattedAddress(),
 			s.user2.FormattedAddress(),
