@@ -1,6 +1,7 @@
 package post
 
 import (
+	"bytes"
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -150,7 +151,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	if feeGranter != nil {
 		if dfd.feegrantKeeper == nil {
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
-		} else if !feeGranter.Equals(feePayer) {
+		} else if !bytes.Equal(feeGranter, feePayer) {
 			err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
 			if err != nil {
 				return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
@@ -177,7 +178,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeFeePay,
 			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
+			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFromAcc.String()),
 		))
 	}
 
@@ -191,7 +192,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeTipPay,
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
-			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
+			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFromAcc.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
 		))
 	}
@@ -202,7 +203,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 // DeductCoins deducts coins from the given account.
 // Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins, distributeFees bool) error {
 	if !coins.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
 	}

@@ -4,12 +4,14 @@ import (
 	"context"
 	"math/rand"
 
+	"cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -95,9 +97,9 @@ func (s *TestSuite) SetupSuite() {
 	s.cdc = s.chain.Config().EncodingConfig.Codec
 
 	// get the users
-	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
-	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)[0]
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
@@ -152,7 +154,6 @@ func (s *TestSuite) TestQueryBaseFee() {
 }
 
 func (s *TestSuite) TestSendTxUpdating() {
-
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
 	s.Require().True(ok)
@@ -162,21 +163,19 @@ func (s *TestSuite) TestSendTxUpdating() {
 
 	baseFee := s.QueryBaseFee()
 	gas := int64(1000000)
-	minBaseFee := baseFee.MulInt(sdk.NewInt(gas))
+	minBaseFee := baseFee.MulInt(math.NewInt(gas))
 
 	s.Run("expect fee market state to update", func() {
-		for _ = range 10 {
+		for range 10 {
 			s.T().Log("sending coins")
 			// send with the exact expected fee
 			go func() {
 				txResp, err := s.SendCoins(
 					context.Background(),
-					nodes[0],
-					cosmosChain,
 					s.user1.KeyName(),
 					s.user1.FormattedAddress(),
 					s.user2.FormattedAddress(),
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(10000))),
 					minBaseFee,
 					gas,
 				)
@@ -187,12 +186,10 @@ func (s *TestSuite) TestSendTxUpdating() {
 			go func() {
 				txResp, err := s.SendCoins(
 					context.Background(),
-					nodes[1],
-					cosmosChain,
 					s.user2.KeyName(),
 					s.user2.FormattedAddress(),
 					s.user1.FormattedAddress(),
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, sdk.NewInt(10000))),
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(10000))),
 					minBaseFee,
 					gas,
 				)

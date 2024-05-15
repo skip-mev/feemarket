@@ -7,10 +7,9 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
@@ -60,10 +59,6 @@ var (
 		},
 	}
 
-	consensusParams = ictestutil.Toml{
-		"timeout_commit": "3500ms",
-	}
-
 	// interchain specification
 	spec = &interchaintest.ChainSpec{
 		ChainName:     "feemarket",
@@ -77,19 +72,18 @@ var (
 			Images: []ibc.DockerImage{
 				image,
 			},
-			Type:                "cosmos",
-			Name:                "feemarket",
-			Denom:               denom,
-			ChainID:             "chain-id-0",
-			Bin:                 "feemarketd",
-			Bech32Prefix:        "cosmos",
-			CoinType:            "118",
-			GasAdjustment:       gasAdjustment,
-			GasPrices:           fmt.Sprintf("50%s", denom),
-			TrustingPeriod:      "48h",
-			NoHostMount:         noHostMount,
-			ModifyGenesis:       cosmos.ModifyGenesis(genesisKV),
-			ConfigFileOverrides: map[string]any{"config/config.toml": ictestutil.Toml{"consensus": consensusParams}},
+			Type:           "cosmos",
+			Name:           "feemarket",
+			Denom:          denom,
+			ChainID:        "chain-id-0",
+			Bin:            "feemarketd",
+			Bech32Prefix:   "cosmos",
+			CoinType:       "118",
+			GasAdjustment:  gasAdjustment,
+			GasPrices:      fmt.Sprintf("0%s", denom),
+			TrustingPeriod: "48h",
+			NoHostMount:    noHostMount,
+			ModifyGenesis:  cosmos.ModifyGenesis(genesisKV),
 		},
 	}
 )
