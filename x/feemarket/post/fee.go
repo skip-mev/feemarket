@@ -115,22 +115,10 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to update fee market state")
 	}
 
-	ctx.Logger().Info("fee deduct post handle",
-		"NEW STATE", state,
-	)
-
 	err = dfd.feemarketKeeper.SetState(ctx, state)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to set fee market state")
 	}
-
-	state, err = dfd.feemarketKeeper.GetState(ctx)
-	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
-	}
-	ctx.Logger().Info("fee deduct post handle",
-		"NEWEST STATE", state,
-	)
 
 	return next(ctx, tx, simulate, success)
 }
