@@ -369,19 +369,22 @@ func (s *TestSuite) keyringDirFromNode() string {
 	return localDir
 }
 
-func (s *TestSuite) SendCoins2(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64) (*coretypes.ResultBroadcastTxCommit, error) {
+func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64, numMsg int) (*coretypes.ResultBroadcastTxCommit, error) {
 	cc, ok := s.chain.(*cosmos.CosmosChain)
 	if !ok {
 		panic("unable to assert ibc.Chain as CosmosChain")
 	}
 
-	msg := &banktypes.MsgSend{
-		FromAddress: sender.FormattedAddress(),
-		ToAddress:   receiver.FormattedAddress(),
-		Amount:      amt,
+	msgs := make([]sdk.Msg, numMsg)
+	for i := 0; i < numMsg; i++ {
+		msgs[i] = &banktypes.MsgSend{
+			FromAddress: sender.FormattedAddress(),
+			ToAddress:   receiver.FormattedAddress(),
+			Amount:      amt,
+		}
 	}
 
-	tx := s.CreateTx(cc, sender, fees.String(), gas, msg)
+	tx := s.CreateTx(cc, sender, fees.String(), gas, msgs...)
 
 	// get an rpc endpoint for the chain
 	c := cc.Nodes()[0].Client
