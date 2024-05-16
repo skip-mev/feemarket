@@ -2,9 +2,10 @@ package e2e
 
 import (
 	"context"
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"math/rand"
 	"sync"
+
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"cosmossdk.io/math"
 
