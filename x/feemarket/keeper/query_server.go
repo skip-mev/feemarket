@@ -37,9 +37,10 @@ func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types
 }
 
 // BaseFee defines a method that returns the current feemarket base fee.
-func (q QueryServer) BaseFee(goCtx context.Context, _ *types.BaseFeeRequest) (*types.BaseFeeResponse, error) {
+func (q QueryServer) BaseFee(goCtx context.Context, req *types.BaseFeeRequest) (*types.BaseFeeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	fee, err := q.k.GetMinGasPrices(ctx)
+	fee, err := q.k.GetMinGasPrices(ctx, req.Denoms...)
+
 	return &types.BaseFeeResponse{Fees: fee}, err
 }
