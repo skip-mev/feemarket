@@ -32,7 +32,9 @@ type QueryClient interface {
 	Params(ctx context.Context, in *ParamsRequest, opts ...grpc.CallOption) (*ParamsResponse, error)
 	// State returns the current feemarket module state.
 	State(ctx context.Context, in *StateRequest, opts ...grpc.CallOption) (*StateResponse, error)
-	// BaseFee returns the current feemarket module base fee.
+	// BaseFee returns the current feemarket module base fee in terms of each
+	// denom provided. If no denom is provided, the base feemarket denom fee will
+	// be returned.
 	BaseFee(ctx context.Context, in *BaseFeeRequest, opts ...grpc.CallOption) (*BaseFeeResponse, error)
 }
 
@@ -79,7 +81,9 @@ type QueryServer interface {
 	Params(context.Context, *ParamsRequest) (*ParamsResponse, error)
 	// State returns the current feemarket module state.
 	State(context.Context, *StateRequest) (*StateResponse, error)
-	// BaseFee returns the current feemarket module base fee.
+	// BaseFee returns the current feemarket module base fee in terms of each
+	// denom provided. If no denom is provided, the base feemarket denom fee will
+	// be returned.
 	BaseFee(context.Context, *BaseFeeRequest) (*BaseFeeResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }

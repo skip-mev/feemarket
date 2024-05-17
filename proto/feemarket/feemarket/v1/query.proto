@@ -26,10 +26,12 @@ service Query {
     };
   };
 
-  // BaseFee returns the current feemarket module base fee.
+  // BaseFee returns the current feemarket module base fee in terms of each
+  // denom provided. If no denom is provided, the base feemarket denom fee will
+  // be returned.
   rpc BaseFee(BaseFeeRequest) returns (BaseFeeResponse) {
     option (google.api.http) = {
-      get : "/feemarket/v1/base_fee"
+      get : "/feemarket/v1/base_fee/{denoms}"
     };
   };
 }
@@ -47,7 +49,7 @@ message StateRequest {}
 message StateResponse { State state = 1 [ (gogoproto.nullable) = false ]; }
 
 // BaseFeeRequest is the request type for the Query/BaseFee RPC method.
-message BaseFeeRequest {}
+message BaseFeeRequest { repeated string denoms = 1; }
 
 // StateResponse is the response type for the Query/BaseFee RPC method.
 message BaseFeeResponse {
