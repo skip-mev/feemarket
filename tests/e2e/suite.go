@@ -157,6 +157,8 @@ func (s *TestSuite) TestQueryBaseFee() {
 	})
 }
 
+// TestSendTxDecrease tests that the feemarket will decrease until it hits the min base fee
+// when gas utilization is below the target block utilization.
 func (s *TestSuite) TestSendTxDecrease() {
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
@@ -254,6 +256,8 @@ func (s *TestSuite) TestSendTxDecrease() {
 	})
 }
 
+// TestSendTxIncrease tests that the feemarket will increase
+// when gas utilization is above the target block utilization.
 func (s *TestSuite) TestSendTxIncrease() {
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
