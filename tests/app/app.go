@@ -508,9 +508,6 @@ func NewSimApp(
 	// set denom resolver to test variant.
 	app.FeeMarketKeeper.SetDenomResolver(&feemarkettypes.TestDenomResolver{})
 
-	// set denom resolver to test variant.
-	app.FeeMarketKeeper.SetDenomResolver(&feemarkettypes.TestDenomResolver{})
-
 	// Create a global ante handler that will be called on each transaction when
 	// proposals are being built and verified.
 	anteHandlerOptions := ante.HandlerOptions{
