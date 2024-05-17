@@ -169,8 +169,15 @@ func (s *TestSuite) TestSendTxDecrease() {
 
 	baseFee := s.QueryBaseFee()
 	gas := int64(200000)
-	minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
-	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
+	minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))
+	var fee sdk.DecCoin
+	for _, bf := range minBaseFee {
+		if bf.Denom == s.denom {
+			fee = bf
+		}
+	}
+
+	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(fee.Denom, fee.Amount.TruncateInt()))
 	sendAmt := int64(100000)
 
 	s.Run("expect fee market state to decrease", func() {
@@ -230,10 +237,10 @@ func (s *TestSuite) TestSendTxDecrease() {
 			}()
 
 			wg.Wait()
-			fee := s.QueryBaseFee()
-			s.T().Log("base fee", fee.String())
+			baseFee := s.QueryBaseFee()
+			s.T().Log("base fee", baseFee.String())
 
-			if fee.AmountOf(feemarkettypes.DefaultFeeDenom).Equal(params.MinBaseFee) {
+			if baseFee.AmountOf(feemarkettypes.DefaultFeeDenom).Equal(params.MinBaseFee) {
 				break
 			}
 		}
@@ -244,10 +251,10 @@ func (s *TestSuite) TestSendTxDecrease() {
 		s.Require().NoError(err)
 		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
 
-		fee := s.QueryBaseFee()
-		s.T().Log("base fee", fee.String())
+		baseFee := s.QueryBaseFee()
+		s.T().Log("base fee", baseFee.String())
 
-		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), minBaseFee.Denom)
+		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), fee.Denom)
 		s.Require().NoError(err)
 		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
 		s.T().Log("balance:", amt.String())
@@ -271,10 +278,15 @@ func (s *TestSuite) TestSendTxIncrease() {
 		for {
 			// send with the exact expected fee
 			baseFee = s.QueryBaseFee()
-			minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
-			// add headroom
-			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
+			minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))
+			var fee sdk.DecCoin
+			for _, bf := range minBaseFee {
+				if bf.Denom == s.denom {
+					fee = bf
+				}
+			}
 
+			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(fee.Denom, fee.Amount.Add(math.LegacyNewDec(1)).TruncateInt()))
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 

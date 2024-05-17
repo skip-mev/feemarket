@@ -34,9 +34,16 @@ func (_m *FeeMarketKeeper) GetDenomResolver() types.DenomResolver {
 	return r0
 }
 
-// GetMinGasPrices provides a mock function with given fields: ctx
-func (_m *FeeMarketKeeper) GetMinGasPrices(ctx cosmos_sdktypes.Context) (cosmos_sdktypes.DecCoins, error) {
-	ret := _m.Called(ctx)
+// GetMinGasPrices provides a mock function with given fields: ctx, denoms
+func (_m *FeeMarketKeeper) GetMinGasPrices(ctx cosmos_sdktypes.Context, denoms ...string) (cosmos_sdktypes.DecCoins, error) {
+	_va := make([]interface{}, len(denoms))
+	for _i := range denoms {
+		_va[_i] = denoms[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetMinGasPrices")
@@ -44,19 +51,19 @@ func (_m *FeeMarketKeeper) GetMinGasPrices(ctx cosmos_sdktypes.Context) (cosmos_
 
 	var r0 cosmos_sdktypes.DecCoins
 	var r1 error
-	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context) (cosmos_sdktypes.DecCoins, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context, ...string) (cosmos_sdktypes.DecCoins, error)); ok {
+		return rf(ctx, denoms...)
 	}
-	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context) cosmos_sdktypes.DecCoins); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(cosmos_sdktypes.Context, ...string) cosmos_sdktypes.DecCoins); ok {
+		r0 = rf(ctx, denoms...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(cosmos_sdktypes.DecCoins)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(cosmos_sdktypes.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(cosmos_sdktypes.Context, ...string) error); ok {
+		r1 = rf(ctx, denoms...)
 	} else {
 		r1 = ret.Error(1)
 	}

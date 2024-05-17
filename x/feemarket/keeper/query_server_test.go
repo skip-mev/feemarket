@@ -92,8 +92,9 @@ func (s *KeeperTestSuite) TestStateRequest() {
 }
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
+	testDenom := "skip"
+
 	s.Run("can get default base fee with converted fee", func() {
-		testDenom := "atom"
 		req := &types.BaseFeeRequest{
 			Denoms: []string{testDenom},
 		}
@@ -120,12 +121,14 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.BaseFeeRequest{}
+		req := &types.BaseFeeRequest{
+			Denoms: []string{testDenom},
+		}
 		resp, err := s.queryServer.BaseFee(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Fees, fees)
@@ -149,7 +152,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Fees, fee)

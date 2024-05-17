@@ -162,7 +162,9 @@ func (s *TestSuite) QueryBaseFee() sdk.DecCoins {
 	// create the oracle client
 	c := types.NewQueryClient(cc)
 
-	resp, err := c.BaseFee(context.Background(), &types.BaseFeeRequest{})
+	resp, err := c.BaseFee(context.Background(), &types.BaseFeeRequest{
+		Denoms: []string{"skip"},
+	})
 	s.Require().NoError(err)
 
 	return resp.Fees

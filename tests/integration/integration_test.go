@@ -133,6 +133,27 @@ func MakeTestEncodingConfig() TestEncodingConfig {
 	}
 }
 
+func (s *IntegrationTestSuite) TestGetGasPrices() {
+	s.Run("set and get default base fee", func() {
+		params := types.DefaultParams()
+		testDenom := "skip"
+
+		err := s.TestKeepers.FeeMarketKeeper.SetParams(s.ctx, params)
+		s.Require().NoError(err)
+
+		state := types.DefaultState()
+
+		err = s.TestKeepers.FeeMarketKeeper.SetState(s.ctx, state)
+		s.Require().NoError(err)
+
+		prices, err := s.TestKeepers.FeeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
+		s.Require().NoError(err)
+
+		expected := sdk.NewDecCoins(sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, state.BaseFee), sdk.NewDecCoinFromDec(testDenom, state.BaseFee))
+		s.Require().EqualValues(expected, prices)
+	})
+}
+
 func InterfaceRegistry() codectypes.InterfaceRegistry {
 	interfaceRegistry, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
 		ProtoFiles: proto.HybridResolver,

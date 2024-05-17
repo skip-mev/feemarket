@@ -469,7 +469,7 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		gs := types.DefaultGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
 
-		testDenom := "atom"
+		testDenom := "skip"
 		expected := sdk.NewDecCoins(sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, gs.State.BaseFee), sdk.NewDecCoinFromDec(testDenom, gs.State.BaseFee))
 
 		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
