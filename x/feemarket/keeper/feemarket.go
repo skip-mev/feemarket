@@ -93,11 +93,11 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context, denoms ...string) (sdk.DecCoin
 			continue
 		}
 
-		converted, err := k.GetDenomResolver().ConvertToDenom(ctx, sdk.NewCoin(params.FeeDenom, baseFee.Add(math.LegacyNewDec(1)).TruncateInt()), denom)
+		converted, err := k.GetDenomResolver().ConvertToDenom(ctx, sdk.NewCoin(params.FeeDenom, baseFee.TruncateInt()), denom)
 		if err != nil {
 			return minGasPrices, err
 		}
-		minGasPrices.Add(sdk.NewDecCoinFromCoin(converted))
+		minGasPrices = minGasPrices.Add(sdk.NewDecCoinFromCoin(converted))
 	}
 
 	return minGasPrices, nil

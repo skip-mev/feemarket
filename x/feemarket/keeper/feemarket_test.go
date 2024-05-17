@@ -465,6 +465,18 @@ func (s *KeeperTestSuite) TestGetMinGasPrices() {
 		s.Require().Equal(expected, mgp)
 	})
 
+	s.Run("can retrieve min gas prices with default eip-1559 - multi fee", func() {
+		gs := types.DefaultGenesisState()
+		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)
+
+		testDenom := "atom"
+		expected := sdk.NewDecCoins(sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, gs.State.BaseFee), sdk.NewDecCoinFromDec(testDenom, gs.State.BaseFee))
+
+		mgp, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
+		s.Require().NoError(err)
+		s.Require().Equal(expected, mgp)
+	})
+
 	s.Run("can retrieve min gas prices with aimd eip-1559", func() {
 		gs := types.DefaultAIMDGenesisState()
 		s.feeMarketKeeper.InitGenesis(s.ctx, *gs)

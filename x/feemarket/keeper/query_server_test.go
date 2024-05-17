@@ -92,13 +92,16 @@ func (s *KeeperTestSuite) TestStateRequest() {
 }
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
-	s.Run("can get default base fee", func() {
-		req := &types.BaseFeeRequest{}
+	s.Run("can get default base fee with converted fee", func() {
+		testDenom := "atom"
+		req := &types.BaseFeeRequest{
+			Denoms: []string{testDenom},
+		}
 		resp, err := s.queryServer.BaseFee(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx, testDenom)
 		s.Require().NoError(err)
 
 		s.Require().Equal(resp.Fees, fee)
