@@ -172,7 +172,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	var events sdk.Events
 
 	// deduct the fees and tip
-	if !fee.IsZero() {
+	if !fee.Amount.IsNil() && !fee.IsZero() {
 		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(fee), distributeFees)
 		if err != nil {
 			return err
@@ -186,7 +186,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	}
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	if !tip.IsZero() {
+	if !tip.Amount.IsNil() && !tip.IsZero() {
 		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), proposer, sdk.NewCoins(tip))
 		if err != nil {
 			return err
