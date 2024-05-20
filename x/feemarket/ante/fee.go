@@ -54,6 +54,9 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	gas := feeTx.GetGas() // use provided gas limit
 
 	if len(feeCoins) != 1 {
+		if len(feeCoins) == 0 {
+			return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
+		}
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
@@ -64,7 +67,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	)
 
 	if !simulate {
-		fee, _, err := CheckTxFee(ctx, minGasPrices[0], feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
+		fee, _, err := CheckTxFee(ctx, minFee, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
@@ -80,7 +83,10 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 // fees given the current state of the fee market. Returns an error if insufficient fees.
 func CheckTxFee(ctx sdk.Context, minFeesDecCoin sdk.DecCoin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	if len(feeTx.GetFee()) != 1 {
-		return sdk.Coin{}, sdk.Coin{}, feemarkettypes.ErrTooManyFeeCoins
+		if len(feeTx.GetFee()) == 0 {
+			return sdk.Coin{}, sdk.Coin{}, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeTx.GetFee()))
+		}
+		return sdk.Coin{}, sdk.Coin{}, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeTx.GetFee()))
 	}
 
 	feeDenom := minFeesDecCoin.Denom

@@ -3,6 +3,9 @@ package e2e
 import (
 	"context"
 	"math/rand"
+	"sync"
+
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"cosmossdk.io/math"
 
@@ -17,7 +20,7 @@ import (
 )
 
 const (
-	initBalance = 10000000000000
+	initBalance = 30000000000000
 )
 
 var r *rand.Rand
@@ -119,8 +122,9 @@ func (s *TestSuite) SetupSubTest() {
 	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 
 	state := s.QueryState()
-
 	s.T().Log("state at block height", height+1, ":", state.String())
+	fee := s.QueryBaseFee()
+	s.T().Log("fee at block height", height+1, ":", fee.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
@@ -153,9 +157,9 @@ func (s *TestSuite) TestQueryBaseFee() {
 	})
 }
 
-func (s *TestSuite) TestSendTxUpdating() {
-	ctx := context.Background()
-
+// TestSendTxDecrease tests that the feemarket will decrease until it hits the min base fee
+// when gas utilization is below the target block utilization.
+func (s *TestSuite) TestSendTxDecrease() {
 	// cast chain to cosmos-chain
 	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
 	s.Require().True(ok)
@@ -163,23 +167,190 @@ func (s *TestSuite) TestSendTxUpdating() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
-	s.Run("expect fee market state to update", func() {
-		baseFee := s.QueryBaseFee()
+	params := s.QueryParams()
 
-		gas := int64(1000000)
-		minBaseFee := baseFee.MulInt(math.NewInt(gas))
+	baseFee := s.QueryBaseFee()
+	gas := int64(200000)
+	minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
+	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
+	sendAmt := int64(100000)
 
-		// send with the exact expected fee
-		txResp, err := s.SendCoins(
-			ctx,
-			s.user1.KeyName(),
-			s.user1.FormattedAddress(),
-			s.user2.FormattedAddress(),
-			sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(10000))),
-			minBaseFee,
-			gas,
-		)
-		s.Require().NoError(err, txResp)
-		s.T().Log(txResp)
+	s.Run("expect fee market state to decrease", func() {
+		s.T().Log("performing sends...")
+		for {
+			// send with the exact expected fee
+
+			wg := sync.WaitGroup{}
+			wg.Add(3)
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user1,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					1,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user3,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					1,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user2,
+					s.user3,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					1,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			wg.Wait()
+			fee := s.QueryBaseFee()
+			s.T().Log("base fee", fee.String())
+
+			if fee.AmountOf(feemarkettypes.DefaultFeeDenom).Equal(params.MinBaseFee) {
+				break
+			}
+		}
+
+		// wait for 5 blocks
+		// query height
+		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		s.Require().NoError(err)
+		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+
+		fee := s.QueryBaseFee()
+		s.T().Log("base fee", fee.String())
+
+		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), minBaseFee.Denom)
+		s.Require().NoError(err)
+		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
+		s.T().Log("balance:", amt.String())
+	})
+}
+
+// TestSendTxIncrease tests that the feemarket will increase
+// when gas utilization is above the target block utilization.
+func (s *TestSuite) TestSendTxIncrease() {
+	// cast chain to cosmos-chain
+	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
+	s.Require().True(ok)
+	// get nodes
+	nodes := cosmosChain.Nodes()
+	s.Require().True(len(nodes) > 0)
+
+	baseFee := s.QueryBaseFee()
+	gas := int64(20000100)
+	sendAmt := int64(100)
+
+	s.Run("expect fee market fee to increase", func() {
+		s.T().Log("performing sends...")
+		for {
+			// send with the exact expected fee
+			baseFee = s.QueryBaseFee()
+			minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
+			// add headroom
+			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
+
+			wg := sync.WaitGroup{}
+			wg.Add(3)
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user1,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					400,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user3,
+					s.user2,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					400,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			go func() {
+				defer wg.Done()
+				txResp, err := s.SendCoinsMultiBroadcast(
+					context.Background(),
+					s.user2,
+					s.user1,
+					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					minBaseFeeCoins,
+					gas,
+					400,
+				)
+				s.Require().NoError(err, txResp)
+				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
+				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+			}()
+
+			wg.Wait()
+			baseFee = s.QueryBaseFee()
+			s.T().Log("base fee", baseFee.String())
+
+			if baseFee.AmountOf(feemarkettypes.DefaultFeeDenom).GT(math.LegacyNewDec(1000000)) {
+				break
+			}
+		}
+
+		// wait for 5 blocks
+		// query height
+		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		s.Require().NoError(err)
+		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+
+		fee := s.QueryBaseFee()
+		s.T().Log("base fee", fee.String())
+
+		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), baseFee[0].Denom)
+		s.Require().NoError(err)
+		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
+		s.T().Log("balance:", amt.String())
 	})
 }
