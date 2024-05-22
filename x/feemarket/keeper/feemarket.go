@@ -53,8 +53,8 @@ func (k *Keeper) UpdateFeeMarket(ctx sdk.Context) error {
 	return k.SetState(ctx, state)
 }
 
-// GetBaseFee returns the base fee from the fee market state.
-func (k *Keeper) GetBaseFee(ctx sdk.Context) (math.LegacyDec, error) {
+// GetBaseGasPrice returns the base fee from the fee market state.
+func (k *Keeper) GetBaseGasPrice(ctx sdk.Context) (math.LegacyDec, error) {
 	state, err := k.GetState(ctx)
 	if err != nil {
 		return math.LegacyDec{}, err
@@ -73,9 +73,32 @@ func (k *Keeper) GetLearningRate(ctx sdk.Context) (math.LegacyDec, error) {
 	return state.LearningRate, nil
 }
 
-// GetMinGasPrices returns the mininum gas prices as sdk.Coins from the fee market state.
+// GetMinGasPrice returns the mininum gas prices for given denom as sdk.DecCoins from the fee market state.
+func (k *Keeper) GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, error) {
+	baseGasPrice, err := k.GetBaseGasPrice(ctx)
+	if err != nil {
+		return sdk.DecCoin{}, err
+	}
+
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return sdk.DecCoin{}, err
+	}
+
+	var gasPrice sdk.DecCoin
+
+	if params.FeeDenom == denom {
+		gasPrice = sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
+	} else {
+		gasPrice, err = k.GetDenomResolver().ConvertToDenom(ctx, sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice), denom)
+	}
+
+	return gasPrice, nil
+}
+
+// GetMinGasPrices returns the mininum gas prices as sdk.DecCoins from the fee market state.
 func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
-	baseFee, err := k.GetBaseFee(ctx)
+	baseGasPrice, err := k.GetBaseGasPrice(ctx)
 	if err != nil {
 		return sdk.NewDecCoins(), err
 	}
@@ -85,8 +108,26 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 		return sdk.NewDecCoins(), err
 	}
 
-	fee := sdk.NewDecCoinFromDec(params.FeeDenom, baseFee)
-	minGasPrices := sdk.NewDecCoins(fee)
+	minGasPrice := sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
+	minGasPrices := sdk.NewDecCoins(minGasPrice)
+
+	extraDenoms, err := k.resolver.AllowedDenoms(ctx)
+	if err != nil {
+		return sdk.NewDecCoins(), err
+	}
+
+	for _, denom := range extraDenoms {
+		gasPrice, err := k.GetDenomResolver().ConvertToDenom(ctx, minGasPrice, denom)
+		if err != nil {
+			k.Logger(ctx).Info(
+				"failed to convert gas price",
+				"min gas price", minGasPrice,
+				"denom", denom,
+			)
+			continue
+		}
+		minGasPrices.Add(gasPrice)
+	}
 
 	return minGasPrices, nil
 }

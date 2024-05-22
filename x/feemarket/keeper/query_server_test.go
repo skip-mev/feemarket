@@ -93,7 +93,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
 	s.Run("can get default base fee", func() {
-		req := &types.BaseFeeRequest{}
+		req := &types.GasPriceRequest{}
 		resp, err := s.queryServer.BaseFee(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
@@ -117,7 +117,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.BaseFeeRequest{}
+		req := &types.GasPriceRequest{}
 		resp, err := s.queryServer.BaseFee(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
@@ -141,7 +141,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.BaseFeeRequest{}
+		req := &types.GasPriceRequest{}
 		resp, err := s.queryServer.BaseFee(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)

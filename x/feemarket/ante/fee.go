@@ -43,13 +43,6 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, sdkerrors.ErrInvalidGasLimit.Wrapf("must provide positive gas")
 	}
 
-	minGasPrices, err := dfd.feemarketKeeper.GetMinGasPrices(ctx)
-	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
-	}
-
-	minFee := minGasPrices[0]
-
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
 
@@ -60,48 +53,51 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
+	feeCoin := feeCoins[0]
+	feeGas := int64(feeTx.GetGas())
+
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoins[0].GetDenom())
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoins[0].GetDenom())
+	}
+
+	// TODO: ??? log all gas prices, not only gas price with a given denom?
 	ctx.Logger().Info("fee deduct ante handle",
-		"min gas prices", minFee,
+		"min gas prices", minGasPrice,
 		"fee", feeCoins,
 		"gas limit", gas,
 	)
 
+	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
+
 	if !simulate {
-		fee, _, err := CheckTxFee(ctx, minFee, feeTx, true, dfd.feemarketKeeper.GetDenomResolver())
+		fee, _, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
-		priorityCtx := ctx.WithPriority(getTxPriority(fee, int64(gas))).WithMinGasPrices(minGasPrices)
-		return next(priorityCtx, tx, simulate)
+		ctx = ctx.WithPriority(getTxPriority(fee, int64(gas)))
+		return next(ctx, tx, simulate)
 	}
-
-	ctx = ctx.WithMinGasPrices(minGasPrices)
 	return next(ctx, tx, simulate)
 }
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minFeesDecCoin sdk.DecCoin, feeTx sdk.FeeTx, isCheck bool, resolver feemarkettypes.DenomResolver) (payCoin sdk.Coin, tip sdk.Coin, err error) {
-	if len(feeTx.GetFee()) != 1 {
-		if len(feeTx.GetFee()) == 0 {
-			return sdk.Coin{}, sdk.Coin{}, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeTx.GetFee()))
-		}
-		return sdk.Coin{}, sdk.Coin{}, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeTx.GetFee()))
-	}
+func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas int64, isCheck bool) (payCoin sdk.Coin, tip sdk.Coin, err error) {
+	payCoin = feeCoin
+	//denom := minGasPrice.Denom
+	//feeCoin := feeTx.GetFee()[0]
 
-	feeDenom := minFeesDecCoin.Denom
-	feeCoin := feeTx.GetFee()[0]
-
-	coinWithBaseDenom := feeCoin
-	if feeCoin.Denom != feeDenom {
-		coinWithBaseDenom, err = resolver.ConvertToDenom(ctx, feeCoin, feeDenom)
-		if err != nil {
-			return sdk.Coin{}, sdk.Coin{}, err
-		}
-	}
+	//coinWithBaseDenom := feeCoin
+	//if feeCoin.Denom != denom {
+	//	coinWithBaseDenom, err = resolver.ConvertToDenom(ctx, feeCoin, denom)
+	//	if err != nil {
+	//		return sdk.Coin{}, sdk.Coin{}, err
+	//	}
+	//}
 
 	// Ensure that the provided fees meet the minimum
-	if !minFeesDecCoin.IsZero() {
+	if !minGasPrice.IsZero() {
 		var (
 			requiredFee sdk.Coin
 			consumedFee sdk.Coin
@@ -111,50 +107,51 @@ func CheckTxFee(ctx sdk.Context, minFeesDecCoin sdk.DecCoin, feeTx sdk.FeeTx, is
 		// price by the gas, where fee = ceil(minGasPrice * gas).
 		gasConsumed := int64(ctx.GasMeter().GasConsumed())
 		gcDec := sdkmath.LegacyNewDec(gasConsumed)
-		glDec := sdkmath.LegacyNewDec(int64(feeTx.GetGas()))
+		glDec := sdkmath.LegacyNewDec(feeGas)
 
-		consumedFeeAmount := minFeesDecCoin.Amount.Mul(gcDec)
-		limitFee := minFeesDecCoin.Amount.Mul(glDec)
-		consumedFee = sdk.NewCoin(minFeesDecCoin.Denom, consumedFeeAmount.Ceil().RoundInt())
-		requiredFee = sdk.NewCoin(minFeesDecCoin.Denom, limitFee.Ceil().RoundInt())
+		consumedFeeAmount := minGasPrice.Amount.Mul(gcDec)
+		limitFee := minGasPrice.Amount.Mul(glDec)
+		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
+		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
 
-		if coinWithBaseDenom.Denom != requiredFee.Denom || !coinWithBaseDenom.IsGTE(requiredFee) {
+		if !payCoin.IsGTE(requiredFee) {
+			// TODO: Why do we return gas consumed
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
-				coinWithBaseDenom,
+				payCoin,
 				requiredFee,
-				minFeesDecCoin,
+				minGasPrice,
 				gasConsumed,
 			)
 		}
 
-		// convert back to given denom is not base denom
-		if feeCoin.Denom != requiredFee.Denom {
-			requiredFee, err = resolver.ConvertToDenom(ctx, requiredFee, feeCoin.Denom)
-			if err != nil {
-				return sdk.Coin{}, sdk.Coin{}, err
-			}
-
-			if !isCheck {
-				consumedFee, err = resolver.ConvertToDenom(ctx, consumedFee, feeCoin.Denom)
-				if err != nil {
-					return sdk.Coin{}, sdk.Coin{}, err
-				}
-			}
-		}
+		//// convert back to given denom is not base denom
+		//if feeCoin.Denom != requiredFee.Denom {
+		//	requiredFee, err = resolver.ConvertToDenom(ctx, requiredFee, feeCoin.Denom)
+		//	if err != nil {
+		//		return sdk.Coin{}, sdk.Coin{}, err
+		//	}
+		//
+		//	if !isCheck {
+		//		consumedFee, err = resolver.ConvertToDenom(ctx, consumedFee, feeCoin.Denom)
+		//		if err != nil {
+		//			return sdk.Coin{}, sdk.Coin{}, err
+		//		}
+		//	}
+		//}
 
 		if isCheck {
 			//  set fee coins to be required amount if checking
-			feeCoin = requiredFee
+			payCoin = requiredFee
 		} else {
 			// tip is the difference between feeCoin and the required fee
-			tip = feeCoin.Sub(requiredFee)
+			tip = payCoin.Sub(requiredFee)
 			// set fee coin to be ONLY the consumed amount if we are calculated consumed fee to deduct
-			feeCoin = consumedFee
+			payCoin = consumedFee
 		}
 	}
 
-	return feeCoin, tip, nil
+	return payCoin, tip, nil
 }
 
 // getTxPriority returns a naive tx priority based on the amount of the smallest denomination of the gas price

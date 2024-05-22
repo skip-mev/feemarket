@@ -98,7 +98,7 @@ func GetBaseFeeCmd() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			resp, err := queryClient.BaseFee(cmd.Context(), &types.BaseFeeRequest{})
+			resp, err := queryClient.BaseFee(cmd.Context(), &types.GasPriceRequest{})
 			if err != nil {
 				return err
 			}
