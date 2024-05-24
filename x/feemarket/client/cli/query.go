@@ -85,25 +85,27 @@ func GetStateCmd() *cobra.Command {
 	return cmd
 }
 
-// GetBaseFeeCmd returns the cli-command that queries the current feemarket base fee.
+// GetBaseFeeCmd returns the cli-command that queries the current feemarket gas price.
 func GetBaseFeeCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "base-fee",
-		Short: "Query for the current feemarket base fee",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Use:   "gas-price",
+		Short: "Query for the current feemarket gas price",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			resp, err := queryClient.BaseFee(cmd.Context(), &types.GasPriceRequest{})
+			resp, err := queryClient.GasPrice(cmd.Context(), &types.GasPriceRequest{
+				Denom: args[0],
+			})
 			if err != nil {
 				return err
 			}
 
-			return clientCtx.PrintString(resp.Fees.String())
+			return clientCtx.PrintString(resp.GetPrice().String())
 		},
 	}
 

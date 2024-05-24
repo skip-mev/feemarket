@@ -37,10 +37,10 @@ func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types
 }
 
 // GasPrice defines a method that returns the current feemarket base gas price.
-func (q QueryServer) GasPrice(goCtx context.Context, _ *types.GasPriceRequest) (*types.GasPriceResponse, error) {
+func (q QueryServer) GasPrice(goCtx context.Context, req *types.GasPriceRequest) (*types.GasPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	fee, err := q.k.GetMinGasPrices(ctx)
+	fee, err := q.k.GetMinGasPrice(ctx, req.GetDenom())
 	return &types.GasPriceResponse{Price: fee}, err
 }
 

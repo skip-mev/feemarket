@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"cosmossdk.io/math"
-
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -92,19 +91,21 @@ func (s *KeeperTestSuite) TestStateRequest() {
 }
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
-	s.Run("can get default base fee", func() {
-		req := &types.GasPriceRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+	s.Run("can get gas price", func() {
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		gasPrice, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fee)
+		s.Require().Equal(resp.GetPrice(), gasPrice)
 	})
 
-	s.Run("can get updated base fee", func() {
+	s.Run("can get updated gas price", func() {
 		state := types.State{
 			BaseFee: math.LegacyOneDec(),
 		}
@@ -117,18 +118,20 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.GasPriceRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		gasPrice, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fees)
+		s.Require().Equal(resp.GetPrice(), gasPrice)
 	})
 
-	s.Run("can get updated base fee < 1", func() {
+	s.Run("can get updated gas price < 1", func() {
 		state := types.State{
 			BaseFee: math.LegacyMustNewDecFromStr("0.005"),
 		}
@@ -141,14 +144,16 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.GasPriceRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fee)
+		s.Require().Equal(resp.GetPrice(), fee)
 	})
 }
