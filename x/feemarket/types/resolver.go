@@ -44,6 +44,6 @@ func (r *ErrorDenomResolver) ConvertToDenom(_ sdk.Context, coin sdk.DecCoin, den
 	return sdk.DecCoin{}, fmt.Errorf("error resolving denom")
 }
 
-func (r *ErrorDenomResolver) AllowedDenoms(ctx sdk.Context) ([]string, error) {
+func (r *ErrorDenomResolver) AllowedDenoms(_ sdk.Context) ([]string, error) {
 	return []string{}, nil
 }

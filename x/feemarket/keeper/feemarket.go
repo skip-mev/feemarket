@@ -91,6 +91,9 @@ func (k *Keeper) GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, err
 		gasPrice = sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
 	} else {
 		gasPrice, err = k.GetDenomResolver().ConvertToDenom(ctx, sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice), denom)
+		if err != nil {
+			return sdk.DecCoin{}, err
+		}
 	}
 
 	return gasPrice, nil
