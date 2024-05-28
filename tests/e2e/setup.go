@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -24,15 +26,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/skip-mev/chaintestutil/sample"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -112,63 +114,58 @@ func (s *TestSuite) SimulateTx(ctx context.Context, user cosmos.User, height uin
 func (s *TestSuite) QueryParams() types.Params {
 	s.T().Helper()
 
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
-	// get nodes
-	nodes := cosmosChain.Nodes()
-	s.Require().True(len(nodes) > 0)
+	// get grpc address
+	grpcAddr := s.chain.GetHostGRPCAddress()
 
-	// make params query to first node
-	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "params")
+	// create the client
+	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// unmarshal params
-	var params types.Params
-	err = s.cdc.UnmarshalJSON(resp, &params)
+	// create the oracle client
+	c := types.NewQueryClient(cc)
+
+	resp, err := c.Params(context.Background(), &types.ParamsRequest{})
 	s.Require().NoError(err)
-	return params
+
+	return resp.Params
 }
 
 func (s *TestSuite) QueryState() types.State {
 	s.T().Helper()
 
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
-	// get nodes
-	nodes := cosmosChain.Nodes()
-	s.Require().True(len(nodes) > 0)
+	// get grpc address
+	grpcAddr := s.chain.GetHostGRPCAddress()
 
-	// make params query to first node
-	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "state")
+	// create the client
+	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// unmarshal state
-	var state types.State
-	err = s.cdc.UnmarshalJSON(resp, &state)
+	// create the oracle client
+	c := types.NewQueryClient(cc)
+
+	resp, err := c.State(context.Background(), &types.StateRequest{})
 	s.Require().NoError(err)
-	return state
+
+	return resp.State
 }
 
-func (s *TestSuite) QueryBaseFee() sdk.Coins {
+func (s *TestSuite) QueryBaseFee() sdk.DecCoins {
 	s.T().Helper()
 
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
-	// get nodes
-	nodes := cosmosChain.Nodes()
-	s.Require().True(len(nodes) > 0)
+	// get grpc address
+	grpcAddr := s.chain.GetHostGRPCAddress()
 
-	// make params query to first node
-	resp, _, err := nodes[0].ExecQuery(context.Background(), "feemarket", "base-fee")
+	// create the client
+	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// unmarshal state
-	fees, err := sdk.ParseCoinsNormalized(string(resp))
+	// create the oracle client
+	c := types.NewQueryClient(cc)
+
+	resp, err := c.BaseFee(context.Background(), &types.BaseFeeRequest{})
 	s.Require().NoError(err)
-	return fees
+
+	return resp.Fees
 }
 
 // QueryValidators queries for all the network's validators
@@ -250,7 +247,7 @@ func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.Res
 }
 
 // WaitForHeight waits for the chain to reach the given height
-func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
+func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height int64) {
 	s.T().Helper()
 
 	// wait for next height
@@ -372,12 +369,40 @@ func (s *TestSuite) keyringDirFromNode() string {
 	return localDir
 }
 
+func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64, numMsg int) (*coretypes.ResultBroadcastTxCommit, error) {
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
+	msgs := make([]sdk.Msg, numMsg)
+	for i := 0; i < numMsg; i++ {
+		msgs[i] = &banktypes.MsgSend{
+			FromAddress: sender.FormattedAddress(),
+			ToAddress:   receiver.FormattedAddress(),
+			Amount:      amt,
+		}
+	}
+
+	tx := s.CreateTx(cc, sender, fees.String(), gas, msgs...)
+
+	// get an rpc endpoint for the chain
+	c := cc.Nodes()[0].Client
+	return c.BroadcastTxCommit(ctx, tx)
+}
+
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
-func (s *TestSuite) SendCoins(ctx context.Context, chain *cosmos.CosmosChain, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+func (s *TestSuite) SendCoins(ctx context.Context, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
 	resp, err := s.ExecTx(
 		ctx,
-		chain,
+		cc,
 		keyName,
+		false,
 		"bank",
 		"send",
 		sender,
@@ -399,7 +424,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	ctx context.Context,
 	keyNamePrefix, mnemonic string,
 	amount int64,
-	chain *cosmos.CosmosChain,
+	chain ibc.Chain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
 	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, sample.AlphaString(r, 3))
@@ -410,12 +435,11 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 
 	_, err = s.SendCoins(
 		ctx,
-		chain,
 		interchaintest.FaucetAccountKeyName,
 		interchaintest.FaucetAccountKeyName,
 		user.FormattedAddress(),
-		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(amount))),
-		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, sdk.NewInt(1000000000000))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(amount))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1000000000000))),
 		1000000,
 	)
 	s.Require().NoError(err, "failed to get funds from faucet")
@@ -428,37 +452,24 @@ func (s *TestSuite) GetAndFundTestUsers(
 	ctx context.Context,
 	keyNamePrefix string,
 	amount int64,
-	chains ...*cosmos.CosmosChain,
-) []ibc.Wallet {
-	users := make([]ibc.Wallet, len(chains))
-	var eg errgroup.Group
-	for i, chain := range chains {
-		i := i
-		chain := chain
-		eg.Go(func() error {
-			user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
-			if err != nil {
-				return err
-			}
-			users[i] = user
-			return nil
-		})
-	}
-	s.Require().NoError(eg.Wait())
+	chain ibc.Chain,
+) ibc.Wallet {
+	user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
+	s.Require().NoError(err)
 
-	chainHeights := make([]testutil.ChainHeighter, len(chains))
-	for i := range chains {
-		chainHeights[i] = chains[i]
-	}
-	return users
+	return user
 }
 
 // ExecTx executes a cli command on a node, waits a block and queries the Tx to verify it was included on chain.
-func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, command ...string) (string, error) {
-	node := chain.FullNodes[0]
+func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, blocking bool, command ...string) (string, error) {
+	node := chain.Validators[0]
 
 	resp, err := node.ExecTx(ctx, keyName, command...)
 	s.Require().NoError(err)
+
+	if !blocking {
+		return resp, nil
+	}
 
 	height, err := chain.Height(context.Background())
 	s.Require().NoError(err)
@@ -469,4 +480,41 @@ func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyNa
 	s.Require().Nil(stderr)
 
 	return string(stdout), nil
+}
+
+// CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
+func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee string, gas int64, msgs ...sdk.Msg) []byte {
+	bc := cosmos.NewBroadcaster(s.T(), chain)
+
+	ctx := context.Background()
+	// create tx factory + Client Context
+	txf, err := bc.GetFactory(ctx, user)
+	s.Require().NoError(err)
+
+	cc, err := bc.GetClientContext(ctx, user)
+	s.Require().NoError(err)
+
+	txf = txf.WithSimulateAndExecute(true)
+
+	txf, err = txf.Prepare(cc)
+	s.Require().NoError(err)
+
+	// get gas for tx
+	txf = txf.WithGas(uint64(gas))
+	txf = txf.WithGasAdjustment(0)
+	txf = txf.WithGasPrices("")
+	txf = txf.WithFees(fee)
+
+	// update sequence number
+	txf = txf.WithSequence(txf.Sequence())
+
+	// sign the tx
+	txBuilder, err := txf.BuildUnsignedTx(msgs...)
+	s.Require().NoError(err)
+	s.Require().NoError(tx.Sign(cc.CmdContext, txf, cc.GetFromName(), txBuilder, true))
+
+	// encode and return
+	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
+	s.Require().NoError(err)
+	return bz
 }

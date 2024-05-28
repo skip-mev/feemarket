@@ -16,6 +16,11 @@ func (k *Keeper) UpdateFeeMarket(ctx sdk.Context) error {
 		return err
 	}
 
+	k.Logger(ctx).Info(
+		"updated the fee market",
+		"params", params,
+	)
+
 	if !params.Enabled {
 		return nil
 	}

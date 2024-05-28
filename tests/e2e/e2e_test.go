@@ -18,6 +18,9 @@ import (
 )
 
 var (
+	minBaseFee = sdkmath.LegacyNewDec(10)
+	baseFee    = sdkmath.LegacyNewDec(1000000)
+
 	// config params
 	numValidators = 3
 	numFullNodes  = 1
@@ -35,28 +38,30 @@ var (
 	genesisKV = []cosmos.GenesisKV{
 		{
 			Key: "app_state.feemarket.params",
-			Value: feemarkettypes.NewParams(
-				feemarkettypes.DefaultWindow,
-				feemarkettypes.DefaultAlpha,
-				feemarkettypes.DefaultBeta,
-				feemarkettypes.DefaultTheta,
-				feemarkettypes.DefaultDelta,
-				feemarkettypes.DefaultTargetBlockUtilization,
-				feemarkettypes.DefaultMaxBlockUtilization,
-				sdkmath.LegacyNewDec(1000),
-				feemarkettypes.DefaultMinLearningRate,
-				feemarkettypes.DefaultMaxLearningRate,
-				feemarkettypes.DefaultFeeDenom,
-				true,
-			),
+			Value: feemarkettypes.Params{
+				Alpha:                  feemarkettypes.DefaultAlpha,
+				Beta:                   feemarkettypes.DefaultBeta,
+				Theta:                  feemarkettypes.DefaultTheta,
+				Delta:                  feemarkettypes.DefaultDelta,
+				MinBaseFee:             minBaseFee,
+				MinLearningRate:        feemarkettypes.DefaultMinLearningRate,
+				MaxLearningRate:        feemarkettypes.DefaultMaxLearningRate,
+				TargetBlockUtilization: feemarkettypes.DefaultTargetBlockUtilization / 4,
+				MaxBlockUtilization:    feemarkettypes.DefaultMaxBlockUtilization,
+				Window:                 feemarkettypes.DefaultWindow,
+				FeeDenom:               feemarkettypes.DefaultFeeDenom,
+				Enabled:                true,
+				DistributeFees:         false,
+			},
 		},
 		{
 			Key: "app_state.feemarket.state",
-			Value: feemarkettypes.NewState(
-				feemarkettypes.DefaultWindow,
-				sdkmath.LegacyNewDec(1000),
-				feemarkettypes.DefaultMaxLearningRate,
-			),
+			Value: feemarkettypes.State{
+				BaseFee:      baseFee,
+				LearningRate: feemarkettypes.DefaultMaxLearningRate,
+				Window:       make([]uint64, feemarkettypes.DefaultWindow),
+				Index:        0,
+			},
 		},
 	}
 
