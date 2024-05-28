@@ -29,10 +29,10 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/skip-mev/chaintestutil/sample"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
+	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc"
@@ -247,7 +247,7 @@ func (s *TestSuite) Block(chain *cosmos.CosmosChain, height int64) *rpctypes.Res
 }
 
 // WaitForHeight waits for the chain to reach the given height
-func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height int64) {
+func (s *TestSuite) WaitForHeight(chain *cosmos.CosmosChain, height uint64) {
 	s.T().Helper()
 
 	// wait for next height
@@ -511,7 +511,7 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	// sign the tx
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	s.Require().NoError(err)
-	s.Require().NoError(tx.Sign(cc.CmdContext, txf, cc.GetFromName(), txBuilder, true))
+	s.Require().NoError(tx.Sign(txf, cc.GetFromName(), txBuilder, true))
 
 	// encode and return
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
