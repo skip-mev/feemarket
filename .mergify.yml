@@ -1,0 +1,11 @@
+queue_rules:
+  - name: default
+
+pull_request_rules:
+  - name: backport patches to sdk-47
+    conditions:
+      - base=main
+    actions:
+      backport:
+        branches:
+          - sdk-47
