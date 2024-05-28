@@ -462,7 +462,7 @@ func (s *TestSuite) GetAndFundTestUsers(
 
 // ExecTx executes a cli command on a node, waits a block and queries the Tx to verify it was included on chain.
 func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyName string, blocking bool, command ...string) (string, error) {
-	node := chain.Validators[0]
+	node := chain.FullNodes[0]
 
 	resp, err := node.ExecTx(ctx, keyName, command...)
 	s.Require().NoError(err)

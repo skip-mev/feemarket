@@ -179,7 +179,8 @@ func (s *TestSuite) TestSendTxDecrease() {
 		s.T().Log("performing sends...")
 		for {
 			// send with the exact expected fee
-
+			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+			s.Require().NoError(err)
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 
@@ -196,7 +197,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 
 			go func() {
@@ -212,7 +213,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 
 			go func() {
@@ -228,10 +229,11 @@ func (s *TestSuite) TestSendTxDecrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
-
 			wg.Wait()
+			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+
 			fee := s.QueryBaseFee()
 			s.T().Log("base fee", fee.String())
 
@@ -279,6 +281,8 @@ func (s *TestSuite) TestSendTxIncrease() {
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
+			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+			s.Require().NoError(err)
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 
@@ -295,7 +299,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 
 			go func() {
@@ -311,7 +315,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 
 			go func() {
@@ -327,10 +331,11 @@ func (s *TestSuite) TestSendTxIncrease() {
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
-
 			wg.Wait()
+			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+
 			baseFee = s.QueryBaseFee()
 			s.T().Log("base fee", baseFee.String())
 
