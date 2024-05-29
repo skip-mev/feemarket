@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"cosmossdk.io/math"
+
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
