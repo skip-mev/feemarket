@@ -20,8 +20,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 const (
@@ -210,8 +208,8 @@ func (s *TestSuite) SetupSubTest() {
 
 	state := s.QueryState()
 	s.T().Log("state at block height", height+1, ":", state.String())
-	fee := s.QueryBaseFee()
-	s.T().Log("fee at block height", height+1, ":", fee.String())
+	gasPrice := s.QueryDefaultGasPrice()
+	s.T().Log("gas price at block height", height+1, ":", gasPrice.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
@@ -234,17 +232,17 @@ func (s *TestSuite) TestQueryState() {
 	})
 }
 
-func (s *TestSuite) TestQueryBaseFee() {
-	s.Run("query base fee", func() {
-		// query base fee
-		fees := s.QueryBaseFee()
+func (s *TestSuite) TestQueryGasPrice() {
+	s.Run("query gas price", func() {
+		// query gas price
+		gasPrice := s.QueryDefaultGasPrice()
 
 		// expect validate to pass
-		require.NoError(s.T(), fees.Validate(), fees)
+		require.NoError(s.T(), gasPrice.Validate(), gasPrice)
 	})
 }
 
-// TestSendTxDecrease tests that the feemarket will decrease until it hits the min base fee
+// TestSendTxDecrease tests that the feemarket will decrease until it hits the min gas price
 // when gas utilization is below the target block utilization.
 func (s *TestSuite) TestSendTxDecrease() {
 	// cast chain to cosmos-chain
@@ -256,16 +254,16 @@ func (s *TestSuite) TestSendTxDecrease() {
 
 	params := s.QueryParams()
 
-	baseFee := s.QueryBaseFee()
+	defaultGasPrice := s.QueryDefaultGasPrice()
 	gas := int64(200000)
-	minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
+	minBaseFee := sdk.NewDecCoinFromDec(defaultGasPrice.Denom, defaultGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
 	sendAmt := int64(100000)
 
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
 		for {
-			// send with the exact expected fee
+			// send with the exact expected defaultGasPrice
 
 			wg := sync.WaitGroup{}
 			wg.Add(3)
@@ -319,10 +317,10 @@ func (s *TestSuite) TestSendTxDecrease() {
 			}()
 
 			wg.Wait()
-			fee := s.QueryBaseFee()
-			s.T().Log("base fee", fee.String())
+			gasPrice := s.QueryDefaultGasPrice()
+			s.T().Log("base defaultGasPrice", gasPrice.String())
 
-			if fee.AmountOf(feemarkettypes.DefaultFeeDenom).Equal(params.MinBaseFee) {
+			if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
 				break
 			}
 		}
@@ -333,8 +331,8 @@ func (s *TestSuite) TestSendTxDecrease() {
 		s.Require().NoError(err)
 		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
 
-		fee := s.QueryBaseFee()
-		s.T().Log("base fee", fee.String())
+		gasPrice := s.QueryDefaultGasPrice()
+		s.T().Log("gas price", gasPrice.String())
 
 		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), minBaseFee.Denom)
 		s.Require().NoError(err)
@@ -353,16 +351,16 @@ func (s *TestSuite) TestSendTxIncrease() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
-	baseFee := s.QueryBaseFee()
+	baseGasPrice := s.QueryDefaultGasPrice()
 	gas := int64(20000100)
 	sendAmt := int64(100)
 
-	s.Run("expect fee market fee to increase", func() {
+	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
 		for {
-			// send with the exact expected fee
-			baseFee = s.QueryBaseFee()
-			minBaseFee := baseFee.MulDec(math.LegacyNewDec(gas))[0]
+			// send with the exact expected baseGasPrice
+			baseGasPrice = s.QueryDefaultGasPrice()
+			minBaseFee := sdk.NewDecCoinFromDec(baseGasPrice.Denom, baseGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
@@ -418,10 +416,10 @@ func (s *TestSuite) TestSendTxIncrease() {
 			}()
 
 			wg.Wait()
-			baseFee = s.QueryBaseFee()
-			s.T().Log("base fee", baseFee.String())
+			baseGasPrice = s.QueryDefaultGasPrice()
+			s.T().Log("gas price", baseGasPrice.String())
 
-			if baseFee.AmountOf(feemarkettypes.DefaultFeeDenom).GT(math.LegacyNewDec(1000000)) {
+			if baseGasPrice.Amount.GT(math.LegacyNewDec(1000000)) {
 				break
 			}
 		}
@@ -432,10 +430,10 @@ func (s *TestSuite) TestSendTxIncrease() {
 		s.Require().NoError(err)
 		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
 
-		fee := s.QueryBaseFee()
-		s.T().Log("base fee", fee.String())
+		gasPrice := s.QueryDefaultGasPrice()
+		s.T().Log("gas price", gasPrice.String())
 
-		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), baseFee[0].Denom)
+		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), gasPrice.Denom)
 		s.Require().NoError(err)
 		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
 		s.T().Log("balance:", amt.String())
