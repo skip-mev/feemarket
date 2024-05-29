@@ -66,9 +66,9 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	feeCoin := feeCoins[0]
 	feeGas := int64(feeTx.GetGas())
 
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoins[0].GetDenom())
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoins[0].GetDenom())
+		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoin.GetDenom())
 	}
 
 	// TODO: ??? log all gas prices, not only gas price with a given denom?
