@@ -48,10 +48,7 @@ require (
 	github.com/Antonboom/nilnil v0.1.9 // indirect
 	github.com/Antonboom/testifylint v1.3.0 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
-<<<<<<< HEAD
 	github.com/ChainSafe/go-schnorrkel v1.0.0 // indirect
-=======
->>>>>>> 8905fc1 (go mod tidy (#82))
 	github.com/Crocmagnon/fatcontext v0.2.2 // indirect
 	github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24 // indirect
 	github.com/GaijinEntertainment/go-exhaustruct/v3 v3.2.0 // indirect
@@ -294,11 +291,7 @@ require (
 	gitlab.com/bosi/decorder v0.4.2 // indirect
 	go-simpler.org/musttag v0.12.2 // indirect
 	go-simpler.org/sloglint v0.7.0 // indirect
-<<<<<<< HEAD
-	go.etcd.io/bbolt v1.3.7 // indirect
-=======
 	go.etcd.io/bbolt v1.3.8 // indirect
->>>>>>> 8905fc1 (go mod tidy (#82))
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.47.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.47.0 // indirect
