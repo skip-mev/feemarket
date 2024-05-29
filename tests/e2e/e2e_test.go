@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 
+	"github.com/skip-mev/feemarket/x/feemarket"
+
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/suite"
@@ -21,7 +26,7 @@ var (
 	baseFee    = sdkmath.LegacyNewDec(1000000)
 
 	// config params
-	numValidators = 3
+	numValidators = 4
 	numFullNodes  = 1
 	denom         = "stake"
 
@@ -30,9 +35,14 @@ var (
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
-	encodingConfig = MakeEncodingConfig()
-	noHostMount    = false
-	gasAdjustment  = 10.0
+	encodingConfig = testutil.MakeTestEncodingConfig(
+		bank.AppModuleBasic{},
+		gov.AppModuleBasic{},
+		auth.AppModuleBasic{},
+		feemarket.AppModuleBasic{},
+	)
+	noHostMount   = false
+	gasAdjustment = 10.0
 
 	genesisKV = []cosmos.GenesisKV{
 		{
@@ -73,7 +83,7 @@ var (
 		Version:       "latest",
 		NoHostMount:   &noHostMount,
 		ChainConfig: ibc.ChainConfig{
-			EncodingConfig: encodingConfig,
+			EncodingConfig: &encodingConfig,
 			Images: []ibc.DockerImage{
 				image,
 			},
@@ -93,13 +103,10 @@ var (
 	}
 )
 
-func MakeEncodingConfig() *testutil.TestEncodingConfig {
-	cfg := cosmos.DefaultEncoding()
-	feemarkettypes.RegisterInterfaces(cfg.InterfaceRegistry)
-	return &cfg
-}
-
 func TestE2ETestSuite(t *testing.T) {
-	s := e2e.NewE2ETestSuiteFromSpec(spec)
+	s := e2e.NewIntegrationSuite(
+		spec,
+	)
+
 	suite.Run(t, s)
 }
