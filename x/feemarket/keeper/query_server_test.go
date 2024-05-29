@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"cosmossdk.io/math"
-
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
@@ -27,7 +26,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
 			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
-			MinBaseFee:             math.LegacyNewDec(10),
+			MinBaseGasPrice:        math.LegacyNewDec(10),
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,
@@ -69,7 +68,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 	s.Run("can get updated state", func() {
 		state := types.State{
-			BaseFee:      math.LegacyOneDec(),
+			BaseGasPrice: math.LegacyOneDec(),
 			LearningRate: math.LegacyOneDec(),
 			Window:       []uint64{1},
 			Index:        0,
@@ -92,21 +91,23 @@ func (s *KeeperTestSuite) TestStateRequest() {
 }
 
 func (s *KeeperTestSuite) TestBaseFeeRequest() {
-	s.Run("can get default base fee", func() {
-		req := &types.BaseFeeRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+	s.Run("can get gas price", func() {
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		gasPrice, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fee)
+		s.Require().Equal(resp.GetPrice(), gasPrice)
 	})
 
-	s.Run("can get updated base fee", func() {
+	s.Run("can get updated gas price", func() {
 		state := types.State{
-			BaseFee: math.LegacyOneDec(),
+			BaseGasPrice: math.LegacyOneDec(),
 		}
 		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
@@ -117,20 +118,22 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.BaseFeeRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fees, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		gasPrice, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fees)
+		s.Require().Equal(resp.GetPrice(), gasPrice)
 	})
 
-	s.Run("can get updated base fee < 1", func() {
+	s.Run("can get updated gas price < 1", func() {
 		state := types.State{
-			BaseFee: math.LegacyMustNewDecFromStr("0.005"),
+			BaseGasPrice: math.LegacyMustNewDecFromStr("0.005"),
 		}
 		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
@@ -141,14 +144,16 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 		err = s.feeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		req := &types.BaseFeeRequest{}
-		resp, err := s.queryServer.BaseFee(s.ctx, req)
+		req := &types.GasPriceRequest{
+			Denom: "stake",
+		}
+		resp, err := s.queryServer.GasPrice(s.ctx, req)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 
-		fee, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		fee, err := s.feeMarketKeeper.GetMinGasPrice(s.ctx, req.GetDenom())
 		s.Require().NoError(err)
 
-		s.Require().Equal(resp.Fees, fee)
+		s.Require().Equal(resp.GetPrice(), fee)
 	})
 }

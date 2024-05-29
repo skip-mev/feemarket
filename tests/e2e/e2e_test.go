@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	minBaseFee = sdkmath.LegacyNewDec(10)
-	baseFee    = sdkmath.LegacyNewDec(1000000)
+	minBaseGasPrice = sdkmath.LegacyNewDec(10)
+	baseGasPrice    = sdkmath.LegacyNewDec(1000000)
 
 	// config params
 	numValidators = 3
@@ -42,7 +42,7 @@ var (
 				Beta:                   feemarkettypes.DefaultBeta,
 				Theta:                  feemarkettypes.DefaultTheta,
 				Delta:                  feemarkettypes.DefaultDelta,
-				MinBaseFee:             minBaseFee,
+				MinBaseGasPrice:        minBaseGasPrice,
 				MinLearningRate:        feemarkettypes.DefaultMinLearningRate,
 				MaxLearningRate:        feemarkettypes.DefaultMaxLearningRate,
 				TargetBlockUtilization: feemarkettypes.DefaultTargetBlockUtilization / 4,
@@ -56,7 +56,7 @@ var (
 		{
 			Key: "app_state.feemarket.state",
 			Value: feemarkettypes.State{
-				BaseFee:      baseFee,
+				BaseGasPrice: baseGasPrice,
 				LearningRate: feemarkettypes.DefaultMaxLearningRate,
 				Window:       make([]uint64, feemarkettypes.DefaultWindow),
 				Index:        0,

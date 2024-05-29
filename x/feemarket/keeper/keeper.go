@@ -57,9 +57,9 @@ func (k *Keeper) GetAuthority() string {
 }
 
 // ResolveToBaseDenom converts the given coin to the given denomination.
-func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.Coin, denom string) (sdk.Coin, error) {
+func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error) {
 	if k.resolver == nil {
-		return sdk.Coin{}, types.ErrResolverNotSet
+		return sdk.DecCoin{}, types.ErrResolverNotSet
 	}
 
 	return k.resolver.ConvertToDenom(ctx, coin, denom)

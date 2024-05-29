@@ -149,7 +149,7 @@ func (s *TestSuite) QueryState() types.State {
 	return resp.State
 }
 
-func (s *TestSuite) QueryBaseFee() sdk.DecCoins {
+func (s *TestSuite) QueryDefaultGasPrice() sdk.DecCoin {
 	s.T().Helper()
 
 	// get grpc address
@@ -162,10 +162,12 @@ func (s *TestSuite) QueryBaseFee() sdk.DecCoins {
 	// create the oracle client
 	c := types.NewQueryClient(cc)
 
-	resp, err := c.BaseFee(context.Background(), &types.BaseFeeRequest{})
+	resp, err := c.GasPrice(context.Background(), &types.GasPriceRequest{
+		Denom: sdk.DefaultBondDenom,
+	})
 	s.Require().NoError(err)
 
-	return resp.Fees
+	return resp.GetPrice()
 }
 
 // QueryValidators queries for all the network's validators
