@@ -77,7 +77,7 @@ func (s *IntegrationTestSuite) TestParams() {
 			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
 			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
-			MinBaseFee:             math.LegacyNewDec(10),
+			MinBaseGasPrice:        math.LegacyNewDec(10),
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,

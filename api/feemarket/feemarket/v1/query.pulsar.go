@@ -2587,7 +2587,7 @@ func (x *StateResponse) GetState() *State {
 	return nil
 }
 
-// BaseFeeRequest is the request type for the Query/BaseFee RPC method.
+// BaseFeeRequest is the request type for the Query/BaseGasPrice RPC method.
 type BaseFeeRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2614,7 +2614,7 @@ func (*BaseFeeRequest) Descriptor() ([]byte, []int) {
 	return file_feemarket_feemarket_v1_query_proto_rawDescGZIP(), []int{4}
 }
 
-// StateResponse is the response type for the Query/BaseFee RPC method.
+// StateResponse is the response type for the Query/BaseGasPrice RPC method.
 type BaseFeeResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2759,10 +2759,10 @@ var file_feemarket_feemarket_v1_query_proto_depIdxs = []int32{
 	8, // 2: feemarket.feemarket.v1.BaseFeeResponse.fee:type_name -> cosmos.base.v1beta1.Coin
 	0, // 3: feemarket.feemarket.v1.Query.Params:input_type -> feemarket.feemarket.v1.ParamsRequest
 	2, // 4: feemarket.feemarket.v1.Query.State:input_type -> feemarket.feemarket.v1.StateRequest
-	4, // 5: feemarket.feemarket.v1.Query.BaseFee:input_type -> feemarket.feemarket.v1.BaseFeeRequest
+	4, // 5: feemarket.feemarket.v1.Query.BaseGasPrice:input_type -> feemarket.feemarket.v1.BaseFeeRequest
 	1, // 6: feemarket.feemarket.v1.Query.Params:output_type -> feemarket.feemarket.v1.ParamsResponse
 	3, // 7: feemarket.feemarket.v1.Query.State:output_type -> feemarket.feemarket.v1.StateResponse
-	5, // 8: feemarket.feemarket.v1.Query.BaseFee:output_type -> feemarket.feemarket.v1.BaseFeeResponse
+	5, // 8: feemarket.feemarket.v1.Query.BaseGasPrice:output_type -> feemarket.feemarket.v1.BaseFeeResponse
 	6, // [6:9] is the sub-list for method output_type
 	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

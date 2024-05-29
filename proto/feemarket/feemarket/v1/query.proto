@@ -26,10 +26,19 @@ service Query {
     };
   };
 
-  // BaseFee returns the current feemarket module base fee.
-  rpc BaseFee(BaseFeeRequest) returns (BaseFeeResponse) {
+  // GasPrice returns the current feemarket module gas price
+  // for specified denom.
+  rpc GasPrice(GasPriceRequest) returns (GasPriceResponse) {
     option (google.api.http) = {
-      get : "/feemarket/v1/base_fee"
+      get : "/feemarket/v1/gas_price/{denom}"
+    };
+  };
+
+  // GasPrices returns the current feemarket module list of gas prices
+  // in all available denoms.
+  rpc GasPrices(GasPricesRequest) returns (GasPricesResponse) {
+    option (google.api.http) = {
+      get : "/feemarket/v1/gas_prices"
     };
   };
 }
@@ -46,12 +55,29 @@ message StateRequest {}
 // StateResponse is the response type for the Query/State RPC method.
 message StateResponse { State state = 1 [ (gogoproto.nullable) = false ]; }
 
-// BaseFeeRequest is the request type for the Query/BaseFee RPC method.
-message BaseFeeRequest {}
+// GasPriceRequest is the request type for the Query/GasPrice RPC method.
+message GasPriceRequest {
+  // denom we are querying gas price in
+  string denom = 1;
+}
 
-// StateResponse is the response type for the Query/BaseFee RPC method.
-message BaseFeeResponse {
-  repeated cosmos.base.v1beta1.DecCoin fees = 1 [
+// GasPriceResponse is the response type for the Query/GasPrice RPC method.
+// Returns a gas price in specified denom.
+message GasPriceResponse {
+  cosmos.base.v1beta1.DecCoin price = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// GasPriceRequest is the request type for the Query/GasPrices RPC method.
+message GasPricesRequest {
+}
+
+// GasPricesResponse is the response type for the Query/GasPrices RPC method.
+// Returns a gas price in all available denoms.
+message GasPricesResponse {
+  repeated cosmos.base.v1beta1.DecCoin prices = 1 [
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"

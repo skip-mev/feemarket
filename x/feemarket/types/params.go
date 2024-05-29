@@ -21,7 +21,7 @@ func NewParams(
 	delta math.LegacyDec,
 	targetBlockSize uint64,
 	maxBlockSize uint64,
-	minBaseFee math.LegacyDec,
+	minBaseGasPrice math.LegacyDec,
 	minLearingRate math.LegacyDec,
 	maxLearningRate math.LegacyDec,
 	feeDenom string,
@@ -32,7 +32,7 @@ func NewParams(
 		Beta:                   beta,
 		Theta:                  theta,
 		Delta:                  delta,
-		MinBaseFee:             minBaseFee,
+		MinBaseGasPrice:        minBaseGasPrice,
 		MinLearningRate:        minLearingRate,
 		MaxLearningRate:        maxLearningRate,
 		TargetBlockUtilization: targetBlockSize,
@@ -77,8 +77,8 @@ func (p *Params) ValidateBasic() error {
 		return fmt.Errorf("max block size cannot be greater than target block size times %d", MaxBlockUtilizationRatio)
 	}
 
-	if p.MinBaseFee.IsNil() || !p.MinBaseFee.GTE(math.LegacyZeroDec()) {
-		return fmt.Errorf("min base fee cannot be nil and must be greater than or equal to zero")
+	if p.MinBaseGasPrice.IsNil() || !p.MinBaseGasPrice.GTE(math.LegacyZeroDec()) {
+		return fmt.Errorf("min base gas price cannot be nil and must be greater than or equal to zero")
 	}
 
 	if p.MaxLearningRate.IsNil() || p.MinLearningRate.IsNegative() {

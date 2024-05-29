@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Query_Params_FullMethodName  = "/feemarket.feemarket.v1.Query/Params"
 	Query_State_FullMethodName   = "/feemarket.feemarket.v1.Query/State"
-	Query_BaseFee_FullMethodName = "/feemarket.feemarket.v1.Query/BaseFee"
+	Query_BaseFee_FullMethodName = "/feemarket.feemarket.v1.Query/BaseGasPrice"
 )
 
 // QueryClient is the client API for Query service.
@@ -95,7 +95,7 @@ func (UnimplementedQueryServer) State(context.Context, *StateRequest) (*StateRes
 	return nil, status.Errorf(codes.Unimplemented, "method State not implemented")
 }
 func (UnimplementedQueryServer) BaseFee(context.Context, *BaseFeeRequest) (*BaseFeeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BaseFee not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method BaseGasPrice not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -180,7 +180,7 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Query_State_Handler,
 		},
 		{
-			MethodName: "BaseFee",
+			MethodName: "BaseGasPrice",
 			Handler:    _Query_BaseFee_Handler,
 		},
 	},
