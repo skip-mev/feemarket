@@ -4,13 +4,24 @@ import (
 	"fmt"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 
+	"github.com/skip-mev/feemarket/x/feemarket"
+
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+<<<<<<< HEAD
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
+=======
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+>>>>>>> 57d7094 (test: export e2e tests as a package (#85))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
@@ -22,7 +33,7 @@ var (
 	baseGasPrice    = sdkmath.LegacyNewDec(1000000)
 
 	// config params
-	numValidators = 3
+	numValidators = 4
 	numFullNodes  = 1
 	denom         = "stake"
 
@@ -31,9 +42,14 @@ var (
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
-	encodingConfig = MakeEncodingConfig()
-	noHostMount    = false
-	gasAdjustment  = 10.0
+	encodingConfig = testutil.MakeTestEncodingConfig(
+		bank.AppModuleBasic{},
+		gov.AppModuleBasic{},
+		auth.AppModuleBasic{},
+		feemarket.AppModuleBasic{},
+	)
+	noHostMount   = false
+	gasAdjustment = 10.0
 
 	genesisKV = []cosmos.GenesisKV{
 		{
@@ -78,7 +94,7 @@ var (
 		Version:       "latest",
 		NoHostMount:   &noHostMount,
 		ChainConfig: ibc.ChainConfig{
-			EncodingConfig: encodingConfig,
+			EncodingConfig: &encodingConfig,
 			Images: []ibc.DockerImage{
 				image,
 			},
@@ -99,13 +115,10 @@ var (
 	}
 )
 
-func MakeEncodingConfig() *testutil.TestEncodingConfig {
-	cfg := cosmos.DefaultEncoding()
-	feemarkettypes.RegisterInterfaces(cfg.InterfaceRegistry)
-	return &cfg
-}
-
 func TestE2ETestSuite(t *testing.T) {
-	s := e2e.NewE2ETestSuiteFromSpec(spec)
+	s := e2e.NewIntegrationSuite(
+		spec,
+	)
+
 	suite.Run(t, s)
 }
