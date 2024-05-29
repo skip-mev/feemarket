@@ -48,6 +48,6 @@ func (q QueryServer) GasPrice(goCtx context.Context, req *types.GasPriceRequest)
 func (q QueryServer) GasPrices(goCtx context.Context, _ *types.GasPricesRequest) (*types.GasPricesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	fee, err := q.k.GetMinGasPrices(ctx)
+	gasPrices, err := q.k.GetMinGasPrices(ctx)
 	return &types.GasPricesResponse{Prices: fee}, err
 }
