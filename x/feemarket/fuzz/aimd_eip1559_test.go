@@ -78,7 +78,7 @@ func TestAIMDBaseFee(t *testing.T) {
 		// Update the fee market.
 		for i := uint64(0); i < numBlocks; i++ {
 			blockUtilization := gasGen.Draw(t, "gas")
-			prevBaseFee := state.BaseGasPrice
+			prevBaseGasPrice:= state.BaseGasPrice
 
 			if err := state.Update(blockUtilization, params); err != nil {
 				t.Fatalf("block update errors: %v", err)
