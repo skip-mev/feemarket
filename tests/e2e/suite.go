@@ -3,13 +3,18 @@ package e2e
 import (
 	"context"
 	"math/rand"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
 	"cosmossdk.io/math"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
@@ -18,7 +23,15 @@ import (
 )
 
 const (
-	initBalance = 30000000000000
+	envKeepAlive          = "FEEMARKET_INTEGRATION_KEEPALIVE"
+	initBalance           = 30000000000000
+	genesisAmount         = 1000000000
+	defaultDenom          = "stake"
+	validatorKey          = "validator"
+	yes                   = "yes"
+	deposit               = 1000000
+	userMnemonic          = "foster poverty abstract scorpion short shrimp tilt edge romance adapt only benefit moral another where host egg echo ability wisdom lizard lazy pool roast"
+	userAccountAddressHex = "877E307618AB73E009A978AC32E0264791F6D40A"
 )
 
 var r *rand.Rand
@@ -36,12 +49,8 @@ type TestSuite struct {
 	spec *interchaintest.ChainSpec
 	// chain
 	chain ibc.Chain
-	// interchain
-	ic *interchaintest.Interchain
 	// users
 	user1, user2, user3 ibc.Wallet
-	// denom
-	denom string
 
 	// overrides for key-ring configuration of the broadcaster
 	broadcasterOverrides *KeyringOverride
@@ -50,23 +59,78 @@ type TestSuite struct {
 	bc *cosmos.Broadcaster
 
 	cdc codec.Codec
+
+	// default token denom
+	denom string
+
+	// authority address
+	authority sdk.AccAddress
+
+	// block time
+	blockTime time.Duration
+
+	// interchain constructor
+	icc InterchainConstructor
+
+	// interchain
+	ic Interchain
+
+	// chain constructor
+	cc ChainConstructor
 }
 
-func NewE2ETestSuiteFromSpec(spec *interchaintest.ChainSpec) *TestSuite {
-	return &TestSuite{
-		spec:  spec,
-		denom: "stake",
+// Option is a function that modifies the TestSuite
+type Option func(*TestSuite)
+
+// WithDenom sets the token denom
+func WithDenom(denom string) Option {
+	return func(s *TestSuite) {
+		s.denom = denom
 	}
 }
 
-func (s *TestSuite) WithDenom(denom string) *TestSuite {
-	s.denom = denom
+// WithAuthority sets the authority address
+func WithAuthority(addr sdk.AccAddress) Option {
+	return func(s *TestSuite) {
+		s.authority = addr
+	}
+}
 
-	// update the bech32 prefixes
-	sdk.GetConfig().SetBech32PrefixForAccount(s.denom, s.denom+sdk.PrefixPublic)
-	sdk.GetConfig().SetBech32PrefixForValidator(s.denom+sdk.PrefixValidator, s.denom+sdk.PrefixValidator+sdk.PrefixPublic)
-	sdk.GetConfig().Seal()
-	return s
+// WithBlockTime sets the block time
+func WithBlockTime(t time.Duration) Option {
+	return func(s *TestSuite) {
+		s.blockTime = t
+	}
+}
+
+// WithInterchainConstructor sets the interchain constructor
+func WithInterchainConstructor(ic InterchainConstructor) Option {
+	return func(s *TestSuite) {
+		s.icc = ic
+	}
+}
+
+// WithChainConstructor sets the chain constructor
+func WithChainConstructor(cc ChainConstructor) Option {
+	return func(s *TestSuite) {
+		s.cc = cc
+	}
+}
+
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, opts ...Option) *TestSuite {
+	suite := &TestSuite{
+		spec:      spec,
+		denom:     defaultDenom,
+		authority: authtypes.NewModuleAddress(govtypes.ModuleName),
+		icc:       DefaultInterchainConstructor,
+		cc:        DefaultChainConstructor,
+	}
+
+	for _, opt := range opts {
+		opt(suite)
+	}
+
+	return suite
 }
 
 func (s *TestSuite) WithKeyringOptions(cdc codec.Codec, opts keyring.Option) {
@@ -79,17 +143,15 @@ func (s *TestSuite) WithKeyringOptions(cdc codec.Codec, opts keyring.Option) {
 func (s *TestSuite) SetupSuite() {
 	// build the chain
 	s.T().Log("building chain with spec", s.spec)
-	s.chain = ChainBuilderFromChainSpec(s.T(), s.spec)
+	chains := s.cc(s.T(), s.spec)
 
 	// build the interchain
 	s.T().Log("building interchain")
 	ctx := context.Background()
-	s.ic = BuildInterchain(s.T(), ctx, s.chain)
+	// start the chain
+	s.ic = s.icc(context.Background(), s.T(), chains)
 
-	cc, ok := s.chain.(*cosmos.CosmosChain)
-	if !ok {
-		panic("unable to assert ibc.Chain as CosmosChain")
-	}
+	s.chain = chains[0]
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
@@ -98,9 +160,9 @@ func (s *TestSuite) SetupSuite() {
 	s.cdc = s.chain.Config().EncodingConfig.Codec
 
 	// get the users
-	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
-	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
-	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, cc)
+	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
+	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
+	s.user3 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
 
 	// create the broadcaster
 	s.T().Log("creating broadcaster")
@@ -108,8 +170,33 @@ func (s *TestSuite) SetupSuite() {
 }
 
 func (s *TestSuite) TearDownSuite() {
-	// close the interchain
-	s.Require().NoError(s.ic.Close())
+	defer s.Teardown()
+	// get the oracle integration-test suite keep alive env
+	if ok := os.Getenv(envKeepAlive); ok == "" {
+		return
+	}
+
+	// await on a signal to keep the chain running
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	s.T().Log("Keeping the chain running")
+	<-sig
+}
+
+func (s *TestSuite) Teardown() {
+	// stop all nodes + sidecars in the chain
+	ctx := context.Background()
+	if s.chain == nil {
+		return
+	}
+
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
+	_ = cc.StopAllNodes(ctx)
+	_ = cc.StopAllSidecars(ctx)
 }
 
 func (s *TestSuite) SetupSubTest() {
