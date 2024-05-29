@@ -41,7 +41,7 @@ func (q QueryServer) GasPrice(goCtx context.Context, req *types.GasPriceRequest)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	gasPrice, err := q.k.GetMinGasPrice(ctx, req.GetDenom())
-	return &types.GasPriceResponse{Price: fee}, err
+	return &types.GasPriceResponse{Price: gasPrice}, err
 }
 
 // GasPrices defines a method that returns the current feemarket list of gas prices.
@@ -49,5 +49,5 @@ func (q QueryServer) GasPrices(goCtx context.Context, _ *types.GasPricesRequest)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	gasPrices, err := q.k.GetMinGasPrices(ctx)
-	return &types.GasPricesResponse{Prices: fee}, err
+	return &types.GasPricesResponse{Prices: gasPrices}, err
 }

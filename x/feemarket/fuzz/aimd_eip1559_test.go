@@ -78,7 +78,7 @@ func TestAIMDBaseFee(t *testing.T) {
 		// Update the fee market.
 		for i := uint64(0); i < numBlocks; i++ {
 			blockUtilization := gasGen.Draw(t, "gas")
-			prevBaseGasPrice:= state.BaseGasPrice
+			prevBaseGasPrice := state.BaseGasPrice
 
 			if err := state.Update(blockUtilization, params); err != nil {
 				t.Fatalf("block update errors: %v", err)
@@ -86,7 +86,7 @@ func TestAIMDBaseFee(t *testing.T) {
 
 			// Update the learning rate.
 			state.UpdateLearningRate(params)
-			// Update the base fee.
+			// Update the base gas price.
 			state.UpdateBaseGasPrice(params)
 
 			// Ensure that the minimum base fee is always less than the base fee.
@@ -94,20 +94,20 @@ func TestAIMDBaseFee(t *testing.T) {
 
 			switch {
 			case blockUtilization > params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.GTE(prevBaseFee))
+				require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice))
 			case blockUtilization < params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.LTE(prevBaseFee))
+				require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice))
 			default:
 
 				// Account for the delta adjustment.
 				net := state.GetNetUtilization(params)
 				switch {
 				case net.GT(math.ZeroInt()):
-					require.True(t, state.BaseGasPrice.GTE(prevBaseFee))
+					require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice))
 				case net.LT(math.ZeroInt()):
-					require.True(t, state.BaseGasPrice.LTE(prevBaseFee))
+					require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice))
 				default:
-					require.True(t, state.BaseGasPrice.Equal(prevBaseFee))
+					require.True(t, state.BaseGasPrice.Equal(prevBaseGasPrice))
 				}
 			}
 

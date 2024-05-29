@@ -121,8 +121,8 @@ func (s *TestSuite) SetupSubTest() {
 
 	state := s.QueryState()
 	s.T().Log("state at block height", height+1, ":", state.String())
-	fee := s.QueryDefaultGasPrice()
-	s.T().Log("fee at block height", height+1, ":", fee.String())
+	gasPrice := s.QueryDefaultGasPrice()
+	s.T().Log("gas price at block height", height+1, ":", gasPrice.String())
 }
 
 func (s *TestSuite) TestQueryParams() {
