@@ -176,14 +176,10 @@ func (s *TestSuite) TestSendTxDecrease() {
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
 		for {
-<<<<<<< HEAD
 			// send with the exact expected fee
 			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 			s.Require().NoError(err)
-=======
 			// send with the exact expected defaultGasPrice
-
->>>>>>> cf0c02f (refactored queries, ante/post handlers and DenomResolver (#81))
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 
@@ -235,15 +231,10 @@ func (s *TestSuite) TestSendTxDecrease() {
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 			wg.Wait()
-<<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 
-			fee := s.QueryBaseFee()
-			s.T().Log("base fee", fee.String())
-=======
 			gasPrice := s.QueryDefaultGasPrice()
 			s.T().Log("base defaultGasPrice", gasPrice.String())
->>>>>>> cf0c02f (refactored queries, ante/post handlers and DenomResolver (#81))
 
 			if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
 				break
@@ -342,15 +333,10 @@ func (s *TestSuite) TestSendTxIncrease() {
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 			wg.Wait()
-<<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 
-			baseFee = s.QueryBaseFee()
-			s.T().Log("base fee", baseFee.String())
-=======
 			baseGasPrice = s.QueryDefaultGasPrice()
 			s.T().Log("gas price", baseGasPrice.String())
->>>>>>> cf0c02f (refactored queries, ante/post handlers and DenomResolver (#81))
 
 			if baseGasPrice.Amount.GT(math.LegacyNewDec(1000000)) {
 				break
