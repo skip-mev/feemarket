@@ -89,7 +89,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	feeCoin := feeCoins[0]
 	feeGas := int64(feeTx.GetGas())
 
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoins[0].GetDenom())
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoins[0].GetDenom())
 	}

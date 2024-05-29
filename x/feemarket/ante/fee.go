@@ -128,7 +128,7 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 			//  set fee coins to be required amount if checking
 			payCoin = requiredFee
 		} else {
-			// tip is the difference between feeCoin and the required fee
+			// tip is the difference between payCoin and the required fee
 			tip = payCoin.Sub(requiredFee)
 			// set fee coin to be ONLY the consumed amount if we are calculated consumed fee to deduct
 			payCoin = consumedFee
