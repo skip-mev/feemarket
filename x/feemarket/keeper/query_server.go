@@ -40,7 +40,7 @@ func (q QueryServer) State(goCtx context.Context, _ *types.StateRequest) (*types
 func (q QueryServer) GasPrice(goCtx context.Context, req *types.GasPriceRequest) (*types.GasPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	fee, err := q.k.GetMinGasPrice(ctx, req.GetDenom())
+	gasPrice, err := q.k.GetMinGasPrice(ctx, req.GetDenom())
 	return &types.GasPriceResponse{Price: fee}, err
 }
 
