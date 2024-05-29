@@ -43,8 +43,8 @@ func TestBaseFee(t *testing.T) {
 		params := CreateRandomParams(t)
 
 		// Update the current base fee to be 10% higher than the minimum base fee.
-		prevBaseFee := state.BaseFee.Mul(math.LegacyNewDec(11)).Quo(math.LegacyNewDec(10))
-		state.BaseFee = prevBaseFee
+		prevBaseFee := state.BaseGasPrice.Mul(math.LegacyNewDec(11)).Quo(math.LegacyNewDec(10))
+		state.BaseGasPrice = prevBaseFee
 
 		// Randomly generate the block utilization.
 		blockUtilization := rapid.Uint64Range(0, params.MaxBlockUtilization).Draw(t, "gas")
@@ -57,18 +57,18 @@ func TestBaseFee(t *testing.T) {
 		// Update the learning rate.
 		state.UpdateLearningRate(params)
 		// Update the base fee.
-		state.UpdateBaseFee(params)
+		state.UpdateBaseGasPrice(params)
 
 		// Ensure that the minimum base fee is always less than the base fee.
-		require.True(t, params.MinBaseFee.LTE(state.BaseFee))
+		require.True(t, params.MinBaseGasPrice.LTE(state.BaseGasPrice))
 
 		switch {
 		case blockUtilization > params.TargetBlockUtilization:
-			require.True(t, state.BaseFee.GTE(prevBaseFee))
+			require.True(t, state.BaseGasPrice.GTE(prevBaseFee))
 		case blockUtilization < params.TargetBlockUtilization:
-			require.True(t, state.BaseFee.LTE(prevBaseFee))
+			require.True(t, state.BaseGasPrice.LTE(prevBaseFee))
 		default:
-			require.Equal(t, state.BaseFee, prevBaseFee)
+			require.Equal(t, state.BaseGasPrice, prevBaseFee)
 		}
 	})
 }

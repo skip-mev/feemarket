@@ -35,7 +35,7 @@ func (ms MsgServer) Params(goCtx context.Context, msg *types.MsgParams) (*types.
 		return nil, fmt.Errorf("error setting params: %w", err)
 	}
 
-	newState := types.NewState(params.Window, params.MinBaseFee, params.MinLearningRate)
+	newState := types.NewState(params.Window, params.MinBaseGasPrice, params.MinLearningRate)
 	if err := ms.k.SetState(ctx, newState); err != nil {
 		return nil, fmt.Errorf("error setting state: %w", err)
 	}
