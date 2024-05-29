@@ -233,7 +233,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 			gasPrice := s.QueryDefaultGasPrice()
 			s.T().Log("base defaultGasPrice", gasPrice.String())
 
-			if gasPrice.Amount.Equal(params.MinBaseFee) {
+			if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
 				break
 			}
 		}

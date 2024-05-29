@@ -26,7 +26,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
 			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
 			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
-			MinBaseFee:             math.LegacyNewDec(10),
+			MinBaseGasPrice:        math.LegacyNewDec(10),
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
 			TargetBlockUtilization: 5,
@@ -68,7 +68,7 @@ func (s *KeeperTestSuite) TestStateRequest() {
 
 	s.Run("can get updated state", func() {
 		state := types.State{
-			BaseFee:      math.LegacyOneDec(),
+			BaseGasPrice: math.LegacyOneDec(),
 			LearningRate: math.LegacyOneDec(),
 			Window:       []uint64{1},
 			Index:        0,
@@ -107,7 +107,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 
 	s.Run("can get updated gas price", func() {
 		state := types.State{
-			BaseFee: math.LegacyOneDec(),
+			BaseGasPrice: math.LegacyOneDec(),
 		}
 		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
@@ -133,7 +133,7 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 
 	s.Run("can get updated gas price < 1", func() {
 		state := types.State{
-			BaseFee: math.LegacyMustNewDecFromStr("0.005"),
+			BaseGasPrice: math.LegacyMustNewDecFromStr("0.005"),
 		}
 		err := s.feeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)

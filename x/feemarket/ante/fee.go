@@ -115,7 +115,6 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
 
 		if !payCoin.IsGTE(requiredFee) {
-			// TODO: Why do we return gas consumed
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
 				payCoin,

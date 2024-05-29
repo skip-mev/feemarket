@@ -10,8 +10,8 @@ import (
 type DenomResolver interface {
 	// ConvertToDenom converts deccoin into the equivalent amount of the token denominated in denom.
 	ConvertToDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error)
-	// AllowedDenoms returns a list of denoms it's possible to pay fees with
-	AllowedDenoms(ctx sdk.Context) ([]string, error)
+	// ExtraDenoms returns a list of denoms in addition of `Params.base_denom` it's possible to pay fees with
+	ExtraDenoms(ctx sdk.Context) ([]string, error)
 }
 
 // TestDenomResolver is a test implementation of the DenomResolver interface.  It returns "feeCoin.Amount baseDenom" for all coins that are not the baseDenom.
@@ -27,7 +27,7 @@ func (r *TestDenomResolver) ConvertToDenom(_ sdk.Context, coin sdk.DecCoin, deno
 	return sdk.NewDecCoinFromDec(denom, coin.Amount), nil
 }
 
-func (r *TestDenomResolver) AllowedDenoms(_ sdk.Context) ([]string, error) {
+func (r *TestDenomResolver) ExtraDenoms(_ sdk.Context) ([]string, error) {
 	return []string{}, nil
 }
 
@@ -44,6 +44,6 @@ func (r *ErrorDenomResolver) ConvertToDenom(_ sdk.Context, coin sdk.DecCoin, den
 	return sdk.DecCoin{}, fmt.Errorf("error resolving denom")
 }
 
-func (r *ErrorDenomResolver) AllowedDenoms(_ sdk.Context) ([]string, error) {
+func (r *ErrorDenomResolver) ExtraDenoms(_ sdk.Context) ([]string, error) {
 	return []string{}, nil
 }

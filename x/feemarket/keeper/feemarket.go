@@ -37,7 +37,7 @@ func (k *Keeper) UpdateFeeMarket(ctx sdk.Context) error {
 	)
 
 	// Update the base fee based with the new learning rate and delta adjustment.
-	newBaseFee := state.UpdateBaseFee(params)
+	newBaseFee := state.UpdateBaseGasPrice(params)
 
 	k.Logger(ctx).Info(
 		"updated the fee market",
@@ -60,7 +60,7 @@ func (k *Keeper) GetBaseGasPrice(ctx sdk.Context) (math.LegacyDec, error) {
 		return math.LegacyDec{}, err
 	}
 
-	return state.BaseFee, nil
+	return state.BaseGasPrice, nil
 }
 
 // GetLearningRate returns the learning rate from the fee market state.
@@ -114,7 +114,7 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 	minGasPrice := sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
 	minGasPrices := sdk.NewDecCoins(minGasPrice)
 
-	extraDenoms, err := k.resolver.AllowedDenoms(ctx)
+	extraDenoms, err := k.resolver.ExtraDenoms(ctx)
 	if err != nil {
 		return sdk.NewDecCoins(), err
 	}

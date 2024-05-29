@@ -19,7 +19,7 @@ func TestAnteHandle(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
 
-	validFeeAmount := types.DefaultMinBaseFee.MulInt64(int64(gasLimit))
+	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
 	validFee := sdk.NewCoins(sdk.NewCoin("stake", validFeeAmount.TruncateInt()))
 	validFeeDifferentDenom := sdk.NewCoins(sdk.NewCoin("atom", math.Int(validFeeAmount)))
 
