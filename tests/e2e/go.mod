@@ -99,7 +99,13 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
+<<<<<<< HEAD
 	github.com/ethereum/go-ethereum v1.13.5 // indirect
+=======
+	github.com/emicklei/dot v1.6.1 // indirect
+	github.com/ethereum/go-ethereum v1.14.3 // indirect
+	github.com/fatih/color v1.17.0 // indirect
+>>>>>>> e1a7ed7 (feat: ics testing lib (#89))
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/getsentry/sentry-go v0.25.0 // indirect
