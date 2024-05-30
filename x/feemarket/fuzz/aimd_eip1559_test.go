@@ -10,7 +10,7 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-// TestAIMDLearningRate ensure's that the additive increase
+// TestAIMDLearningRate ensures that the additive increase
 // multiplicative decrease learning rate algorithm correctly
 // adjusts the learning rate. In particular, if the block
 // utilization is greater than theta or less than 1 - theta, then
@@ -18,6 +18,8 @@ import (
 // parameter. Otherwise, the learning rate is decreased by
 // the multiplicative decrease parameter.
 func TestAIMDLearningRate(t *testing.T) {
+	t.Parallel()
+
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultAIMDState()
 		window := rapid.Int64Range(1, 50).Draw(t, "window")
@@ -59,7 +61,7 @@ func TestAIMDLearningRate(t *testing.T) {
 	})
 }
 
-// TestAIMDBaseFee ensure's that the additive increase multiplicative
+// TestAIMDBaseFee ensures that the additive increase multiplicative
 // decrease base fee adjustment algorithm correctly adjusts the base
 // fee. In particular, the base fee should function the same as the
 // default EIP-1559 base fee adjustment algorithm.
@@ -84,32 +86,51 @@ func TestAIMDBaseFee(t *testing.T) {
 				t.Fatalf("block update errors: %v", err)
 			}
 
+			var total uint64
+			for _, utilization := range state.Window {
+				total += utilization
+			}
+
 			// Update the learning rate.
-			state.UpdateLearningRate(params)
+			lr := state.UpdateLearningRate(params)
 			// Update the base gas price.
+
+			var newPrice math.LegacyDec
+			func() {
+				defer func() {
+					if rec := recover(); rec != nil {
+						newPrice = params.MinBaseGasPrice
+					}
+				}()
+
+				// Calculate the new base gasPrice with the learning rate adjustment.
+				currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(state.Window[state.Index]))
+				targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization))
+				utilization := (currentBlockSize.Sub(targetBlockSize)).Quo(targetBlockSize)
+
+				// Truncate the learning rate adjustment to an integer.
+				//
+				// This is equivalent to
+				// 1 + (learningRate * (currentBlockSize - targetBlockSize) / targetBlockSize)
+				learningRateAdjustment := math.LegacyOneDec().Add(lr.Mul(utilization))
+
+				// Calculate the delta adjustment.
+				net := math.LegacyNewDecFromInt(state.GetNetUtilization(params)).Mul(params.Delta)
+
+				// Update the base gasPrice.
+				newPrice = prevBaseGasPrice.Mul(learningRateAdjustment).Add(net)
+				// Ensure the base gasPrice is greater than the minimum base gasPrice.
+				if newPrice.LT(params.MinBaseGasPrice) {
+					newPrice = params.MinBaseGasPrice
+				}
+			}()
+
 			state.UpdateBaseGasPrice(params)
 
-			// Ensure that the minimum base fee is always less than the base fee.
+			// Ensure that the minimum base fee is always less than the base gas price.
 			require.True(t, params.MinBaseGasPrice.LTE(state.BaseGasPrice))
 
-			switch {
-			case blockUtilization > params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice))
-			case blockUtilization < params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice))
-			default:
-
-				// Account for the delta adjustment.
-				net := state.GetNetUtilization(params)
-				switch {
-				case net.GT(math.ZeroInt()):
-					require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice))
-				case net.LT(math.ZeroInt()):
-					require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice))
-				default:
-					require.True(t, state.BaseGasPrice.Equal(prevBaseGasPrice))
-				}
-			}
+			require.Equal(t, newPrice, state.BaseGasPrice)
 
 			// Update the current height.
 			state.IncrementHeight()
