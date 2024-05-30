@@ -1,6 +1,7 @@
 package fuzz_test
 
 import (
+	"fmt"
 	"testing"
 
 	"cosmossdk.io/math"
@@ -59,7 +60,7 @@ func TestAIMDLearningRate(t *testing.T) {
 	})
 }
 
-// TestAIMDBaseFee ensure's that the additive increase multiplicative
+// TestAIMDBaseFee ensures that the additive increase multiplicative
 // decrease base fee adjustment algorithm correctly adjusts the base
 // fee. In particular, the base fee should function the same as the
 // default EIP-1559 base fee adjustment algorithm.
@@ -89,14 +90,14 @@ func TestAIMDBaseFee(t *testing.T) {
 			// Update the base gas price.
 			state.UpdateBaseGasPrice(params)
 
-			// Ensure that the minimum base fee is always less than the base fee.
+			// Ensure that the minimum base fee is always less than the base gas price.
 			require.True(t, params.MinBaseGasPrice.LTE(state.BaseGasPrice))
 
 			switch {
 			case blockUtilization > params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice))
+				require.True(t, state.BaseGasPrice.GTE(prevBaseGasPrice), fmt.Sprintf("base gas price %v, prev gas price %v, gas %v", state.BaseGasPrice, prevBaseGasPrice, blockUtilization))
 			case blockUtilization < params.TargetBlockUtilization:
-				require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice))
+				require.True(t, state.BaseGasPrice.LTE(prevBaseGasPrice), fmt.Sprintf("base gas price %v, prev gas price %v, gas %v", state.BaseGasPrice, prevBaseGasPrice, blockUtilization))
 			default:
 
 				// Account for the delta adjustment.
