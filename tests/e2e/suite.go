@@ -15,6 +15,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	oracleconfig "github.com/skip-mev/slinky/oracle/config"
+	"github.com/skip-mev/slinky/providers/apis/marketmap"
+	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
@@ -42,15 +45,66 @@ func init() {
 	r = rand.New(s)
 }
 
+func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
+	return ibc.SidecarConfig{
+		ProcessName: "oracle",
+		Image:       image,
+		HomeDir:     "/oracle",
+		Ports:       []string{"8080", "8081"},
+		StartCmd: []string{
+			"slinky",
+			"--oracle-config-path", "/oracle/oracle.json",
+		},
+		ValidatorProcess: true,
+		PreStart:         true,
+	}
+}
+
+func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
+	cfg := marketmap.DefaultAPIConfig
+	cfg.URL = url
+
+	// Create the oracle config
+	oracleConfig := oracleconfig.OracleConfig{
+		UpdateInterval: 500 * time.Millisecond,
+		MaxPriceAge:    1 * time.Minute,
+		Host:           "0.0.0.0",
+		Port:           "8080",
+		Providers: []oracleconfig.ProviderConfig{
+			{
+				Name: "marketmap_api",
+				API:  cfg,
+				Type: "market_map_provider",
+			},
+		},
+	}
+
+	return oracleConfig
+}
+
+func DefaultMarketMap() mmtypes.MarketMap {
+	return mmtypes.MarketMap{}
+}
+
+func GetOracleSideCar(node *cosmos.ChainNode) *cosmos.SidecarProcess {
+	if len(node.Sidecars) == 0 {
+		panic("no sidecars found")
+	}
+	return node.Sidecars[0]
+}
+
 // TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
 	suite.Suite
 	// spec
 	spec *interchaintest.ChainSpec
-	// chain
-	chain ibc.Chain
+	// add more fields here as necessary
+	chain *cosmos.CosmosChain
 	// users
 	user1, user2, user3 ibc.Wallet
+
+	// oracle side-car config
+	oracleConfig ibc.SidecarConfig
 
 	// overrides for key-ring configuration of the broadcaster
 	broadcasterOverrides *KeyringOverride
@@ -117,13 +171,14 @@ func WithChainConstructor(cc ChainConstructor) Option {
 	}
 }
 
-func NewIntegrationSuite(spec *interchaintest.ChainSpec, opts ...Option) *TestSuite {
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerImage, opts ...Option) *TestSuite {
 	suite := &TestSuite{
-		spec:      spec,
-		denom:     defaultDenom,
-		authority: authtypes.NewModuleAddress(govtypes.ModuleName),
-		icc:       DefaultInterchainConstructor,
-		cc:        DefaultChainConstructor,
+		spec:         spec,
+		oracleConfig: DefaultOracleSidecar(oracleImage),
+		denom:        defaultDenom,
+		authority:    authtypes.NewModuleAddress(govtypes.ModuleName),
+		icc:          DefaultInterchainConstructor,
+		cc:           DefaultChainConstructor,
 	}
 
 	for _, opt := range opts {
@@ -159,6 +214,29 @@ func (s *TestSuite) SetupSuite() {
 
 	s.cdc = s.chain.Config().EncodingConfig.Codec
 
+	if len(chains) < 1 {
+		panic("no chains created")
+	}
+
+	s.chain.WithPreStartNodes(func(c *cosmos.CosmosChain) {
+		// for each node in the chain, set the sidecars
+		for i := range c.Nodes() {
+			// pin
+			node := c.Nodes()[i]
+			// add sidecars to node
+			AddSidecarToNode(node, s.oracleConfig)
+
+			// set config for the oracle
+			oracleCfg := DefaultOracleConfig("localhost:9090")
+			SetOracleConfigsOnOracle(GetOracleSideCar(node), oracleCfg)
+
+			// set the out-of-process oracle config for all nodes
+			node.WithPreStartNode(func(n *cosmos.ChainNode) {
+				SetOracleConfigsOnApp(n)
+			})
+		}
+	})
+
 	// get the users
 	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
 	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
@@ -190,21 +268,16 @@ func (s *TestSuite) Teardown() {
 		return
 	}
 
-	cc, ok := s.chain.(*cosmos.CosmosChain)
-	if !ok {
-		panic("unable to assert ibc.Chain as CosmosChain")
-	}
-
-	_ = cc.StopAllNodes(ctx)
-	_ = cc.StopAllSidecars(ctx)
+	_ = s.chain.StopAllNodes(ctx)
+	_ = s.chain.StopAllSidecars(ctx)
 }
 
 func (s *TestSuite) SetupSubTest() {
 	// wait for 1 block height
 	// query height
-	height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+	height, err := s.chain.Height(context.Background())
 	s.Require().NoError(err)
-	s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
+	s.WaitForHeight(s.chain, height+1)
 
 	state := s.QueryState()
 	s.T().Log("state at block height", height+1, ":", state.String())
@@ -245,11 +318,8 @@ func (s *TestSuite) TestQueryGasPrice() {
 // TestSendTxDecrease tests that the feemarket will decrease until it hits the min gas price
 // when gas utilization is below the target block utilization.
 func (s *TestSuite) TestSendTxDecrease() {
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
 	// get nodes
-	nodes := cosmosChain.Nodes()
+	nodes := s.chain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
 	params := s.QueryParams()
@@ -274,7 +344,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					context.Background(),
 					s.user1,
 					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					1,
@@ -290,7 +360,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					context.Background(),
 					s.user3,
 					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					1,
@@ -306,7 +376,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					context.Background(),
 					s.user2,
 					s.user3,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					1,
@@ -327,9 +397,9 @@ func (s *TestSuite) TestSendTxDecrease() {
 
 		// wait for 5 blocks
 		// query height
-		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		height, err := s.chain.Height(context.Background())
 		s.Require().NoError(err)
-		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+		s.WaitForHeight(s.chain, height+5)
 
 		gasPrice := s.QueryDefaultGasPrice()
 		s.T().Log("gas price", gasPrice.String())
@@ -344,11 +414,8 @@ func (s *TestSuite) TestSendTxDecrease() {
 // TestSendTxIncrease tests that the feemarket will increase
 // when gas utilization is above the target block utilization.
 func (s *TestSuite) TestSendTxIncrease() {
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
 	// get nodes
-	nodes := cosmosChain.Nodes()
+	nodes := s.chain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
 	baseGasPrice := s.QueryDefaultGasPrice()
@@ -373,7 +440,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					context.Background(),
 					s.user1,
 					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					400,
@@ -389,7 +456,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					context.Background(),
 					s.user3,
 					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					400,
@@ -405,7 +472,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					context.Background(),
 					s.user2,
 					s.user1,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					400,
@@ -426,9 +493,9 @@ func (s *TestSuite) TestSendTxIncrease() {
 
 		// wait for 5 blocks
 		// query height
-		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		height, err := s.chain.Height(context.Background())
 		s.Require().NoError(err)
-		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+		s.WaitForHeight(s.chain, height+5)
 
 		gasPrice := s.QueryDefaultGasPrice()
 		s.T().Log("gas price", gasPrice.String())

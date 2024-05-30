@@ -35,6 +35,11 @@ var (
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
+	oracleImage = ibc.DockerImage{
+		Repository: "ghcr.io/skip-mev/slinky-sidecar",
+		Version:    "latest",
+		UidGid:     "1000:1000",
+	}
 	encodingConfig = testutil.MakeTestEncodingConfig(
 		bank.AppModuleBasic{},
 		gov.AppModuleBasic{},
@@ -106,6 +111,7 @@ var (
 func TestE2ETestSuite(t *testing.T) {
 	s := e2e.NewIntegrationSuite(
 		spec,
+		oracleImage,
 	)
 
 	suite.Run(t, s)

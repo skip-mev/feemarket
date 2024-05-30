@@ -28,7 +28,9 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/skip-mev/chaintestutil/sample"
+	oracleconfig "github.com/skip-mev/slinky/oracle/config"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
@@ -39,6 +41,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
+)
+
+const (
+	oracleConfigPath = "oracle.json"
+	appConfigPath    = "config/app.toml"
 )
 
 type KeyringOverride struct {
@@ -211,7 +218,6 @@ func (s *TestSuite) QueryAccountBalance(chain ibc.Chain, address, denom string) 
 	return balance.Int64()
 }
 
-// QueryAccountSequence
 func (s *TestSuite) QueryAccountSequence(chain *cosmos.CosmosChain, address string) uint64 {
 	s.T().Helper()
 
@@ -302,7 +308,7 @@ func TxHash(tx []byte) string {
 func (s *TestSuite) setupBroadcaster() {
 	s.T().Helper()
 
-	bc := cosmos.NewBroadcaster(s.T(), s.chain.(*cosmos.CosmosChain))
+	bc := cosmos.NewBroadcaster(s.T(), s.chain)
 
 	if s.broadcasterOverrides == nil {
 		s.bc = bc
@@ -322,7 +328,6 @@ func (s *TestSuite) setupBroadcaster() {
 			return factory.WithKeybase(kr)
 		},
 	)
-
 	bc.ConfigureClientContextOptions(
 		func(cc client.Context) client.Context {
 			return cc.WithKeyring(kr)
@@ -334,7 +339,7 @@ func (s *TestSuite) setupBroadcaster() {
 
 // sniped from here: https://github.com/strangelove-ventures/interchaintest ref: 9341b001214d26be420f1ca1ab0f15bad17faee6
 func (s *TestSuite) keyringDirFromNode() string {
-	node := s.chain.(*cosmos.CosmosChain).Nodes()[0]
+	node := s.chain.Nodes()[0]
 
 	// create a temp-dir
 	localDir := s.T().TempDir()
@@ -372,10 +377,6 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64, numMsg int) (*coretypes.ResultBroadcastTxCommit, error) {
-	cc, ok := s.chain.(*cosmos.CosmosChain)
-	if !ok {
-		panic("unable to assert ibc.Chain as CosmosChain")
-	}
 
 	msgs := make([]sdk.Msg, numMsg)
 	for i := 0; i < numMsg; i++ {
@@ -386,23 +387,18 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 		}
 	}
 
-	tx := s.CreateTx(cc, sender, fees.String(), gas, msgs...)
+	tx := s.CreateTx(s.chain, sender, fees.String(), gas, msgs...)
 
 	// get an rpc endpoint for the chain
-	c := cc.Nodes()[0].Client
+	c := s.chain.Nodes()[0].Client
 	return c.BroadcastTxCommit(ctx, tx)
 }
 
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
 func (s *TestSuite) SendCoins(ctx context.Context, keyName, sender, receiver string, amt, fees sdk.Coins, gas int64) (string, error) {
-	cc, ok := s.chain.(*cosmos.CosmosChain)
-	if !ok {
-		panic("unable to assert ibc.Chain as CosmosChain")
-	}
-
 	resp, err := s.ExecTx(
 		ctx,
-		cc,
+		s.chain,
 		keyName,
 		false,
 		"bank",
@@ -519,4 +515,120 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
 	s.Require().NoError(err)
 	return bz
+}
+
+// SetOracleConfigsOnApp writes the oracle configuration to the given node's application config.
+func SetOracleConfigsOnApp(node *cosmos.ChainNode) {
+	oracle := GetOracleSideCar(node)
+
+	// read the app config from the node
+	bz, err := node.ReadFile(context.Background(), appConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	// Unmarshall the app config to update the oracle and metrics file paths.
+	var appConfig map[string]interface{}
+	err = toml.Unmarshal(bz, &appConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	oracleAppConfig, ok := appConfig["oracle"].(map[string]interface{})
+	if !ok {
+		panic("oracle config not found")
+	}
+
+	// Update the file paths to the oracle and metrics configs.
+	oracleAppConfig["enabled"] = true
+	oracleAppConfig["oracle_address"] = fmt.Sprintf("%s:%s", oracle.HostName(), "8080")
+	oracleAppConfig["client_timeout"] = "1s"
+	oracleAppConfig["metrics_enabled"] = true
+	oracleAppConfig["prometheus_server_address"] = fmt.Sprintf("localhost:%s", "8081")
+
+	appConfig["oracle"] = oracleAppConfig
+	bz, err = toml.Marshal(appConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	// Write back the app config.
+	err = node.WriteFile(context.Background(), bz, appConfigPath)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// AddSidecarToNode adds the sidecar configured by the given config to the given node. These are configured
+// so that the sidecar is started before the node is started.
+func AddSidecarToNode(node *cosmos.ChainNode, conf ibc.SidecarConfig) {
+	// create the sidecar process
+	node.NewSidecarProcess(
+		context.Background(),
+		true,
+		conf.ProcessName,
+		node.DockerClient,
+		node.NetworkID,
+		conf.Image,
+		conf.HomeDir,
+		conf.Ports,
+		conf.StartCmd,
+		conf.Env,
+	)
+}
+
+// SetOracleConfigsOnOracle writes the oracle and metrics configs to the given node's
+// oracle sidecar.
+func SetOracleConfigsOnOracle(
+	oracle *cosmos.SidecarProcess,
+	oracleCfg oracleconfig.OracleConfig,
+) {
+	// marshal the oracle config
+	bz, err := json.Marshal(oracleCfg)
+	if err != nil {
+		panic(err)
+	}
+
+	// write the oracle config to the node
+	err = oracle.WriteFile(context.Background(), bz, oracleConfigPath)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// RestartOracle restarts the oracle sidecar for a given node
+func RestartOracle(node *cosmos.ChainNode) error {
+	if len(node.Sidecars) != 1 {
+		panic("expected node to have oracle sidecar")
+	}
+
+	oracle := node.Sidecars[0]
+
+	if err := oracle.StopContainer(context.Background()); err != nil {
+		return err
+	}
+
+	return oracle.StartContainer(context.Background())
+}
+
+// StopOracle stops the oracle sidecar for a given node
+func StopOracle(node *cosmos.ChainNode) error {
+	if len(node.Sidecars) != 1 {
+		panic("expected node to have oracle sidecar")
+	}
+
+	oracle := node.Sidecars[0]
+
+	return oracle.StopContainer(context.Background())
+}
+
+// StartOracle starts the oracle sidecar for a given node
+func StartOracle(node *cosmos.ChainNode) error {
+	if len(node.Sidecars) != 1 {
+		panic("expected node to have oracle sidecar")
+	}
+
+	oracle := node.Sidecars[0]
+
+	return oracle.StartContainer(context.Background())
 }
