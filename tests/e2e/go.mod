@@ -18,7 +18,7 @@ require (
 	github.com/cometbft/cometbft v0.38.7
 	github.com/cosmos/cosmos-sdk v0.50.6
 	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
-	github.com/skip-mev/feemarket v0.0.0-00010101000000-000000000000
+	github.com/skip-mev/feemarket v0.0.1-alpha.2.0.20240529211541-57d7094237da
 	github.com/strangelove-ventures/interchaintest/v8 v8.3.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
