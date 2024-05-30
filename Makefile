@@ -129,6 +129,9 @@ test-e2e: $(TEST_E2E_DEPS)
 test-unit:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
 
+test-fuzz:
+	@cd ./x/feemarket/fuzz && go test -v -race -rapid.checks=100_000 -p 4
+
 test-integration:
 	@go test -v -race ./tests/integration
 
@@ -140,7 +143,7 @@ test-cover:
 	@go tool cover -html=$(COVER_FILE) -o $(COVER_HTML_FILE)
 	@rm $(COVER_FILE)
 
-test-all: test-unit test-integration test-e2e
+test-all: test-unit test-integration test-e2e test-fuzz
 
 .PHONY: test-unit test-e2e test-integration test-cover test-all
 
