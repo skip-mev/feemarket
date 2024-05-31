@@ -108,6 +108,21 @@ func TestAnteHandle(t *testing.T) {
 			ExpPass:  true,
 			ExpErr:   nil,
 		},
+		{
+			Name: "signer has enough funds - no fee, should pass",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+				return antesuite.TestCaseArgs{
+					Msgs:     []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit: gasLimit,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
 	}
 
 	for _, tc := range testCases {
