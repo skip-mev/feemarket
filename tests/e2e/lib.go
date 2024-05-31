@@ -13,12 +13,12 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-// ChainConstructor returns the chain that will be using slinky, as well as any additional chains
+// ChainConstructor returns the chain that will be used, as well as any additional chains
 // that are needed for the test. The first chain returned will be the chain that is used in the
-// slinky integration tests.
+// feemarket integration tests.
 type ChainConstructor func(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos.CosmosChain
 
-// Interchain is an interface representing the set of chains that are used in the slinky e2e tests, as well
+// Interchain is an interface representing the set of chains that are used in the feemarket e2e tests, as well
 // as any additional relayer / ibc-path information
 type Interchain interface {
 	Relayer() ibc.Relayer
