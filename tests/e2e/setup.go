@@ -377,7 +377,6 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64, numMsg int) (*coretypes.ResultBroadcastTxCommit, error) {
-
 	msgs := make([]sdk.Msg, numMsg)
 	for i := 0; i < numMsg; i++ {
 		msgs[i] = &banktypes.MsgSend{

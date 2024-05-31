@@ -55,20 +55,28 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
+	var (
+		feeProvided bool
+		feeDenom    string
+	)
 
 	if len(feeCoins) != 1 {
-		if len(feeCoins) == 0 {
-			return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
+		// len(feeCoins) > 1
+		if len(feeCoins) != 0 {
+			return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 		}
-		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
+
+		// If no feeCoin is provided, set a minGasPrice
+		// but defer all checking to the PostHandler
+		feeDenom = params.FeeDenom
+	} else {
+		feeDenom = feeCoins[0].Denom
+		feeProvided = true
 	}
 
-	feeCoin := feeCoins[0]
-	feeGas := int64(feeTx.GetGas())
-
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeDenom)
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoin.GetDenom())
+		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeDenom)
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
@@ -79,8 +87,8 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
 
-	if !simulate {
-		fee, _, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
+	if !simulate && feeProvided {
+		fee, _, err := CheckTxFee(ctx, minGasPrice, feeCoins[0], int64(feeTx.GetGas()), true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
@@ -92,7 +100,7 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas int64, isCheck bool) (payCoin sdk.Coin, tip sdk.Coin, err error) {
+func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas int64, isAnte bool) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	payCoin = feeCoin
 
 	// Ensure that the provided fees meet the minimum
@@ -123,13 +131,13 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 			)
 		}
 
-		if isCheck {
-			//  set fee coins to be required amount if checking
+		if isAnte {
+			//  set fee coins to be required amount if checking in antehandler
 			payCoin = requiredFee
 		} else {
 			// tip is the difference between payCoin and the required fee
 			tip = payCoin.Sub(requiredFee)
-			// set fee coin to be ONLY the consumed amount if we are calculated consumed fee to deduct
+			// set fee coin to be ONLY the consumed amount if we are calculated consumed fee to deduct in posthandler
 			payCoin = consumedFee
 		}
 	}
