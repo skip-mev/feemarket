@@ -64,15 +64,12 @@ message GasPriceRequest {
 // GasPriceResponse is the response type for the Query/GasPrice RPC method.
 // Returns a gas price in specified denom.
 message GasPriceResponse {
-  cosmos.base.v1beta1.DecCoin price = 1 [
-    (gogoproto.nullable) = false,
-    (amino.dont_omitempty) = true
-  ];
+  cosmos.base.v1beta1.DecCoin price = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 
 // GasPriceRequest is the request type for the Query/GasPrices RPC method.
-message GasPricesRequest {
-}
+message GasPricesRequest {}
 
 // GasPricesResponse is the response type for the Query/GasPrices RPC method.
 // Returns a gas price in all available denoms.
