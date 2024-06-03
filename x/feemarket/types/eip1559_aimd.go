@@ -38,9 +38,7 @@ var (
 	// consumed in a block.
 	DefaultAIMDMaxBlockSize uint64 = 30_000_000
 
-	// DefaultAIMDMinBaseFee is the default minimum base fee. This is the
-	// default on Ethereum. Note that ethereum is denominated in 1e18 wei.
-	// Cosmos chains will likely want to change this to 1e6.
+	// DefaultAIMDMinBaseFee is the default minimum base fee.
 	DefaultAIMDMinBaseFee = math.LegacyMustNewDecFromStr("1000000000")
 
 	// DefaultAIMDMinLearningRate is the default minimum learning rate.
