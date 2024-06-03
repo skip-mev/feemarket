@@ -35,10 +35,8 @@ var (
 	// on Ethereum. This denominated in units of gas consumed in a block.
 	DefaultMaxBlockUtilization uint64 = 30_000_000
 
-	// DefaultMinBaseGasPrice is the default minimum base fee. This is the default
-	// on Ethereum. Note that Ethereum is denominated in 1e18 wei. Cosmos chains will
-	// likely want to change this to 1e6.
-	DefaultMinBaseGasPrice = math.LegacyMustNewDecFromStr("1")
+	// DefaultMinBaseGasPrice is the default minimum base fee.
+	DefaultMinBaseGasPrice = math.LegacyOneDec()
 
 	// DefaultMinLearningRate is not used in the base EIP-1559 implementation.
 	DefaultMinLearningRate = math.LegacyMustNewDecFromStr("0.125")
