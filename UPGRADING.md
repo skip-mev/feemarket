@@ -12,9 +12,11 @@ To integrate your chain with `x/feemarket`, the following steps should be perfor
 
 ### Determine Parameters
 
-We recommend using 
+We provide sensible default parameters for running either the [EIP-1559](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/x/feemarket/types/eip1559.go#L56) or [AIMD EIP-1559](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/x/feemarket/types/eip1559_aimd.go#L65) feemarkets. 
 
-### Upgrade Handlers
+> **Note**
+>
+> The default parameters use the default Cosmos SDK bond denomination. The should be modified to your chain's fee denomination.
 
 ## Changes for End-Users
 
@@ -27,8 +29,55 @@ With the addition of `x/feemarket`, there are some important changes that end-us
 3. Fees _must_ always be a single coin denomination.
    1. Example `--fees skip` is valid while `--fees 10stake,10skip` is invalid 
 
-Note that fees are still paid using the `fees` [field](https://github.com/cosmos/cosmos-sdk/blob/d1aab15790570bff77aa0b8652288a276205efb0/proto/cosmos/tx/v1beta1/tx.proto#L214) of a Cosmos SDK Transaction as they were before.
+> **Note**
+>
+>  Fees are still paid using the `fees` [field](https://github.com/cosmos/cosmos-sdk/blob/d1aab15790570bff77aa0b8652288a276205efb0/proto/cosmos/tx/v1beta1/tx.proto#L214) of a Cosmos SDK Transaction as they were before.
 
 ### Querying Gas Price 
 
+Extensive querying information can be seen in the module [spec](./README.md#query).
+
+The specific query for `GasPrices` can be found [here](./README.md#gas-prices).
+
+#### Code Snippet
+
+Wallet, relayers, and other users will want to add programmatic ways to query this before building their transactions.  Below is an example of how a user could implement this lightweight query in Go:
+
+```go
+package example
+
+import (
+    "context"
+	
+    sdk "github.com/cosmos/cosmos-sdk/types"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials/insecure"
+    feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+)
+
+const endpoint = "TEST-ENDPOINT"
+
+func QueryGasPrice(ctx context.Context, denom string) (sdk.DecCoin, error) {
+	// Set up gRPC connection to chain
+   cc, err := grpc.NewClient(endpoint, insecure.NewCredentials())
+   if err != nil {
+	   return sdk.DecCoin{}, err
+   }
+   defer cc.Close()
+   
+   // Create FeeMarketClient with underlying gRPC connection
+   feeMarketClient := feemarkettypes.NewQueryClient(cc)
+   
+   gasPrice, err := feeMarketClient.GasPrice(ctx, &feemarkettypes.GasPriceRequest{
+	   Denom: denom,
+   })
+   if err != nil {
+	   return sdk.DecCoin{}, err
+   }
+   
+   return gasPrice, nil
+}
+```
+
+#### Examples of Other EIP-1559 Integrations
 
