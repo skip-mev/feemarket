@@ -6,9 +6,9 @@ To integrate your chain with `x/feemarket`, the following steps should be perfor
 
 ### Add the Module to Your App
 
-- The `FeeMarketKeeper` must be added to your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L163).
-- A `DenomResolver` (if desired) must be set in your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L509).
-- `Ante` and `Post` handlers must be configured and set with the application `FeeMarketKeeper` as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L513).
+* The `FeeMarketKeeper` must be added to your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L163).
+* A `DenomResolver` (if desired) must be set in your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L509).
+* `Ante` and `Post` handlers must be configured and set with the application `FeeMarketKeeper` as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L513).
 
 ### Determine Parameters
 
@@ -83,7 +83,7 @@ func QueryGasPrice(ctx context.Context, denom string) (sdk.DecCoin, error) {
 
 The [Osmosis](https://github.com/osmosis-labs/osmosis) Blockchain has a similar EIP-1559 feemarket that has been integrated by wallets and relayers.  Below are some examples as to how different projects query the dynamic fee for transactions:
 
-- [Keplr Wallet EIP-1559 BaseFee Query](https://github.com/chainapsis/keplr-wallet/blob/b0a96c2c713d8163ce840fcd5abbac4eb612607c/packages/stores/src/query/osmosis/base-fee/index.ts#L18)
-- [Cosmos-Relayer EIP-1559 BaseFee Query](https://github.com/cosmos/relayer/blob/9b140b664fe6b10161af1093ccd26627b942742e/relayer/chains/cosmos/fee_market.go#L13)
-- [Hermes Relayer EIP-1559 Fee Query](https://github.com/informalsystems/hermes/blob/fc8376ba98e4b595e446b366b736a0c046d6026a/crates/relayer/src/chain/cosmos/eip_base_fee.rs#L15)
-  - Note: Hermes also already implements a query `x/feemarket` seen [here](https://github.com/informalsystems/hermes/blob/fc8376ba98e4b595e446b366b736a0c046d6026a/crates/relayer/src/chain/cosmos/eip_base_fee.rs#L33)
+* [Keplr Wallet EIP-1559 BaseFee Query](https://github.com/chainapsis/keplr-wallet/blob/b0a96c2c713d8163ce840fcd5abbac4eb612607c/packages/stores/src/query/osmosis/base-fee/index.ts#L18)
+* [Cosmos-Relayer EIP-1559 BaseFee Query](https://github.com/cosmos/relayer/blob/9b140b664fe6b10161af1093ccd26627b942742e/relayer/chains/cosmos/fee_market.go#L13)
+* [Hermes Relayer EIP-1559 Fee Query](https://github.com/informalsystems/hermes/blob/fc8376ba98e4b595e446b366b736a0c046d6026a/crates/relayer/src/chain/cosmos/eip_base_fee.rs#L15)
+  * Note: Hermes also already implements a query `x/feemarket` seen [here](https://github.com/informalsystems/hermes/blob/fc8376ba98e4b595e446b366b736a0c046d6026a/crates/relayer/src/chain/cosmos/eip_base_fee.rs#L33)
