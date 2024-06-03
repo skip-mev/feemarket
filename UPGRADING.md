@@ -6,7 +6,13 @@ To integrate your chain with `x/feemarket`, the following steps should be perfor
 
 ### Add the Module to Your App
 
+- The `FeeMarketKeeper` must be added to your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L163).
+- A `DenomResolver` (if desired) must be set in your application as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L509).
+- `Ante` and `Post` handlers must be configured and set with the application `FeeMarketKeeper` as seen [here](https://github.com/skip-mev/feemarket/blob/0f83e172c92a02db45f83bf89065fd9543967729/tests/app/app.go#L513).
+
 ### Determine Parameters
+
+We recommend using 
 
 ### Upgrade Handlers
 
