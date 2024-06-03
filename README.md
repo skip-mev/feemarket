@@ -7,7 +7,7 @@ This document specifies the feemarket module.
 The feemarket module is an implementation of the Additive Increase Multiplicative Decrease (AIMD) EIP-1559
 feemarket. More information about the implementation can be found [here](./x/feemarket/README.md).
 
-This module is planned to be used in the Cosmos Hub.
+This module is planned to be used in the Cosmos Hub and Neutron.
 
 ## Status
 
@@ -16,7 +16,7 @@ The team has not yet completed acceptance testing of the feemarket. We do not re
 ## Contents
 
 * [State](#state)
-    * [BaseFee](#basefee)
+    * [GasPrice](#gas-price)
     * [LearningRate](#learningrate)
     * [Window](#window)
     * [Index](#index)
@@ -56,10 +56,10 @@ aforementioned state:
 
 * State: `0x02 |ProtocolBuffer(State)`
 
-### BaseFee
+### GasPrice
 
-BaseFee is the current base fee. This is denominated in the fee per gas
-unit.
+GasPrice is the current gas price. This is denominated in the fee per gas
+unit in the base fee denom.
 
 ### LearningRate
 
@@ -80,9 +80,9 @@ Index is the index of the current block in the block utilization window.
 // the current base fee, learning rate, and block utilization within the
 // specified AIMD window.
 message State {
-  // BaseFee is the current base fee. This is denominated in the fee per gas
+  // BaseGasPrice is the current base fee. This is denominated in the fee per gas
   // unit.
-  string base_fee = 1 [
+  string base_gas_price = 1 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
@@ -123,8 +123,11 @@ type FeeMarketKeeper interface {
     // Set the params in the store.
     SetParams(ctx sdk.Context, params types.Params) error
 
-    // Get the current minimum gas prices (base fee) from the store.
-    GetMinGasPrices(ctx sdk.Context) (sdk.Coins, error)
+	// Get the minimum gas price for a given denom from the store.
+    GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, error) {
+
+    // Get the current minimum gas prices from the store.
+    GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error)
 }
 ```
 
@@ -149,7 +152,6 @@ message MsgParams {
 The message handling can fail if:
 
 * signer is not the gov module account address.
-
 
 ## Events
 
@@ -232,10 +234,10 @@ Delta is the amount we additively increase/decrease the base fee when the
 net block utilization difference in the window is above/below the target
 utilization.
 
-### MinBaseFee
+### MinBaseGasPrice
 
-MinBaseFee determines the initial base fee of the module and the global
-minimum for the network. This is denominated in fee per gas unit.
+MinBaseFee determines the initial gas price of the module and the global
+minimum for the network. This is denominated in fee per gas unit in the `FeeDenom`.
 
 ### MinLearningRate
 
@@ -300,7 +302,7 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // Delta is the amount we additively increase/decrease the base fee when the
+  // Delta is the amount we additively increase/decrease the gas price when the
   // net block utilization difference in the window is above/below the target
   // utilization.
   string delta = 4 [
@@ -309,10 +311,10 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // MinBaseFee determines the initial base fee of the module and the global
+  // MinGasPrice determines the initial gas price of the module and the global
   // minimum
   // for the network. This is denominated in fee per gas unit.
-  string min_base_fee = 5 [
+  string MinGasPrice = 5 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
@@ -386,7 +388,7 @@ alpha: "0.000000000000000000"
 beta: "1.000000000000000000"
 delta: "0.000000000000000000"
 enabled: true
-fee_denom: stake
+fee_denom: skip
 max_block_utilization: "30000000"
 max_learning_rate: "0.125000000000000000"
 min_base_fee: "1.000000000000000000"
@@ -420,24 +422,44 @@ window:
   - "0"
 ```
 
-##### base-fee
+##### gas-price
 
-The `base-fee` command allows users to query the current base-fee.
+The `gas-price` command allows users to query the current gas-price for a given denom.
 
 ```shell
-feemarketd query feemarket base-fee [flags]
+feemarketd query feemarket gas-price [denom ][flags]
 ```
 
 Example:
 
 ```shell
-feemarketd query feemarket base-fee
+feemarketd query feemarket gas-price skip
 ```
 
 Example Output:
 
 ```yml
-1000000stake
+1000000skip
+```
+
+##### gas-prices
+
+The `gas-prices` command allows users to query the current gas-price for all supported denoms.
+
+```shell
+feemarketd query feemarket gas-prices [flags]
+```
+
+Example:
+
+```shell
+feemarketd query feemarket gas-prices
+```
+
+Example Output:
+
+```yml
+1000000stake,100000skip
 ```
 
 ## gRPC
@@ -475,7 +497,7 @@ Example Output:
     "targetBlockUtilization": "15000000",
     "maxBlockUtilization": "30000000",
     "window": "1",
-    "feeDenom": "stake",
+    "feeDenom": "skip",
     "enabled": true
   }
 }
@@ -502,7 +524,7 @@ Example Output:
 ```json
 {
   "state": {
-    "baseFee": "1000000",
+    "baseGasPrice": "1000000",
     "learningRate": "125000000000000000",
     "window": [
       "0"
@@ -511,12 +533,40 @@ Example Output:
 }
 ```
 
-### BaseFee
+### GasPrice
 
-The `BaseFee` endpoint allows users to query the current on-chain base-fee.
+The `GasPrice` endpoint allows users to query the current on-chain gas price for a given denom.
 
 ```shell
-feemarket.feemarket.v1.Query/BaseFee
+feemarket.feemarket.v1.Query/GasPrice
+```
+
+Example:
+
+```shell
+grpcurl -plaintext \
+    -d '{"denom": "skip"}' \
+    localhost:9090 \
+    feemarket.feemarket.v1.Query/GasPrice/
+```
+
+Example Output:
+
+```json
+{
+  "price": {
+      "denom": "skip",
+      "amount": "1000000"
+  }
+}
+```
+
+### GasPrices
+
+The `GasPrices` endpoint allows users to query the current on-chain gas prices for all denoms.
+
+```shell
+feemarket.feemarket.v1.Query/GasPrices
 ```
 
 Example:
@@ -524,16 +574,16 @@ Example:
 ```shell
 grpcurl -plaintext \
     localhost:9090 \
-    feemarket.feemarket.v1.Query/BaseFee
+    feemarket.feemarket.v1.Query/GasPrices
 ```
 
 Example Output:
 
 ```json
 {
-  "fees": [
+  "prices": [
     {
-      "denom": "stake",
+      "denom": "skip",
       "amount": "1000000"
     }
   ]
