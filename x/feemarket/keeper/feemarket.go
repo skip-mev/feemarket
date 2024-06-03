@@ -129,7 +129,7 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 			)
 			continue
 		}
-		minGasPrices.Add(gasPrice)
+		minGasPrices = minGasPrices.Add(gasPrice)
 	}
 
 	return minGasPrices, nil
