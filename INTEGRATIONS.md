@@ -64,7 +64,7 @@ The calculation for a transaction's fee is: `gasLimit` * `gasPrice`.  End users 
 
 The actual amount that will be deducted from a user's account is:
 
-```
+```text
   deducted = gasConsumed * gasPrice
 ```
 
@@ -72,13 +72,13 @@ Users can also optionally add a `tip` to their transaction which will be paid to
 
 A fee with a tip is as follows:
 
-```
+```text
   feeWithTip = tip + (gasLimit * gasPrice)
 ```
 
 The deducted amount after a transaction will be:
 
-```
+```text
   deducted = tip + (gasConsumed * gasPrice)
 ```
 
