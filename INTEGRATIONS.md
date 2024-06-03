@@ -59,11 +59,14 @@ The query will return an error if the given denomination is not supported.
 ```
 
 ### Using `gasPrice` to construct a transaction
+
 There are two ways to construct a transaction with `gasPrice`:
+
 1.  Provide the minimum fee: `feeAmount = gasPrice * gasLimit` (`gasLimit` gives the maximum amount of gas a transaction can consume. You can obtain appropriate `gasLimit` by simulating a transaction to see how much gas it consumes under normal conditions).
 2. Provide a "tip" in addition to the minimum fee: `feeAmount=gasPrice * gasLimit + tip` This will be paid to the block proposer and result in your transaction being placed ahead of others with lower tips (or being included in the block instead of others when the block is full)
 
 ### Understanding Fee Deducted
+
 The actual amount of fee deducted from the fee payer is based on gas consumed, not `gasLimit`.
 
 The amount consumed is equal to the `inferredTip + gasPrice * gasConsumed`, where `inferredTip = feeAmount - gasLimit * gasPrice`  (This may be different than the tip you specified when building the transaction because the `gasPrice` on chain may have changed since when you queried it.)
