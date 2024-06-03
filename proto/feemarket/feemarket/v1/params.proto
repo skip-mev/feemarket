@@ -72,24 +72,21 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // TargetBlockUtilization is the target block utilization.
-  uint64 target_block_utilization = 8;
-
   // MaxBlockUtilization is the maximum block utilization.
-  uint64 max_block_utilization = 9;
+  uint64 max_block_utilization = 8;
 
   // Window defines the window size for calculating an adaptive learning rate
   // over a moving window of blocks.
-  uint64 window = 10;
+  uint64 window = 9;
 
   // FeeDenom is the denom that will be used for all fee payments.
-  string fee_denom = 11;
+  string fee_denom = 10;
 
   // Enabled is a boolean that determines whether the EIP1559 fee market is
   // enabled.
-  bool enabled = 12;
+  bool enabled = 11;
 
   // DistributeFees is a boolean that determines whether the fees are burned or
   // distributed to all stakers.
-  bool distribute_fees = 13;
+  bool distribute_fees = 12;
 }
