@@ -21,12 +21,12 @@ var (
 	// decrease the learning rate when the target utilization is not met.
 	DefaultAIMDBeta = math.LegacyMustNewDecFromStr("0.95")
 
-	// DefaultAIMDTheta is the default threshold for determining whether
+	// DefaultAIMDGamma is the default threshold for determining whether
 	// to increase or decrease the learning rate. In this case, we increase
 	// the learning rate if the block utilization within the window is greater
 	// than 0.75 or less than 0.25. Otherwise, we multiplicatively decrease
 	// the learning rate.
-	DefaultAIMDTheta = math.LegacyMustNewDecFromStr("0.25")
+	DefaultAIMDGamma = math.LegacyMustNewDecFromStr("0.25")
 
 	// DefaultAIMDDelta is the default delta value for how much we additively
 	// increase or decrease the base fee when the net block utilization within
@@ -67,7 +67,7 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDWindow,
 		DefaultAIMDAlpha,
 		DefaultAIMDBeta,
-		DefaultAIMDTheta,
+		DefaultAIMDGamma,
 		DefaultAIMDDelta,
 		DefaultAIMDTargetBlockSize,
 		DefaultAIMDMaxBlockSize,

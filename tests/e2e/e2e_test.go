@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	minBaseGasPrice = sdkmath.LegacyNewDec(10)
-	baseGasPrice    = sdkmath.LegacyNewDec(1000000)
+	minBaseGasPrice = sdkmath.LegacyMustNewDecFromStr("0.1")
+	baseGasPrice    = sdkmath.LegacyNewDec(1)
 
 	// config params
 	numValidators = 4
@@ -55,7 +55,7 @@ var (
 			Value: feemarkettypes.Params{
 				Alpha:                  feemarkettypes.DefaultAlpha,
 				Beta:                   feemarkettypes.DefaultBeta,
-				Theta:                  feemarkettypes.DefaultTheta,
+				Gamma:                  feemarkettypes.DefaultAIMDGamma,
 				Delta:                  feemarkettypes.DefaultDelta,
 				MinBaseGasPrice:        minBaseGasPrice,
 				MinLearningRate:        feemarkettypes.DefaultMinLearningRate,

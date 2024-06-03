@@ -80,11 +80,11 @@ func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
 
 	if !simulate {
-		fee, _, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
+		_, tip, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
-		ctx = ctx.WithPriority(getTxPriority(fee, int64(gas)))
+		ctx = ctx.WithPriority(getTxPriority(tip, int64(gas)))
 		return next(ctx, tx, simulate)
 	}
 	return next(ctx, tx, simulate)
@@ -124,6 +124,7 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 		}
 
 		if isCheck {
+			tip = payCoin.Sub(requiredFee)
 			//  set fee coins to be required amount if checking
 			payCoin = requiredFee
 		} else {
@@ -148,7 +149,7 @@ func getTxPriority(fee sdk.Coin, gas int64) int64 {
 	if gasPrice.IsInt64() {
 		p = gasPrice.Int64()
 	}
-	if priority == 0 || p < priority {
+	if p < priority {
 		priority = p
 	}
 
