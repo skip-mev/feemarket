@@ -36,7 +36,7 @@ var (
 	DefaultMaxBlockUtilization uint64 = 30_000_000
 
 	// DefaultMinBaseGasPrice is the default minimum base fee.
-	DefaultMinBaseGasPrice = math.LegacyMustNewDecFromStr("0.001")
+	DefaultMinBaseGasPrice = math.LegacyOneDec()
 
 	// DefaultMinLearningRate is not used in the base EIP-1559 implementation.
 	DefaultMinLearningRate = math.LegacyMustNewDecFromStr("0.125")

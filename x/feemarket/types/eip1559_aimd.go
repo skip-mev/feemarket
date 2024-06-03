@@ -44,7 +44,7 @@ var (
 	DefaultAIMDMaxBlockSize uint64 = 30_000_000
 
 	// DefaultAIMDMinBaseFee is the default minimum base fee.
-	DefaultAIMDMinBaseFee = DefaultMinBaseGasPrice
+	DefaultAIMDMinBaseFee = math.LegacyMustNewDecFromStr("1000000000")
 
 	// DefaultAIMDMinLearningRate is the default minimum learning rate.
 	DefaultAIMDMinLearningRate = math.LegacyMustNewDecFromStr("0.01")

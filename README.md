@@ -7,8 +7,6 @@ This document specifies the feemarket module.
 The feemarket module is an implementation of the Additive Increase Multiplicative Decrease (AIMD) EIP-1559
 feemarket. More information about the implementation can be found [here](./x/feemarket/README.md).
 
-This module is planned to be used in the Cosmos Hub and Neutron.
-
 ## Upgrading to FeeMarket
 
 More information about upgrading your chain to `x/feemarket` can be found in our dedicated [guide](./UPGRADING.md).
@@ -240,7 +238,7 @@ utilization.
 
 ### MinBaseGasPrice
 
-MinBaseFee determines the initial gas price of the module and the global
+MinBaseGasPrice determines the initial gas price of the module and the global
 minimum for the network. This is denominated in fee per gas unit in the `FeeDenom`.
 
 ### MinLearningRate
@@ -315,10 +313,10 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // MinGasPrice determines the initial gas price of the module and the global
+  // MinBaseGasPrice determines the initial gas price of the module and the global
   // minimum
   // for the network. This is denominated in fee per gas unit.
-  string MinGasPrice = 5 [
+  string MinBaseGasPrice = 5 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
