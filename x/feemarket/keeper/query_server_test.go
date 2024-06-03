@@ -25,7 +25,7 @@ func (s *KeeperTestSuite) TestParamsRequest() {
 		params := types.Params{
 			Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
 			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
-			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
+			Gamma:                  math.LegacyMustNewDecFromStr("0.1"),
 			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
 			MinBaseGasPrice:        math.LegacyNewDec(10),
 			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),

@@ -49,7 +49,7 @@ func TestAIMDLearningRate(t *testing.T) {
 			require.True(t, lr.GTE(params.MinLearningRate))
 			require.True(t, lr.LTE(params.MaxLearningRate))
 
-			if utilization.LTE(params.Theta) || utilization.GTE(math.LegacyOneDec().Sub(params.Theta)) {
+			if utilization.LTE(params.Gamma) || utilization.GTE(math.LegacyOneDec().Sub(params.Gamma)) {
 				require.True(t, lr.GTE(prevLearningRate))
 			} else {
 				require.True(t, lr.LTE(prevLearningRate))
@@ -147,8 +147,8 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	b := rapid.Uint64Range(50, 99).Draw(t, "beta")
 	beta := math.LegacyNewDec(int64(b)).Quo(math.LegacyNewDec(100))
 
-	th := rapid.Uint64Range(10, 90).Draw(t, "theta")
-	theta := math.LegacyNewDec(int64(th)).Quo(math.LegacyNewDec(100))
+	g := rapid.Uint64Range(10, 50).Draw(t, "gamma")
+	gamma := math.LegacyNewDec(int64(g)).Quo(math.LegacyNewDec(100))
 
 	d := rapid.Uint64Range(1, 1000).Draw(t, "delta")
 	delta := math.LegacyNewDec(int64(d)).Quo(math.LegacyNewDec(1000))
@@ -161,7 +161,7 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	params := types.DefaultAIMDParams()
 	params.Alpha = alpha
 	params.Beta = beta
-	params.Theta = theta
+	params.Gamma = gamma
 	params.Delta = delta
 	params.MaxBlockUtilization = maxBlockUtilization
 	params.TargetBlockUtilization = targetBlockUtilization

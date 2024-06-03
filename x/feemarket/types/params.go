@@ -17,7 +17,7 @@ func NewParams(
 	window uint64,
 	alpha math.LegacyDec,
 	beta math.LegacyDec,
-	theta math.LegacyDec,
+	gamma math.LegacyDec,
 	delta math.LegacyDec,
 	targetBlockSize uint64,
 	maxBlockSize uint64,
@@ -30,7 +30,7 @@ func NewParams(
 	return Params{
 		Alpha:                  alpha,
 		Beta:                   beta,
-		Theta:                  theta,
+		Gamma:                  gamma,
 		Delta:                  delta,
 		MinBaseGasPrice:        minBaseGasPrice,
 		MinLearningRate:        minLearingRate,
@@ -57,8 +57,8 @@ func (p *Params) ValidateBasic() error {
 		return fmt.Errorf("beta cannot be nil and must be between [0, 1]")
 	}
 
-	if p.Theta.IsNil() || p.Theta.IsNegative() || p.Theta.GT(math.LegacyOneDec()) {
-		return fmt.Errorf("theta cannot be nil and must be between [0, 1]")
+	if p.Gamma.IsNil() || p.Gamma.IsNegative() || p.Gamma.GT(math.LegacyMustNewDecFromStr("0.5")) {
+		return fmt.Errorf("theta cannot be nil and must be between [0, 0.5]")
 	}
 
 	if p.Delta.IsNil() || p.Delta.IsNegative() {

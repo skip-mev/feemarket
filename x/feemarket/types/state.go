@@ -108,7 +108,7 @@ func (s *State) UpdateLearningRate(params Params) (lr math.LegacyDec) {
 
 	// Determine if the average utilization is above or below the target
 	// threshold and adjust the learning rate accordingly.
-	if avg.LTE(params.Theta) || avg.GTE(math.LegacyOneDec().Sub(params.Theta)) {
+	if avg.LTE(params.Gamma) || avg.GTE(math.LegacyOneDec().Sub(params.Gamma)) {
 		lr = params.Alpha.Add(s.LearningRate)
 		if lr.GT(params.MaxLearningRate) {
 			lr = params.MaxLearningRate
