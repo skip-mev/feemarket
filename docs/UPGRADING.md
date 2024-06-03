@@ -35,4 +35,4 @@ With the addition of `x/feemarket`, there are some important changes that end-us
 
 ### Querying Gas Price 
 
-Information on how to query and use dynamic gas prices can be found [here](./INTEGRATIONS.md).
+Information on how to query and use dynamic gas prices can be found [here](INTEGRATIONS.md).
