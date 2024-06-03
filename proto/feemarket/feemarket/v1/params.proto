@@ -35,7 +35,7 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // Delta is the amount we additively increase/decrease the base fee when the
+  // Delta is the amount we additively increase/decrease the gas price when the
   // net block utilization difference in the window is above/below the target
   // utilization.
   string delta = 4 [
