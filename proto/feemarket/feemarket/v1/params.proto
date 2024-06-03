@@ -11,6 +11,8 @@ import "gogoproto/gogo.proto";
 message Params {
   // Alpha is the amount we additively increase the learning rate
   // when it is above or below the target +/- threshold.
+  //
+  // Must be > 0.
   string alpha = 1 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
@@ -19,17 +21,21 @@ message Params {
 
   // Beta is the amount we multiplicatively decrease the learning rate
   // when it is within the target +/- threshold.
+  //
+  // Must be [0, 1].
   string beta = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
-  // Theta is the threshold for the learning rate. If the learning rate is
+  // Gamma is the threshold for the learning rate. If the learning rate is
   // above or below the target +/- threshold, we additively increase the
   // learning rate by Alpha. Otherwise, we multiplicatively decrease the
   // learning rate by Beta.
-  string theta = 3 [
+  //
+  // Must be [0, 0.5].
+  string gamma = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
