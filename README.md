@@ -11,9 +11,9 @@ feemarket. More information about the implementation can be found [here](./x/fee
 
 More information about upgrading your chain to `x/feemarket` can be found in our dedicated [guide](./UPGRADING.md).
 
-## Status
+## Important Considerations for End-Users
 
-The team has not yet completed acceptance testing of the feemarket. We do not recommend integrating it until final testing has been completed (expected May 2024), and we have removed this warning from the readme.
+Wallets, relayers and other end-users should refer to our [guide](./INTEGRATIONS.md) for using dynamic fees for transaction submission.
 
 ## Contents
 
