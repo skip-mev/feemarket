@@ -33,11 +33,6 @@ var (
 	// the window is not equal to the target utilization.
 	DefaultAIMDDelta = math.LegacyMustNewDecFromStr("0.0")
 
-	// DefaultAIMDTargetBlockSize is the default target block utilization. This
-	// is the default on Ethereum. This denominated in units of gas consumed in
-	// a block.
-	DefaultAIMDTargetBlockSize uint64 = 15_000_000
-
 	// DefaultAIMDMaxBlockSize is the default maximum block utilization.
 	// This is the default on Ethereum. This denominated in units of gas
 	// consumed in a block.
@@ -69,7 +64,6 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDBeta,
 		DefaultAIMDGamma,
 		DefaultAIMDDelta,
-		DefaultAIMDTargetBlockSize,
 		DefaultAIMDMaxBlockSize,
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,

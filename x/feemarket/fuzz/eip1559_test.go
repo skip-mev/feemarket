@@ -35,9 +35,9 @@ func TestLearningRate(t *testing.T) {
 	})
 }
 
-// TestBaseFee ensures that the base fee moves in the correct
+// TestGasPrice ensures that the gas price moves in the correct
 // direction for the default EIP-1559 implementation.
-func TestBaseFee(t *testing.T) {
+func TestGasPrice(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultState()
 		params := CreateRandomParams(t)
@@ -63,9 +63,9 @@ func TestBaseFee(t *testing.T) {
 		require.True(t, params.MinBaseGasPrice.LTE(state.BaseGasPrice))
 
 		switch {
-		case blockUtilization > params.TargetBlockUtilization:
+		case blockUtilization > params.TargetBlockUtilization():
 			require.True(t, state.BaseGasPrice.GTE(prevBaseFee))
-		case blockUtilization < params.TargetBlockUtilization:
+		case blockUtilization < params.TargetBlockUtilization():
 			require.True(t, state.BaseGasPrice.LTE(prevBaseFee))
 		default:
 			require.Equal(t, state.BaseGasPrice, prevBaseFee)
@@ -85,15 +85,13 @@ func CreateRandomParams(t *rapid.T) types.Params {
 	g := rapid.Uint64Range(10, 50).Draw(t, "gamma")
 	gamma := math.LegacyNewDec(int64(g)).Quo(math.LegacyNewDec(100))
 
-	targetBlockUtilization := rapid.Uint64Range(1, 30_000_000).Draw(t, "target_block_utilization")
-	maxBlockUtilization := rapid.Uint64Range(targetBlockUtilization, targetBlockUtilization*5).Draw(t, "max_block_utilization")
+	maxBlockUtilization := rapid.Uint64Range(2, 30_000_000).Draw(t, "max_block_utilization")
 
 	params := types.DefaultParams()
 	params.Alpha = alpha
 	params.Beta = beta
 	params.Gamma = gamma
 	params.MaxBlockUtilization = maxBlockUtilization
-	params.TargetBlockUtilization = targetBlockUtilization
 
 	return params
 }

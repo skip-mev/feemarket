@@ -61,11 +61,11 @@ func TestAIMDLearningRate(t *testing.T) {
 	})
 }
 
-// TestAIMDBaseFee ensures that the additive increase multiplicative
-// decrease base fee adjustment algorithm correctly adjusts the base
-// fee. In particular, the base fee should function the same as the
+// TestAIMDGasPrice ensures that the additive increase multiplicative
+// decrease gas price adjustment algorithm correctly adjusts the base
+// fee. In particular, the gas price should function the same as the
 // default EIP-1559 base fee adjustment algorithm.
-func TestAIMDBaseFee(t *testing.T) {
+func TestAIMDGasPrice(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultAIMDState()
 		window := rapid.Int64Range(1, 50).Draw(t, "window")
@@ -105,7 +105,7 @@ func TestAIMDBaseFee(t *testing.T) {
 
 				// Calculate the new base gasPrice with the learning rate adjustment.
 				currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(state.Window[state.Index]))
-				targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization))
+				targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization()))
 				utilization := (currentBlockSize.Sub(targetBlockSize)).Quo(targetBlockSize)
 
 				// Truncate the learning rate adjustment to an integer.
@@ -164,7 +164,6 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	params.Gamma = gamma
 	params.Delta = delta
 	params.MaxBlockUtilization = maxBlockUtilization
-	params.TargetBlockUtilization = targetBlockUtilization
 	params.DistributeFees = distributeFees
 
 	return params

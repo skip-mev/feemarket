@@ -57,7 +57,7 @@ func (s *State) UpdateBaseGasPrice(params Params) (gasPrice math.LegacyDec) {
 
 	// Calculate the new base gasPrice with the learning rate adjustment.
 	currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(s.Window[s.Index]))
-	targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization))
+	targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization()))
 	utilization := (currentBlockSize.Sub(targetBlockSize)).Quo(targetBlockSize)
 
 	// Truncate the learning rate adjustment to an integer.
@@ -129,7 +129,7 @@ func (s *State) UpdateLearningRate(params Params) (lr math.LegacyDec) {
 func (s *State) GetNetUtilization(params Params) math.Int {
 	net := math.NewInt(0)
 
-	targetUtilization := math.NewIntFromUint64(params.TargetBlockUtilization)
+	targetUtilization := math.NewIntFromUint64(params.TargetBlockUtilization())
 	for _, utilization := range s.Window {
 		diff := math.NewIntFromUint64(utilization).Sub(targetUtilization)
 		net = net.Add(diff)
