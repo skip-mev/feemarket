@@ -1,4 +1,4 @@
-## `x/feemarket`
+# `x/feemarket`
 
 ## Contents
 
