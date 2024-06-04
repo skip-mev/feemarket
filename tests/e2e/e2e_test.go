@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/gov"
+<<<<<<< HEAD
 
 	"github.com/skip-mev/feemarket/x/feemarket"
 
@@ -16,9 +19,15 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
+=======
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+>>>>>>> 4b6c5fc (feat: fall back to default cosmos sdk fee deductor  (#99))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
+	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 

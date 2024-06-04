@@ -3,18 +3,40 @@ module github.com/skip-mev/feemarket
 go 1.22.3
 
 require (
+<<<<<<< HEAD
 	cosmossdk.io/api v0.3.1
 	cosmossdk.io/core v0.5.1
+=======
+	cosmossdk.io/api v0.7.5
+	cosmossdk.io/client/v2 v2.0.0-00010101000000-000000000000
+	cosmossdk.io/core v0.11.0
+>>>>>>> 4b6c5fc (feat: fall back to default cosmos sdk fee deductor  (#99))
 	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.3.1
 	cosmossdk.io/math v1.3.0
+<<<<<<< HEAD
+=======
+	cosmossdk.io/store v1.1.0
+	cosmossdk.io/tools/confix v0.1.1
+	cosmossdk.io/x/circuit v0.1.1
+	cosmossdk.io/x/evidence v0.1.1
+	cosmossdk.io/x/feegrant v0.1.1
+	cosmossdk.io/x/nft v0.1.1
+	cosmossdk.io/x/tx v0.13.3
+	cosmossdk.io/x/upgrade v0.1.2
+>>>>>>> 4b6c5fc (feat: fall back to default cosmos sdk fee deductor  (#99))
 	github.com/client9/misspell v0.3.4
 	github.com/cometbft/cometbft v0.37.5
 	github.com/cometbft/cometbft-db v0.8.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
+<<<<<<< HEAD
 	github.com/cosmos/cosmos-sdk v0.47.11
 	github.com/cosmos/gogoproto v1.4.11
+=======
+	github.com/cosmos/cosmos-sdk v0.50.7
+	github.com/cosmos/gogoproto v1.4.12
+>>>>>>> 4b6c5fc (feat: fall back to default cosmos sdk fee deductor  (#99))
 	github.com/golang/protobuf v1.5.4
 	github.com/golangci/golangci-lint v1.59.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
