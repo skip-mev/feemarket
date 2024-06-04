@@ -12,7 +12,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"testing"
 	"time"
 
 	"cosmossdk.io/math"
@@ -35,8 +34,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -51,49 +48,6 @@ const (
 type KeyringOverride struct {
 	keyringOptions keyring.Option
 	cdc            codec.Codec
-}
-
-// ChainBuilderFromChainSpec creates an interchaintest chain builder factory given a ChainSpec
-// and returns the associated chain
-func ChainBuilderFromChainSpec(t *testing.T, spec *interchaintest.ChainSpec) ibc.Chain {
-	// require that NumFullNodes == NumValidators == 3
-	require.Equal(t, *spec.NumValidators, 3)
-
-	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{spec})
-
-	chains, err := cf.Chains(t.Name())
-	require.NoError(t, err)
-
-	require.Len(t, chains, 1)
-	chain := chains[0]
-
-	_, ok := chain.(*cosmos.CosmosChain)
-	require.True(t, ok)
-
-	return chain
-}
-
-// BuildInterchain creates a new Interchain testing env with the configured Block SDK CosmosChain
-func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interchaintest.Interchain {
-	ic := interchaintest.NewInterchain()
-	ic.AddChain(chain)
-
-	// create docker network
-	dockerClient, networkID := interchaintest.DockerSetup(t)
-
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
-	defer cancel()
-
-	// build the interchain
-	err := ic.Build(ctx, nil, interchaintest.InterchainBuildOptions{
-		SkipPathCreation: true,
-		Client:           dockerClient,
-		NetworkID:        networkID,
-		TestName:         t.Name(),
-	})
-	require.NoError(t, err)
-
-	return ic
 }
 
 // SimulateTx simulates the provided messages, and checks whether the provided failure condition is met
