@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	minBaseGasPrice = sdkmath.LegacyMustNewDecFromStr("0.1")
-	baseGasPrice    = sdkmath.LegacyOneDec()
+	minBaseGasPrice = sdkmath.LegacyMustNewDecFromStr("0.001")
+	baseGasPrice    = sdkmath.LegacyMustNewDecFromStr("0.1")
 
 	// config params
 	numValidators = 4

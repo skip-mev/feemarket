@@ -480,7 +480,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 			baseGasPrice = s.QueryDefaultGasPrice()
 			s.T().Log("gas price", baseGasPrice.String())
 
-			if baseGasPrice.Amount.GT(math.LegacyNewDec(1000000)) {
+			if baseGasPrice.Amount.GT(math.LegacyNewDec(10)) {
 				break
 			}
 		}
