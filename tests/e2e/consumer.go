@@ -76,7 +76,7 @@ func CCVInterchainConstructor(ctx context.Context, t *testing.T, chains []*cosmo
 	// create a relayer
 	client, network := interchaintest.DockerSetup(t)
 	r := interchaintest.NewBuiltinRelayerFactory(
-		ibc.Hermes,
+		ibc.CosmosRly,
 		zaptest.NewLogger(t),
 	).Build(t, client, network)
 
