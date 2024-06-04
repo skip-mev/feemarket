@@ -12,7 +12,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"testing"
 	"time"
 
 	"cosmossdk.io/math"
@@ -29,12 +28,20 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/skip-mev/chaintestutil/sample"
+<<<<<<< HEAD
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+=======
+	oracleconfig "github.com/skip-mev/slinky/oracle/config"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+>>>>>>> 7b6193a (fix: simplify feemarket based on AIMD paper (#94))
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -44,49 +51,6 @@ import (
 type KeyringOverride struct {
 	keyringOptions keyring.Option
 	cdc            codec.Codec
-}
-
-// ChainBuilderFromChainSpec creates an interchaintest chain builder factory given a ChainSpec
-// and returns the associated chain
-func ChainBuilderFromChainSpec(t *testing.T, spec *interchaintest.ChainSpec) ibc.Chain {
-	// require that NumFullNodes == NumValidators == 3
-	require.Equal(t, *spec.NumValidators, 3)
-
-	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{spec})
-
-	chains, err := cf.Chains(t.Name())
-	require.NoError(t, err)
-
-	require.Len(t, chains, 1)
-	chain := chains[0]
-
-	_, ok := chain.(*cosmos.CosmosChain)
-	require.True(t, ok)
-
-	return chain
-}
-
-// BuildInterchain creates a new Interchain testing env with the configured Block SDK CosmosChain
-func BuildInterchain(t *testing.T, ctx context.Context, chain ibc.Chain) *interchaintest.Interchain {
-	ic := interchaintest.NewInterchain()
-	ic.AddChain(chain)
-
-	// create docker network
-	dockerClient, networkID := interchaintest.DockerSetup(t)
-
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
-	defer cancel()
-
-	// build the interchain
-	err := ic.Build(ctx, nil, interchaintest.InterchainBuildOptions{
-		SkipPathCreation: true,
-		Client:           dockerClient,
-		NetworkID:        networkID,
-		TestName:         t.Name(),
-	})
-	require.NoError(t, err)
-
-	return ic
 }
 
 // SimulateTx simulates the provided messages, and checks whether the provided failure condition is met
@@ -372,11 +336,14 @@ func (s *TestSuite) keyringDirFromNode() string {
 }
 
 func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins, gas int64, numMsg int) (*coretypes.ResultBroadcastTxCommit, error) {
+<<<<<<< HEAD
 	cc, ok := s.chain.(*cosmos.CosmosChain)
 	if !ok {
 		panic("unable to assert ibc.Chain as CosmosChain")
 	}
 
+=======
+>>>>>>> 7b6193a (fix: simplify feemarket based on AIMD paper (#94))
 	msgs := make([]sdk.Msg, numMsg)
 	for i := 0; i < numMsg; i++ {
 		msgs[i] = &banktypes.MsgSend{

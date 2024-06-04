@@ -22,8 +22,8 @@ message GenesisState {
 // the current base fee, learning rate, and block utilization within the
 // specified AIMD window.
 message State {
-  // BaseGasPrice is the current base fee. This is denominated in the fee per gas
-  // unit.
+  // BaseGasPrice is the current base fee. This is denominated in the fee per
+  // gas unit.
   string base_gas_price = 1 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
