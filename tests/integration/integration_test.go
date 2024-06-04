@@ -4,22 +4,8 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-<<<<<<< HEAD
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/skip-mev/chaintestutil/encoding"
-=======
-	txsigning "cosmossdk.io/x/tx/signing"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/address"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-	"github.com/cosmos/cosmos-sdk/std"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/gogoproto/proto"
->>>>>>> 7b6193a (fix: simplify feemarket based on AIMD paper (#94))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/app"

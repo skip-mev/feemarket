@@ -16,15 +16,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-<<<<<<< HEAD
 	"github.com/skip-mev/feemarket/tests/app"
-=======
->>>>>>> 7b6193a (fix: simplify feemarket based on AIMD paper (#94))
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type TestSuite struct {

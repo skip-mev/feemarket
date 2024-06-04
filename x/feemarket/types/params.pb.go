@@ -45,7 +45,7 @@ type Params struct {
 	//
 	// Must be [0, 0.5].
 	Gamma cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=gamma,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"gamma"`
-	// Delta is the amount we additively increase/decrease the base fee when the
+	// Delta is the amount we additively increase/decrease the gas price when the
 	// net block utilization difference in the window is above/below the target
 	// utilization.
 	Delta cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=delta,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"delta"`

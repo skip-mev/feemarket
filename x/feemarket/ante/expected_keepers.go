@@ -1,12 +1,6 @@
 package ante
 
 import (
-<<<<<<< HEAD
-=======
-	"context"
-
-	"cosmossdk.io/core/address"
->>>>>>> 7b6193a (fix: simplify feemarket based on AIMD paper (#94))
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
