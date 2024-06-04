@@ -35,7 +35,7 @@ func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos
 				NumValidators: &providerNumValidators,
 				ChainConfig: ibc.ChainConfig{
 					GasPrices:      "1uatom",
-					GasAdjustment:  1.5,
+					GasAdjustment:  0.0,
 					ChainID:        providerChainID,
 					TrustingPeriod: "336h",
 					ModifyGenesis: cosmos.ModifyGenesis(
