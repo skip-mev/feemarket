@@ -21,22 +21,17 @@ var (
 	// decrease the learning rate when the target utilization is not met.
 	DefaultAIMDBeta = math.LegacyMustNewDecFromStr("0.95")
 
-	// DefaultAIMDTheta is the default threshold for determining whether
+	// DefaultAIMDGamma is the default threshold for determining whether
 	// to increase or decrease the learning rate. In this case, we increase
 	// the learning rate if the block utilization within the window is greater
 	// than 0.75 or less than 0.25. Otherwise, we multiplicatively decrease
 	// the learning rate.
-	DefaultAIMDTheta = math.LegacyMustNewDecFromStr("0.25")
+	DefaultAIMDGamma = math.LegacyMustNewDecFromStr("0.25")
 
 	// DefaultAIMDDelta is the default delta value for how much we additively
 	// increase or decrease the base fee when the net block utilization within
 	// the window is not equal to the target utilization.
 	DefaultAIMDDelta = math.LegacyMustNewDecFromStr("0.0")
-
-	// DefaultAIMDTargetBlockSize is the default target block utilization. This
-	// is the default on Ethereum. This denominated in units of gas consumed in
-	// a block.
-	DefaultAIMDTargetBlockSize uint64 = 15_000_000
 
 	// DefaultAIMDMaxBlockSize is the default maximum block utilization.
 	// This is the default on Ethereum. This denominated in units of gas
@@ -65,9 +60,8 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDWindow,
 		DefaultAIMDAlpha,
 		DefaultAIMDBeta,
-		DefaultAIMDTheta,
+		DefaultAIMDGamma,
 		DefaultAIMDDelta,
-		DefaultAIMDTargetBlockSize,
 		DefaultAIMDMaxBlockSize,
 		DefaultAIMDMinBaseFee,
 		DefaultAIMDMinLearningRate,

@@ -20,7 +20,6 @@
     * [MinBaseFee](#minbasefee)
     * [MinLearningRate](#minlearningrate)
     * [MaxLearningRate](#maxlearningrate)
-    * [TargetBlockUtilization](#targetblockutilization)
     * [MaxBlockUtilization](#maxblockutilization)
     * [Window](#window)
     * [FeeDenom](#feedenom)
@@ -234,9 +233,6 @@ MinLearningRate is the lower bound for the learning rate.
 
 MaxLearningRate is the upper bound for the learning rate.
 
-### TargetBlockUtilization
-
-TargetBlockUtilization is the target block utilization for the current block.
 
 ### MaxBlockUtilization
 
@@ -263,8 +259,10 @@ through governance at a later time.
 // Params contains the required set of parameters for the EIP1559 fee market
 // plugin implementation.
 message Params {
-  // Alpha is the amount we additively increase the learninig rate
+  // Alpha is the amount we additively increase the learning rate
   // when it is above or below the target +/- threshold.
+  //
+  // Must be > 0.
   string alpha = 1 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
@@ -273,17 +271,21 @@ message Params {
 
   // Beta is the amount we multiplicatively decrease the learning rate
   // when it is within the target +/- threshold.
+  //
+  // Must be [0, 1].
   string beta = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
 
-  // Theta is the threshold for the learning rate. If the learning rate is
+  // Gamma is the threshold for the learning rate. If the learning rate is
   // above or below the target +/- threshold, we additively increase the
   // learning rate by Alpha. Otherwise, we multiplicatively decrease the
   // learning rate by Beta.
-  string theta = 3 [
+  //
+  // Must be [0, 0.5].
+  string gamma = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
@@ -298,10 +300,9 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // MinBaseGasPrice determines the initial gas price of the module and the global
-  // minimum
-  // for the network. This is denominated in fee per gas unit.
-  string MinBaseGasPrice = 5 [
+  // MinBaseGasPrice determines the initial gas price of the module and the
+  // global minimum for the network.
+  string min_base_gas_price = 5 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
@@ -321,22 +322,23 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // TargetBlockUtilization is the target block utilization.
-  uint64 target_block_utilization = 8;
-
   // MaxBlockUtilization is the maximum block utilization.
-  uint64 max_block_utilization = 9;
+  uint64 max_block_utilization = 8;
 
   // Window defines the window size for calculating an adaptive learning rate
   // over a moving window of blocks.
-  uint64 window = 10;
+  uint64 window = 9;
 
   // FeeDenom is the denom that will be used for all fee payments.
-  string fee_denom = 11;
+  string fee_denom = 10;
 
   // Enabled is a boolean that determines whether the EIP1559 fee market is
   // enabled.
-  bool enabled = 12;
+  bool enabled = 11;
+
+  // DistributeFees is a boolean that determines whether the fees are burned or
+  // distributed to all stakers.
+  bool distribute_fees = 12;
 }
 ```
 
@@ -380,7 +382,6 @@ max_block_utilization: "30000000"
 max_learning_rate: "0.125000000000000000"
 min_base_fee: "1.000000000000000000"
 min_learning_rate: "0.125000000000000000"
-target_block_utilization: "15000000"
 theta: "0.000000000000000000"
 window: "1"
 ```
@@ -481,7 +482,6 @@ Example Output:
     "minBaseFee": "1000000",
     "minLearningRate": "125000000000000000",
     "maxLearningRate": "125000000000000000",
-    "targetBlockUtilization": "15000000",
     "maxBlockUtilization": "30000000",
     "window": "1",
     "feeDenom": "skip",

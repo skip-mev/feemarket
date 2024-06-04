@@ -86,8 +86,8 @@ func (m *GenesisState) GetState() State {
 // the current base fee, learning rate, and block utilization within the
 // specified AIMD window.
 type State struct {
-	// BaseGasPrice is the current base fee. This is denominated in the fee per gas
-	// unit.
+	// BaseGasPrice is the current base fee. This is denominated in the fee per
+	// gas unit.
 	BaseGasPrice cosmossdk_io_math.LegacyDec `protobuf:"bytes,1,opt,name=base_gas_price,json=baseGasPrice,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"base_gas_price"`
 	// LearningRate is the current learning rate.
 	LearningRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=learning_rate,json=learningRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"learning_rate"`

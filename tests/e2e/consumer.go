@@ -16,8 +16,8 @@ import (
 
 var (
 	providerChainID       = "provider-1"
-	providerNumValidators = int(4)
-	providerVersion       = "v5.0.0-rc0"
+	providerNumValidators = 4
+	providerVersion       = "v5.0.0"
 )
 
 // CCVChainConstructor is a constructor for the CCV chain
@@ -76,7 +76,7 @@ func CCVInterchainConstructor(ctx context.Context, t *testing.T, chains []*cosmo
 	// create a relayer
 	client, network := interchaintest.DockerSetup(t)
 	r := interchaintest.NewBuiltinRelayerFactory(
-		ibc.CosmosRly,
+		ibc.Hermes,
 		zaptest.NewLogger(t),
 	).Build(t, client, network)
 

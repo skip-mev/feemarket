@@ -3,6 +3,7 @@ package integration_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -10,12 +11,10 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/std"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/gogoproto/proto"
-
-	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
@@ -82,17 +81,16 @@ func (s *IntegrationTestSuite) TestParams() {
 
 	s.Run("set and get custom params", func() {
 		params := types.Params{
-			Alpha:                  math.LegacyMustNewDecFromStr("0.1"),
-			Beta:                   math.LegacyMustNewDecFromStr("0.1"),
-			Theta:                  math.LegacyMustNewDecFromStr("0.1"),
-			Delta:                  math.LegacyMustNewDecFromStr("0.1"),
-			MinBaseGasPrice:        math.LegacyNewDec(10),
-			MinLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
-			MaxLearningRate:        math.LegacyMustNewDecFromStr("0.1"),
-			TargetBlockUtilization: 5,
-			MaxBlockUtilization:    10,
-			Window:                 1,
-			Enabled:                true,
+			Alpha:               math.LegacyMustNewDecFromStr("0.1"),
+			Beta:                math.LegacyMustNewDecFromStr("0.1"),
+			Gamma:               math.LegacyMustNewDecFromStr("0.1"),
+			Delta:               math.LegacyMustNewDecFromStr("0.1"),
+			MinBaseGasPrice:     math.LegacyNewDec(10),
+			MinLearningRate:     math.LegacyMustNewDecFromStr("0.1"),
+			MaxLearningRate:     math.LegacyMustNewDecFromStr("0.1"),
+			MaxBlockUtilization: 10,
+			Window:              1,
+			Enabled:             true,
 		}
 
 		err := s.TestKeepers.FeeMarketKeeper.SetParams(s.ctx, params)

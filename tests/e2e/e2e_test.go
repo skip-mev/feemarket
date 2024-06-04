@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	minBaseGasPrice = sdkmath.LegacyNewDec(10)
-	baseGasPrice    = sdkmath.LegacyNewDec(1000000)
+	minBaseGasPrice = sdkmath.LegacyMustNewDecFromStr("0.001")
+	baseGasPrice    = sdkmath.LegacyMustNewDecFromStr("0.1")
 
 	// config params
 	numValidators = 4
@@ -53,19 +53,18 @@ var (
 		{
 			Key: "app_state.feemarket.params",
 			Value: feemarkettypes.Params{
-				Alpha:                  feemarkettypes.DefaultAlpha,
-				Beta:                   feemarkettypes.DefaultBeta,
-				Theta:                  feemarkettypes.DefaultTheta,
-				Delta:                  feemarkettypes.DefaultDelta,
-				MinBaseGasPrice:        minBaseGasPrice,
-				MinLearningRate:        feemarkettypes.DefaultMinLearningRate,
-				MaxLearningRate:        feemarkettypes.DefaultMaxLearningRate,
-				TargetBlockUtilization: feemarkettypes.DefaultTargetBlockUtilization / 4,
-				MaxBlockUtilization:    feemarkettypes.DefaultMaxBlockUtilization,
-				Window:                 feemarkettypes.DefaultWindow,
-				FeeDenom:               feemarkettypes.DefaultFeeDenom,
-				Enabled:                true,
-				DistributeFees:         false,
+				Alpha:               feemarkettypes.DefaultAlpha,
+				Beta:                feemarkettypes.DefaultBeta,
+				Gamma:               feemarkettypes.DefaultAIMDGamma,
+				Delta:               feemarkettypes.DefaultDelta,
+				MinBaseGasPrice:     minBaseGasPrice,
+				MinLearningRate:     feemarkettypes.DefaultMinLearningRate,
+				MaxLearningRate:     feemarkettypes.DefaultMaxLearningRate,
+				MaxBlockUtilization: feemarkettypes.DefaultMaxBlockUtilization,
+				Window:              feemarkettypes.DefaultWindow,
+				FeeDenom:            feemarkettypes.DefaultFeeDenom,
+				Enabled:             true,
+				DistributeFees:      false,
 			},
 		},
 		{

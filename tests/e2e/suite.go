@@ -26,15 +26,9 @@ import (
 )
 
 const (
-	envKeepAlive          = "FEEMARKET_INTEGRATION_KEEPALIVE"
-	initBalance           = 30000000000000
-	genesisAmount         = 1000000000
-	defaultDenom          = "stake"
-	validatorKey          = "validator"
-	yes                   = "yes"
-	deposit               = 1000000
-	userMnemonic          = "foster poverty abstract scorpion short shrimp tilt edge romance adapt only benefit moral another where host egg echo ability wisdom lizard lazy pool roast"
-	userAccountAddressHex = "877E307618AB73E009A978AC32E0264791F6D40A"
+	envKeepAlive = "FEEMARKET_INTEGRATION_KEEPALIVE"
+	initBalance  = 30000000000000
+	defaultDenom = "stake"
 )
 
 var r *rand.Rand
@@ -486,7 +480,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 			baseGasPrice = s.QueryDefaultGasPrice()
 			s.T().Log("gas price", baseGasPrice.String())
 
-			if baseGasPrice.Amount.GT(math.LegacyNewDec(1000000)) {
+			if baseGasPrice.Amount.GT(math.LegacyNewDec(10)) {
 				break
 			}
 		}
