@@ -79,7 +79,7 @@ func (s *TestSuite) QueryParams() types.Params {
 	grpcAddr := s.chain.GetHostGRPCAddress()
 
 	// create the client
-	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
 	// create the oracle client
@@ -97,8 +97,7 @@ func (s *TestSuite) QueryState() types.State {
 	// get grpc address
 	grpcAddr := s.chain.GetHostGRPCAddress()
 
-	// create the client
-	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
 	// create the oracle client
@@ -117,7 +116,7 @@ func (s *TestSuite) QueryDefaultGasPrice() sdk.DecCoin {
 	grpcAddr := s.chain.GetHostGRPCAddress()
 
 	// create the client
-	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
 	// create the oracle client
@@ -137,7 +136,7 @@ func (s *TestSuite) QueryValidators(chain *cosmos.CosmosChain) []sdk.ValAddress 
 
 	// get grpc client of the node
 	grpcAddr := chain.GetHostGRPCAddress()
-	cc, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 	defer cc.Close()
 

@@ -223,7 +223,7 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins
 
 	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+		return err
 	}
 
 	return nil
@@ -237,7 +237,7 @@ func SendTip(bankKeeper BankKeeper, ctx sdk.Context, acc, proposer sdk.AccAddres
 
 	err := bankKeeper.SendCoins(ctx, acc, proposer, coins)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+		return err
 	}
 
 	return nil
