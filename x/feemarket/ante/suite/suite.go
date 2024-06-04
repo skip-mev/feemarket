@@ -23,12 +23,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
-
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type TestSuite struct {

@@ -6,20 +6,14 @@ import (
 	"cosmossdk.io/math"
 )
 
-// MaxBlockUtilizationRatio is the maximum ratio of the max block size to the target block size. This
-// can be trivially understood to be the maximum base fee increase that can occur in between
-// blocks. This is a constant that is used to prevent the base fee from increasing too quickly.
-const MaxBlockUtilizationRatio = 10
-
 // NewParams instantiates a new EIP-1559 Params object. This params object is utilized
 // to implement both the base EIP-1559 fee and AIMD EIP-1559 fee market implementations.
 func NewParams(
 	window uint64,
 	alpha math.LegacyDec,
 	beta math.LegacyDec,
-	theta math.LegacyDec,
+	gamma math.LegacyDec,
 	delta math.LegacyDec,
-	targetBlockSize uint64,
 	maxBlockSize uint64,
 	minBaseGasPrice math.LegacyDec,
 	minLearingRate math.LegacyDec,
@@ -28,18 +22,17 @@ func NewParams(
 	enabled bool,
 ) Params {
 	return Params{
-		Alpha:                  alpha,
-		Beta:                   beta,
-		Theta:                  theta,
-		Delta:                  delta,
-		MinBaseGasPrice:        minBaseGasPrice,
-		MinLearningRate:        minLearingRate,
-		MaxLearningRate:        maxLearningRate,
-		TargetBlockUtilization: targetBlockSize,
-		MaxBlockUtilization:    maxBlockSize,
-		Window:                 window,
-		FeeDenom:               feeDenom,
-		Enabled:                enabled,
+		Alpha:               alpha,
+		Beta:                beta,
+		Gamma:               gamma,
+		Delta:               delta,
+		MinBaseGasPrice:     minBaseGasPrice,
+		MinLearningRate:     minLearingRate,
+		MaxLearningRate:     maxLearningRate,
+		MaxBlockUtilization: maxBlockSize,
+		Window:              window,
+		FeeDenom:            feeDenom,
+		Enabled:             enabled,
 	}
 }
 
@@ -57,24 +50,12 @@ func (p *Params) ValidateBasic() error {
 		return fmt.Errorf("beta cannot be nil and must be between [0, 1]")
 	}
 
-	if p.Theta.IsNil() || p.Theta.IsNegative() || p.Theta.GT(math.LegacyOneDec()) {
-		return fmt.Errorf("theta cannot be nil and must be between [0, 1]")
+	if p.Gamma.IsNil() || p.Gamma.IsNegative() || p.Gamma.GT(math.LegacyMustNewDecFromStr("0.5")) {
+		return fmt.Errorf("theta cannot be nil and must be between [0, 0.5]")
 	}
 
 	if p.Delta.IsNil() || p.Delta.IsNegative() {
 		return fmt.Errorf("delta cannot be nil and must be between [0, inf)")
-	}
-
-	if p.TargetBlockUtilization == 0 {
-		return fmt.Errorf("target block size cannot be zero")
-	}
-
-	if p.TargetBlockUtilization > p.MaxBlockUtilization {
-		return fmt.Errorf("target block size cannot be greater than max block size")
-	}
-
-	if p.MaxBlockUtilization/p.TargetBlockUtilization > MaxBlockUtilizationRatio {
-		return fmt.Errorf("max block size cannot be greater than target block size times %d", MaxBlockUtilizationRatio)
 	}
 
 	if p.MinBaseGasPrice.IsNil() || !p.MinBaseGasPrice.GTE(math.LegacyZeroDec()) {
@@ -83,6 +64,10 @@ func (p *Params) ValidateBasic() error {
 
 	if p.MaxLearningRate.IsNil() || p.MinLearningRate.IsNegative() {
 		return fmt.Errorf("min learning rate cannot be negative or nil")
+	}
+
+	if p.MaxBlockUtilization < 2 {
+		return fmt.Errorf("max block utilization cannot be less than 2")
 	}
 
 	if p.MaxLearningRate.IsNil() || p.MaxLearningRate.IsNegative() {
@@ -98,4 +83,9 @@ func (p *Params) ValidateBasic() error {
 	}
 
 	return nil
+}
+
+// TargetBlockUtilization returns 0.5 * MaxBlockUtilization.
+func (p *Params) TargetBlockUtilization() uint64 {
+	return p.MaxBlockUtilization / 2
 }

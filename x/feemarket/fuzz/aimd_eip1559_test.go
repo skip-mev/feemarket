@@ -49,7 +49,7 @@ func TestAIMDLearningRate(t *testing.T) {
 			require.True(t, lr.GTE(params.MinLearningRate))
 			require.True(t, lr.LTE(params.MaxLearningRate))
 
-			if utilization.LTE(params.Theta) || utilization.GTE(math.LegacyOneDec().Sub(params.Theta)) {
+			if utilization.LTE(params.Gamma) || utilization.GTE(math.LegacyOneDec().Sub(params.Gamma)) {
 				require.True(t, lr.GTE(prevLearningRate))
 			} else {
 				require.True(t, lr.LTE(prevLearningRate))
@@ -61,11 +61,11 @@ func TestAIMDLearningRate(t *testing.T) {
 	})
 }
 
-// TestAIMDBaseFee ensures that the additive increase multiplicative
-// decrease base fee adjustment algorithm correctly adjusts the base
-// fee. In particular, the base fee should function the same as the
+// TestAIMDGasPrice ensures that the additive increase multiplicative
+// decrease gas price adjustment algorithm correctly adjusts the base
+// fee. In particular, the gas price should function the same as the
 // default EIP-1559 base fee adjustment algorithm.
-func TestAIMDBaseFee(t *testing.T) {
+func TestAIMDGasPrice(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		state := types.DefaultAIMDState()
 		window := rapid.Int64Range(1, 50).Draw(t, "window")
@@ -105,7 +105,7 @@ func TestAIMDBaseFee(t *testing.T) {
 
 				// Calculate the new base gasPrice with the learning rate adjustment.
 				currentBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(state.Window[state.Index]))
-				targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization))
+				targetBlockSize := math.LegacyNewDecFromInt(math.NewIntFromUint64(params.TargetBlockUtilization()))
 				utilization := (currentBlockSize.Sub(targetBlockSize)).Quo(targetBlockSize)
 
 				// Truncate the learning rate adjustment to an integer.
@@ -147,8 +147,8 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	b := rapid.Uint64Range(50, 99).Draw(t, "beta")
 	beta := math.LegacyNewDec(int64(b)).Quo(math.LegacyNewDec(100))
 
-	th := rapid.Uint64Range(10, 90).Draw(t, "theta")
-	theta := math.LegacyNewDec(int64(th)).Quo(math.LegacyNewDec(100))
+	g := rapid.Uint64Range(10, 50).Draw(t, "gamma")
+	gamma := math.LegacyNewDec(int64(g)).Quo(math.LegacyNewDec(100))
 
 	d := rapid.Uint64Range(1, 1000).Draw(t, "delta")
 	delta := math.LegacyNewDec(int64(d)).Quo(math.LegacyNewDec(1000))
@@ -161,10 +161,9 @@ func CreateRandomAIMDParams(t *rapid.T) types.Params {
 	params := types.DefaultAIMDParams()
 	params.Alpha = alpha
 	params.Beta = beta
-	params.Theta = theta
+	params.Gamma = gamma
 	params.Delta = delta
 	params.MaxBlockUtilization = maxBlockUtilization
-	params.TargetBlockUtilization = targetBlockUtilization
 	params.DistributeFees = distributeFees
 
 	return params
