@@ -12,16 +12,10 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-<<<<<<< HEAD
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
-=======
-	"github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
->>>>>>> 57d7094 (test: export e2e tests as a package (#85))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
@@ -29,8 +23,8 @@ import (
 )
 
 var (
-	minBaseGasPrice = sdkmath.LegacyNewDec(10)
-	baseGasPrice    = sdkmath.LegacyNewDec(1000000)
+	minBaseGasPrice = sdkmath.LegacyMustNewDecFromStr("0.001")
+	baseGasPrice    = sdkmath.LegacyMustNewDecFromStr("0.1")
 
 	// config params
 	numValidators = 4
@@ -55,19 +49,18 @@ var (
 		{
 			Key: "app_state.feemarket.params",
 			Value: feemarkettypes.Params{
-				Alpha:                  feemarkettypes.DefaultAlpha,
-				Beta:                   feemarkettypes.DefaultBeta,
-				Theta:                  feemarkettypes.DefaultTheta,
-				Delta:                  feemarkettypes.DefaultDelta,
-				MinBaseGasPrice:        minBaseGasPrice,
-				MinLearningRate:        feemarkettypes.DefaultMinLearningRate,
-				MaxLearningRate:        feemarkettypes.DefaultMaxLearningRate,
-				TargetBlockUtilization: feemarkettypes.DefaultTargetBlockUtilization / 4,
-				MaxBlockUtilization:    feemarkettypes.DefaultMaxBlockUtilization,
-				Window:                 feemarkettypes.DefaultWindow,
-				FeeDenom:               feemarkettypes.DefaultFeeDenom,
-				Enabled:                true,
-				DistributeFees:         false,
+				Alpha:               feemarkettypes.DefaultAlpha,
+				Beta:                feemarkettypes.DefaultBeta,
+				Gamma:               feemarkettypes.DefaultAIMDGamma,
+				Delta:               feemarkettypes.DefaultDelta,
+				MinBaseGasPrice:     minBaseGasPrice,
+				MinLearningRate:     feemarkettypes.DefaultMinLearningRate,
+				MaxLearningRate:     feemarkettypes.DefaultMaxLearningRate,
+				MaxBlockUtilization: feemarkettypes.DefaultMaxBlockUtilization,
+				Window:              feemarkettypes.DefaultWindow,
+				FeeDenom:            feemarkettypes.DefaultFeeDenom,
+				Enabled:             true,
+				DistributeFees:      false,
 			},
 		},
 		{

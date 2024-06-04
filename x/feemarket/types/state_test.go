@@ -141,7 +141,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		state.BaseGasPrice = math.LegacyMustNewDecFromStr("1000")
 		params.MinBaseGasPrice = math.LegacyMustNewDecFromStr("125")
 
-		state.Window[0] = params.TargetBlockUtilization
+		state.Window[0] = params.TargetBlockUtilization()
 
 		newBaseGasPrice := state.UpdateBaseGasPrice(params)
 		expectedBaseGasPrice := math.LegacyMustNewDecFromStr("1000")
@@ -186,7 +186,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		state.LearningRate = math.LegacyMustNewDecFromStr("0.125")
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization()
 		}
 
 		state.UpdateLearningRate(params)
@@ -307,7 +307,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		state := types.DefaultAIMDState()
 		state.BaseGasPrice = state.BaseGasPrice.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization()
 		}
 
 		lr := state.UpdateLearningRate(params)
@@ -316,7 +316,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		state = types.DefaultAIMDState()
 		state.BaseGasPrice = state.BaseGasPrice.Mul(math.LegacyMustNewDecFromStr("10"))
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization()
 		}
 
 		lrWithDelta := state.UpdateLearningRate(paramsWithDelta)
@@ -341,7 +341,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		params.Delta = math.LegacyNewDec(10)
 
 		// 1/4th of the window is full.
-		state.Window[0] = params.TargetBlockUtilization / 2
+		state.Window[0] = params.TargetBlockUtilization() / 2
 
 		prevLR := state.LearningRate
 		lr := state.UpdateLearningRate(params)
@@ -351,7 +351,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		expectedLR := prevLR.Add(params.Alpha)
 		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
 
-		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization) / 2)
+		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization()) / 2)
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
 		expectedGasPrice := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff)
 
@@ -387,35 +387,6 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		require.Equal(t, expectedLR, lr)
 		require.Equal(t, expectedGasPrice, bgs)
 	})
-
-	t.Run("recovers from overflow with large max block utilization ratio", func(t *testing.T) {
-		state := types.DefaultAIMDState()
-		state.Window = make([]uint64, 50)
-		state.BaseGasPrice = state.BaseGasPrice.Mul(math.LegacyMustNewDecFromStr("10"))
-
-		params := types.DefaultAIMDParams()
-		params.Window = 50
-		// This should overflow the base gas price after a few iterations.
-		params.TargetBlockUtilization = 1
-		params.MaxBlockUtilization = 9_999_999_999_999_999_999
-
-		for {
-			var baseGasPrice math.LegacyDec
-			require.NotPanics(t, func() {
-				state.Update(params.MaxBlockUtilization, params)
-				state.UpdateLearningRate(params)
-				baseGasPrice = state.UpdateBaseGasPrice(params)
-			})
-
-			// An overflow should have occurred.
-			if baseGasPrice.Equal(params.MinBaseGasPrice) {
-				return
-			}
-
-			// Update the height and try again.
-			state.IncrementHeight()
-		}
-	})
 }
 
 func TestState_UpdateLearningRate(t *testing.T) {
@@ -432,7 +403,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.TargetBlockUtilization
+		state.Window[0] = params.TargetBlockUtilization()
 
 		state.UpdateLearningRate(params)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
@@ -465,7 +436,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.TargetBlockUtilization + 50000
+		state.Window[0] = params.TargetBlockUtilization() + 50000
 
 		state.UpdateLearningRate(params)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")
@@ -501,7 +472,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization()
 		}
 
 		state.UpdateLearningRate(params)
@@ -556,7 +527,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 			if i%2 == 0 {
 				state.Window[i] = params.MaxBlockUtilization
 			} else {
-				state.Window[i] = params.TargetBlockUtilization + 1
+				state.Window[i] = params.TargetBlockUtilization() + 1
 			}
 		}
 
@@ -572,7 +543,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 		params := types.DefaultParams()
 
 		netUtilization := state.GetNetUtilization(params)
-		expectedUtilization := math.NewInt(0).Sub(math.NewIntFromUint64(params.TargetBlockUtilization))
+		expectedUtilization := math.NewInt(0).Sub(math.NewIntFromUint64(params.TargetBlockUtilization()))
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -580,7 +551,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.TargetBlockUtilization
+		state.Window[0] = params.TargetBlockUtilization()
 
 		netUtilization := state.GetNetUtilization(params)
 		expectedUtilization := math.NewInt(0)
@@ -594,7 +565,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 		state.Window[0] = params.MaxBlockUtilization
 
 		netUtilization := state.GetNetUtilization(params)
-		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization - params.TargetBlockUtilization)
+		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization - params.TargetBlockUtilization())
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -605,7 +576,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 		netUtilization := state.GetNetUtilization(params)
 
 		multiple := math.NewIntFromUint64(uint64(len(state.Window)))
-		expectedUtilization := math.NewInt(0).Sub(math.NewIntFromUint64(params.TargetBlockUtilization)).Mul(multiple)
+		expectedUtilization := math.NewInt(0).Sub(math.NewIntFromUint64(params.TargetBlockUtilization())).Mul(multiple)
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -620,7 +591,7 @@ func TestState_GetNetUtilization(t *testing.T) {
 		netUtilization := state.GetNetUtilization(params)
 
 		multiple := math.NewIntFromUint64(uint64(len(state.Window)))
-		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization).Sub(math.NewIntFromUint64(params.TargetBlockUtilization)).Mul(multiple)
+		expectedUtilization := math.NewIntFromUint64(params.MaxBlockUtilization).Sub(math.NewIntFromUint64(params.TargetBlockUtilization())).Mul(multiple)
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -649,14 +620,14 @@ func TestState_GetNetUtilization(t *testing.T) {
 			if i%2 == 0 {
 				state.Window[i] = params.MaxBlockUtilization
 			} else {
-				state.Window[i] = params.TargetBlockUtilization
+				state.Window[i] = params.TargetBlockUtilization()
 			}
 		}
 
 		netUtilization := state.GetNetUtilization(params)
 		first := math.NewIntFromUint64(params.MaxBlockUtilization).Mul(math.NewIntFromUint64(params.Window / 2))
-		second := math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window / 2))
-		expectedUtilization := first.Add(second).Sub(math.NewIntFromUint64(params.TargetBlockUtilization).Mul(math.NewIntFromUint64(params.Window)))
+		second := math.NewIntFromUint64(params.TargetBlockUtilization()).Mul(math.NewIntFromUint64(params.Window / 2))
+		expectedUtilization := first.Add(second).Sub(math.NewIntFromUint64(params.TargetBlockUtilization()).Mul(math.NewIntFromUint64(params.Window)))
 		require.True(t, expectedUtilization.Equal(netUtilization))
 	})
 
@@ -665,7 +636,6 @@ func TestState_GetNetUtilization(t *testing.T) {
 		state.Window = make([]uint64, 4)
 
 		params := types.DefaultAIMDParams()
-		params.TargetBlockUtilization = 100
 		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 100
@@ -683,7 +653,6 @@ func TestState_GetNetUtilization(t *testing.T) {
 		state.Window = make([]uint64, 4)
 
 		params := types.DefaultAIMDParams()
-		params.TargetBlockUtilization = 100
 		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 0
@@ -711,7 +680,7 @@ func TestState_GetAverageUtilization(t *testing.T) {
 		state := types.DefaultState()
 		params := types.DefaultParams()
 
-		state.Window[0] = params.TargetBlockUtilization
+		state.Window[0] = params.TargetBlockUtilization()
 
 		avgUtilization := state.GetAverageUtilization(params)
 		expectedUtilization := math.LegacyMustNewDecFromStr("0.5")
@@ -743,7 +712,7 @@ func TestState_GetAverageUtilization(t *testing.T) {
 		params := types.DefaultAIMDParams()
 
 		for i := 0; i < len(state.Window); i++ {
-			state.Window[i] = params.TargetBlockUtilization
+			state.Window[i] = params.TargetBlockUtilization()
 		}
 
 		avgUtilization := state.GetAverageUtilization(params)
@@ -789,7 +758,7 @@ func TestState_GetAverageUtilization(t *testing.T) {
 			if i%2 == 0 {
 				state.Window[i] = params.MaxBlockUtilization
 			} else {
-				state.Window[i] = params.TargetBlockUtilization
+				state.Window[i] = params.TargetBlockUtilization()
 			}
 		}
 
@@ -803,7 +772,6 @@ func TestState_GetAverageUtilization(t *testing.T) {
 		state.Window = make([]uint64, 4)
 
 		params := types.DefaultAIMDParams()
-		params.TargetBlockUtilization = 100
 		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 100
@@ -822,7 +790,6 @@ func TestState_GetAverageUtilization(t *testing.T) {
 
 		params := types.DefaultAIMDParams()
 		params.Window = 4
-		params.TargetBlockUtilization = 100
 		params.MaxBlockUtilization = 200
 
 		state.Window[0] = 0
