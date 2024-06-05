@@ -165,6 +165,7 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 
 		consumedFeeAmount := minGasPrice.Amount.Mul(gcDec)
 		limitFee := minGasPrice.Amount.Mul(glDec)
+
 		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
 		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
 
@@ -180,12 +181,9 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 
 		if isAnte {
 			tip = payCoin.Sub(requiredFee)
-			//  set fee coins to be required amount if checking
 			payCoin = requiredFee
 		} else {
-			// tip is the difference between payCoin and the required fee
-			tip = payCoin.Sub(requiredFee)
-			// set fee coin to be ONLY the consumed amount if we are calculated consumed fee to deduct
+			tip = payCoin.Sub(consumedFee)
 			payCoin = consumedFee
 		}
 	}
