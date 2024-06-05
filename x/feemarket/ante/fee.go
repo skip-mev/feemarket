@@ -113,12 +113,12 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
 
 	if !simulate {
-		fee, tip, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
+		_, _, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
 
-		priorityFee, err := dfd.resolveTxPriorityCoins(ctx, fee.Add(tip), params.FeeDenom)
+		priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
 		}
@@ -217,9 +217,7 @@ func GetTxPriority(fee sdk.Coin, gasLimit int64, currentGasPrice sdk.DecCoin) in
 	// overflow panic protection
 	if scaledGasPrice.GTE(sdkmath.LegacyNewDec(math.MaxInt64)) {
 		return math.MaxInt64
-	}
-
-	if scaledGasPrice.LTE(sdkmath.LegacyOneDec()) {
+	} else if scaledGasPrice.LTE(sdkmath.LegacyOneDec()) {
 		return 0
 	}
 
