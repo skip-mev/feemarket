@@ -21,7 +21,7 @@ type input struct {
 // TestGetTxPriority ensures that tx priority is properly bounded
 func TestGetTxPriority(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
-		inputs := CreateRandomInput(t)
+		inputs := createRandomInput(t)
 
 		priority := ante.GetTxPriority(inputs.payFee, inputs.gasLimit, inputs.currentGasPrice)
 		require.GreaterOrEqual(t, priority, int64(0))
@@ -30,7 +30,7 @@ func TestGetTxPriority(t *testing.T) {
 }
 
 // CreateRandomInput returns a random inputs to the priority function.
-func CreateRandomInput(t *rapid.T) input {
+func createRandomInput(t *rapid.T) input {
 	denom := "skip"
 
 	price := rapid.Int64Range(1, 1_000_000_000).Draw(t, "gas price")
