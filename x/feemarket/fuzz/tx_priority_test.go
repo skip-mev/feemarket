@@ -24,8 +24,8 @@ func TestGetTxPriority(t *testing.T) {
 		inputs := CreateRandomInput(t)
 
 		priority := ante.GetTxPriority(inputs.payFee, inputs.gasLimit, inputs.currentGasPrice)
-		require.GreaterOrEqual(t, priority, 0)
-		require.LessOrEqual(t, priority, math.MaxInt64)
+		require.GreaterOrEqual(t, priority, int64(0))
+		require.LessOrEqual(t, priority, int64(math.MaxInt64))
 	})
 }
 
@@ -33,9 +33,14 @@ func TestGetTxPriority(t *testing.T) {
 func CreateRandomInput(t *rapid.T) input {
 	denom := "skip"
 
-	price := rapid.Int64Range(1, math.MaxInt64).Draw(t, "gas price")
-	gasLimit := rapid.Int64Range(1, math.MaxInt64).Draw(t, "gas limit")
-	priceDec := sdkmath.LegacyNewDecWithPrec(price, 1000)
+	price := rapid.Int64Range(1, 1_000_000_000).Draw(t, "gas price")
+	priceDec := sdkmath.LegacyNewDecWithPrec(price, 6)
+
+	gasLimit := rapid.Int64Range(1_000_000, 1_000_000_000_000).Draw(t, "gas limit")
+
+	if priceDec.MulInt64(gasLimit).GTE(sdkmath.LegacyNewDec(math.MaxInt64)) {
+		t.Fatalf("not supposed to happen")
+	}
 
 	payFeeAmt := rapid.Int64Range(priceDec.MulInt64(gasLimit).TruncateInt64(), math.MaxInt64).Draw(t, "fee amount")
 
