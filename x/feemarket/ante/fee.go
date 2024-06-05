@@ -123,7 +123,12 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 			return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
 		}
 
-		ctx = ctx.WithPriority(getTxPriority(priorityFee, int64(gas)))
+		baseGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, params.FeeDenom)
+		if err != nil {
+			return ctx, err
+		}
+
+		ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice))
 		return next(ctx, tx, simulate)
 	}
 	return next(ctx, tx, simulate)
@@ -147,11 +152,11 @@ func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee s
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
 // fees given the current state of the fee market. Returns an error if insufficient fees.
-func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas int64, isAnte bool) (payCoin sdk.Coin, tip sdk.Coin, err error) {
+func CheckTxFee(ctx sdk.Context, gasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas int64, isAnte bool) (payCoin sdk.Coin, tip sdk.Coin, err error) {
 	payCoin = feeCoin
 
 	// Ensure that the provided fees meet the minimum
-	if !minGasPrice.IsZero() {
+	if !gasPrice.IsZero() {
 		var (
 			requiredFee sdk.Coin
 			consumedFee sdk.Coin
@@ -163,18 +168,18 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 		gcDec := sdkmath.LegacyNewDec(gasConsumed)
 		glDec := sdkmath.LegacyNewDec(feeGas)
 
-		consumedFeeAmount := minGasPrice.Amount.Mul(gcDec)
-		limitFee := minGasPrice.Amount.Mul(glDec)
+		consumedFeeAmount := gasPrice.Amount.Mul(gcDec)
+		limitFee := gasPrice.Amount.Mul(glDec)
 
-		consumedFee = sdk.NewCoin(minGasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
-		requiredFee = sdk.NewCoin(minGasPrice.Denom, limitFee.Ceil().RoundInt())
+		consumedFee = sdk.NewCoin(gasPrice.Denom, consumedFeeAmount.Ceil().RoundInt())
+		requiredFee = sdk.NewCoin(gasPrice.Denom, limitFee.Ceil().RoundInt())
 
 		if !payCoin.IsGTE(requiredFee) {
 			return sdk.Coin{}, sdk.Coin{}, sdkerrors.ErrInsufficientFee.Wrapf(
 				"got: %s required: %s, minGasPrice: %s, gas: %d",
 				payCoin,
 				requiredFee,
-				minGasPrice,
+				gasPrice,
 				gasConsumed,
 			)
 		}
@@ -191,17 +196,32 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 	return payCoin, tip, nil
 }
 
-// getTxPriority returns a naive tx priority based on the amount of  gas price provided in a transaction.
-func getTxPriority(fee sdk.Coin, gas int64) int64 {
-	var priority int64
-	p := int64(math.MaxInt64)
-	gasPrice := fee.Amount.QuoRaw(gas)
-	if gasPrice.IsInt64() {
-		p = gasPrice.Int64()
-	}
-	if p < priority {
-		priority = p
+const (
+	// gasPricePrecision is the amount of digit precision to scale the gas prices to.
+	gasPricePrecision = 6
+)
+
+// GetTxPriority returns a naive tx priority based on the amount of gas price provided in a transaction.
+//
+// The fee amount is divided by the gasLimit to calculate "Effective Gas Price".
+// This value is then normalized and scaled into an integer, so it can be used as a priority.
+//
+//	effectiveGasPrice = feeAmount / gas limit (denominated in fee per gas)
+//	normalizedGasPrice = effectiveGasPrice / currentGasPrice (floor is 1.  The minimum effective gas price can ever be is current gas price)
+//	scaledGasPrice = normalizedGasPrice * 10 ^ gasPricePrecision (amount of decimal places in the normalized gas price to consider when converting to int64).
+func GetTxPriority(fee sdk.Coin, gasLimit int64, currentGasPrice sdk.DecCoin) int64 {
+	effectiveGasPrice := fee.Amount.ToLegacyDec().QuoInt64(gasLimit)
+	normalizedGasPrice := effectiveGasPrice.Quo(currentGasPrice.Amount)
+	scaledGasPrice := normalizedGasPrice.MulInt64(int64(math.Pow10(gasPricePrecision)))
+
+	// overflow panic protection
+	if scaledGasPrice.GTE(sdkmath.LegacyNewDec(math.MaxInt64)) {
+		return math.MaxInt64
 	}
 
-	return priority
+	if scaledGasPrice.LTE(sdkmath.LegacyOneDec()) {
+		return 0
+	}
+
+	return scaledGasPrice.TruncateInt64()
 }
