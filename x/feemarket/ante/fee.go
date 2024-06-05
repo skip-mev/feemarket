@@ -113,14 +113,36 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
 
 	if !simulate {
-		_, tip, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
+		fee, tip, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
-		ctx = ctx.WithPriority(getTxPriority(tip, int64(gas)))
+
+		priorityFee, err := dfd.resolveTxPriorityCoins(ctx, fee.Add(tip), params.FeeDenom)
+		if err != nil {
+			return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
+		}
+
+		ctx = ctx.WithPriority(getTxPriority(priorityFee, int64(gas)))
 		return next(ctx, tx, simulate)
 	}
 	return next(ctx, tx, simulate)
+}
+
+// resolveTxPriorityCoins converts the coins to the proper denom used for tx prioritization calculation.
+func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee sdk.Coin, baseDenom string) (sdk.Coin, error) {
+	if fee.Denom == baseDenom {
+		return fee, nil
+	}
+
+	feeDec := sdk.NewDecCoinFromCoin(fee)
+	convertedDec, err := dfd.feemarketKeeper.GetDenomResolver().ConvertToDenom(ctx, feeDec, baseDenom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// truncate down
+	return sdk.NewCoin(baseDenom, convertedDec.Amount.TruncateInt()), nil
 }
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient
@@ -171,10 +193,7 @@ func CheckTxFee(ctx sdk.Context, minGasPrice sdk.DecCoin, feeCoin sdk.Coin, feeG
 	return payCoin, tip, nil
 }
 
-// getTxPriority returns a naive tx priority based on the amount of the smallest denomination of the gas price
-// provided in a transaction.
-// NOTE: This implementation should be used with a great consideration as it opens potential attack vectors
-// where txs with multiple coins could not be prioritized as expected.
+// getTxPriority returns a naive tx priority based on the amount of  gas price provided in a transaction.
 func getTxPriority(fee sdk.Coin, gas int64) int64 {
 	var priority int64
 	p := int64(math.MaxInt64)
