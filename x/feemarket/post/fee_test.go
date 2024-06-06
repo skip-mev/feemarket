@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/mock"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/post"
@@ -154,7 +152,8 @@ func TestPostHandle(t *testing.T) {
 		resolvableDenom = "atom"
 	)
 
-	gasLimit := antesuite.NewTestGasLimit()
+	// exact cost of transaction
+	gasLimit := uint64(25635)
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
 	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
 	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
