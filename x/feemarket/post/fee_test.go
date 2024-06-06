@@ -153,7 +153,7 @@ func TestPostHandle(t *testing.T) {
 	)
 
 	// exact cost of transaction
-	gasLimit := uint64(27284)
+	gasLimit := uint64(25635)
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
 	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
 	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
