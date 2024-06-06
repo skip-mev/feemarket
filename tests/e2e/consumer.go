@@ -34,8 +34,8 @@ func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos
 				Version:       providerVersion,
 				NumValidators: &providerNumValidators,
 				ChainConfig: ibc.ChainConfig{
-					GasPrices:      "1uatom",
-					GasAdjustment:  1.5,
+					GasPrices:      "0uatom",
+					GasAdjustment:  0.0,
 					ChainID:        providerChainID,
 					TrustingPeriod: "336h",
 					ModifyGenesis: cosmos.ModifyGenesis(
@@ -43,7 +43,8 @@ func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos
 							cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"),
 						},
 					),
-				}},
+				},
+			},
 		},
 	)
 
