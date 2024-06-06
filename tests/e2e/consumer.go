@@ -43,7 +43,8 @@ func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos
 							cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"),
 						},
 					),
-				}},
+				},
+			},
 		},
 	)
 
