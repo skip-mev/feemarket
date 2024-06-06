@@ -5,30 +5,63 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
+
+type feeMarketCheckDecorator struct {
+	feemarketKeeper FeeMarketKeeper
+}
+
+func newFeeMarketCheckDecorator(fmk FeeMarketKeeper) feeMarketCheckDecorator {
+	return feeMarketCheckDecorator{
+		feemarketKeeper: fmk,
+	}
+}
 
 // FeeMarketCheckDecorator checks sufficient fees from the fee payer based off of the current
 // state of the feemarket.
 // If the fee payer does not have the funds to pay for the fees, return an InsufficientFunds error.
 // Call next AnteHandler if fees successfully checked.
+//
+// If x/feemarket is disabled (params.Enabled == false), the handler will fall back to the default
+// Cosmos SDK fee deduction antehandler.
+//
 // CONTRACT: Tx must implement FeeTx interface
 type FeeMarketCheckDecorator struct {
-	feemarketKeeper FeeMarketKeeper
+	feemarketKeeper    FeeMarketKeeper
+	feemarketDecorator feeMarketCheckDecorator
+	cosmosDecorator    ante.DeductFeeDecorator
 }
 
-func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper) FeeMarketCheckDecorator {
+func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper, ak AccountKeeper, bk BankKeeper, fgk FeeGrantKeeper, txfc ante.TxFeeChecker) FeeMarketCheckDecorator {
 	return FeeMarketCheckDecorator{
 		feemarketKeeper: fmk,
+		feemarketDecorator: newFeeMarketCheckDecorator(
+			fmk,
+		),
+		cosmosDecorator: ante.NewDeductFeeDecorator(ak, bk, fgk, txfc),
 	}
 }
 
-// AnteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
-func (dfd FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
+// AnteHandle calls the feemarket internal antehandler if the keeper is enabled.  If disabled, the Cosmos SDK
+// fee antehandler is fallen back to.
+func (d FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
+	params, err := d.feemarketKeeper.GetParams(ctx)
+	if err != nil {
+		return ctx, err
+	}
+	if params.Enabled {
+		return d.feemarketDecorator.anteHandle(ctx, tx, simulate, next)
+	}
+	return d.cosmosDecorator.AnteHandle(ctx, tx, simulate, next)
+}
+
+// anteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
+func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
 	// GenTx consume no fee
 	if ctx.BlockHeight() == 0 {
 		return next(ctx, tx, simulate)

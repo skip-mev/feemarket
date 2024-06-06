@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-
-	"github.com/skip-mev/feemarket/x/feemarket"
-
-	sdkmath "cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
@@ -19,6 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
+	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 

@@ -39,7 +39,7 @@ func TestAnteHandle(t *testing.T) {
 			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+			ExpErr:   sdkerrors.ErrOutOfGas,
 		},
 		// test --gas=auto flag settings
 		// when --gas=auto is set, cosmos-sdk sets gas=0 and simulate=true
@@ -74,7 +74,7 @@ func TestAnteHandle(t *testing.T) {
 			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+			ExpErr:   sdkerrors.ErrOutOfGas,
 		},
 		{
 			Name: "signer has enough funds, should pass",

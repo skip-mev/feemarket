@@ -99,6 +99,10 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
 			s.FeeMarketKeeper,
+			s.AccountKeeper,
+			s.BankKeeper,
+			s.FeeGrantKeeper,
+			nil,
 		),
 		authante.NewSigGasConsumeDecorator(s.AccountKeeper, authante.DefaultSigVerificationGasConsumer),
 	}

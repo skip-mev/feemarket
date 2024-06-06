@@ -352,6 +352,8 @@ func (s *TestSuite) TestSendTxIncrease() {
 	gas := int64(20000100)
 	sendAmt := int64(100)
 
+	params := s.QueryParams()
+
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
 		for {
@@ -419,7 +421,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 			baseGasPrice = s.QueryDefaultGasPrice()
 			s.T().Log("gas price", baseGasPrice.String())
 
-			if baseGasPrice.Amount.GT(math.LegacyNewDec(10)) {
+			if baseGasPrice.Amount.GT(params.MinBaseGasPrice.Mul(math.LegacyNewDec(10))) {
 				break
 			}
 		}
