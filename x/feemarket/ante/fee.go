@@ -58,7 +58,7 @@ func (d FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate
 		return d.feemarketDecorator.anteHandle(ctx, tx, simulate, next)
 	}
 
-	return d.fallback.AnteHandle(ctx, tx, simulate, next)
+	return d.fallbackDecorator.AnteHandle(ctx, tx, simulate, next)
 }
 
 // anteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
