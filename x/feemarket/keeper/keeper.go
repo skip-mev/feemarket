@@ -70,15 +70,6 @@ func (k *Keeper) SetDenomResolver(resolver types.DenomResolver) {
 	k.resolver = resolver
 }
 
-// GetDenomResolver gets the keeper's denom resolver.
-func (k *Keeper) GetDenomResolver() (types.DenomResolver, error) {
-	if k.resolver == nil {
-		return nil, types.ErrResolverNotSet
-	}
-
-	return k.resolver, nil
-}
-
 // GetState returns the feemarket module's state.
 func (k *Keeper) GetState(ctx sdk.Context) (types.State, error) {
 	store := ctx.KVStore(k.storeKey)
