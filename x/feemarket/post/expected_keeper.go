@@ -46,6 +46,6 @@ type FeeMarketKeeper interface {
 	GetParams(ctx sdk.Context) (feemarkettypes.Params, error)
 	SetParams(ctx sdk.Context, params feemarkettypes.Params) error
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
-	GetDenomResolver() feemarkettypes.DenomResolver
+	ResolveToDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error)
 	GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, error)
 }
