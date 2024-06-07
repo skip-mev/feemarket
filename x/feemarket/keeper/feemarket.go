@@ -90,7 +90,7 @@ func (k *Keeper) GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, err
 	if params.FeeDenom == denom {
 		gasPrice = sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
 	} else {
-		gasPrice, err = k.GetDenomResolver().ConvertToDenom(ctx, sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice), denom)
+		gasPrice, err = k.ResolveToDenom(ctx, sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice), denom)
 		if err != nil {
 			return sdk.DecCoin{}, err
 		}
@@ -120,7 +120,7 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 	}
 
 	for _, denom := range extraDenoms {
-		gasPrice, err := k.GetDenomResolver().ConvertToDenom(ctx, minGasPrice, denom)
+		gasPrice, err := k.ResolveToDenom(ctx, minGasPrice, denom)
 		if err != nil {
 			k.Logger(ctx).Info(
 				"failed to convert gas price",
