@@ -47,7 +47,7 @@ func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
 		Ports:       []string{"8080", "8081"},
 		StartCmd: []string{
 			"slinky",
-			"--oracle-config-path", "/oracle/oracle.json",
+			"--oracle-config", "/oracle/oracle.json",
 		},
 		ValidatorProcess: true,
 		PreStart:         true,
@@ -56,7 +56,11 @@ func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
 
 func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
 	cfg := marketmap.DefaultAPIConfig
-	cfg.URL = url
+	cfg.Endpoints = []oracleconfig.Endpoint{
+		{
+			URL: url,
+		},
+	}
 
 	// Create the oracle config
 	oracleConfig := oracleconfig.OracleConfig{
@@ -64,9 +68,9 @@ func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
 		MaxPriceAge:    1 * time.Minute,
 		Host:           "0.0.0.0",
 		Port:           "8080",
-		Providers: []oracleconfig.ProviderConfig{
-			{
-				Name: "marketmap_api",
+		Providers: map[string]oracleconfig.ProviderConfig{
+			marketmap.Name: {
+				Name: marketmap.Name,
 				API:  cfg,
 				Type: "market_map_provider",
 			},
@@ -111,6 +115,8 @@ type TestSuite struct {
 	// default token denom
 	denom string
 
+	gasPrices string
+
 	// authority address
 	authority sdk.AccAddress
 
@@ -134,6 +140,13 @@ type Option func(*TestSuite)
 func WithDenom(denom string) Option {
 	return func(s *TestSuite) {
 		s.denom = denom
+	}
+}
+
+// WithGasPrices sets gas prices.
+func WithGasPrices(gasPrices string) Option {
+	return func(s *TestSuite) {
+		s.gasPrices = gasPrices
 	}
 }
 
@@ -170,6 +183,7 @@ func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerI
 		spec:         spec,
 		oracleConfig: DefaultOracleSidecar(oracleImage),
 		denom:        defaultDenom,
+		gasPrices:    "",
 		authority:    authtypes.NewModuleAddress(govtypes.ModuleName),
 		icc:          DefaultInterchainConstructor,
 		cc:           DefaultChainConstructor,
@@ -192,7 +206,7 @@ func (s *TestSuite) WithKeyringOptions(cdc codec.Codec, opts keyring.Option) {
 func (s *TestSuite) SetupSuite() {
 	// build the chain
 	s.T().Log("building chain with spec", s.spec)
-	chains := s.cc(s.T(), s.spec)
+	chains := s.cc(s.T(), s.spec, s.gasPrices)
 
 	// build the interchain
 	s.T().Log("building interchain")
@@ -414,7 +428,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 
 	baseGasPrice := s.QueryDefaultGasPrice()
 	gas := int64(20000100)
-	sendAmt := int64(100)
+	sendAmt := int64(200)
 
 	params := s.QueryParams()
 

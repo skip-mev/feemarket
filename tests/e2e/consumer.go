@@ -16,12 +16,12 @@ import (
 
 var (
 	providerChainID       = "provider-1"
-	providerNumValidators = 4
-	providerVersion       = "v5.0.0"
+	providerNumValidators = int(4)
+	providerVersion       = "v5.0.0-rc0"
 )
 
 // CCVChainConstructor is a constructor for the CCV chain
-func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos.CosmosChain {
+func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec, gasPrices string) []*cosmos.CosmosChain {
 	// require that we only have 4 validators
 	require.Equal(t, 4, *spec.NumValidators)
 
@@ -29,22 +29,16 @@ func CCVChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos
 		zaptest.NewLogger(t),
 		[]*interchaintest.ChainSpec{
 			spec,
-			{
-				Name:          "ics-provider",
-				Version:       providerVersion,
-				NumValidators: &providerNumValidators,
-				ChainConfig: ibc.ChainConfig{
-					GasPrices:      "0uatom",
-					GasAdjustment:  0.0,
-					ChainID:        providerChainID,
-					TrustingPeriod: "336h",
-					ModifyGenesis: cosmos.ModifyGenesis(
-						[]cosmos.GenesisKV{
-							cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"),
-						},
-					),
-				},
-			},
+			{Name: "ics-provider", Version: providerVersion, NumValidators: &providerNumValidators, ChainConfig: ibc.ChainConfig{
+				GasPrices:      gasPrices,
+				ChainID:        providerChainID,
+				TrustingPeriod: "336h",
+				ModifyGenesis: cosmos.ModifyGenesis(
+					[]cosmos.GenesisKV{
+						cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"),
+					},
+				),
+			}},
 		},
 	)
 
@@ -86,7 +80,7 @@ func CCVInterchainConstructor(ctx context.Context, t *testing.T, chains []*cosmo
 		zaptest.NewLogger(t),
 	).Build(t, client, network)
 
-	path := "feemarket-ibc-path"
+	path := "slinky-ibc-path"
 	// create the interchain
 	ic := interchaintest.NewInterchain().
 		AddChain(chains[0]).

@@ -16,7 +16,7 @@ import (
 // ChainConstructor returns the chain that will be using slinky, as well as any additional chains
 // that are needed for the test. The first chain returned will be the chain that is used in the
 // slinky integration tests.
-type ChainConstructor func(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos.CosmosChain
+type ChainConstructor func(t *testing.T, spec *interchaintest.ChainSpec, gasPrices string) []*cosmos.CosmosChain
 
 // Interchain is an interface representing the set of chains that are used in the slinky e2e tests, as well
 // as any additional relayer / ibc-path information
@@ -32,7 +32,7 @@ type InterchainConstructor func(ctx context.Context, t *testing.T, chains []*cos
 
 // DefaultChainConstructor is the default construct of a chan that will be used in the feemarket
 // integration tests. There is only a single chain that is created.
-func DefaultChainConstructor(t *testing.T, spec *interchaintest.ChainSpec) []*cosmos.CosmosChain {
+func DefaultChainConstructor(t *testing.T, spec *interchaintest.ChainSpec, _ string) []*cosmos.CosmosChain {
 	// require that NumFullNodes == NumValidators == 4
 	require.Equal(t, 4, *spec.NumValidators)
 

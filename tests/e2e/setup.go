@@ -123,7 +123,7 @@ func (s *TestSuite) QueryDefaultGasPrice() sdk.DecCoin {
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.GasPrice(context.Background(), &types.GasPriceRequest{
-		Denom: sdk.DefaultBondDenom,
+		Denom: s.denom,
 	})
 	s.Require().NoError(err)
 
