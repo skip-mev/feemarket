@@ -19,7 +19,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.7
 	github.com/pelletier/go-toml/v2 v2.2.2
 	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
-	github.com/skip-mev/feemarket v0.0.1-alpha.2.0.20240529211541-57d7094237da
+	github.com/skip-mev/feemarket v1.0.0
 	github.com/skip-mev/slinky v1.0.0
 	github.com/strangelove-ventures/interchaintest/v8 v8.4.0
 	github.com/stretchr/testify v1.9.0
