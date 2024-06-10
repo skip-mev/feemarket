@@ -7,7 +7,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -32,22 +31,23 @@ func newFeeMarketCheckDecorator(fmk FeeMarketKeeper) feeMarketCheckDecorator {
 //
 // CONTRACT: Tx must implement FeeTx interface
 type FeeMarketCheckDecorator struct {
-	feemarketKeeper    FeeMarketKeeper
+	feemarketKeeper FeeMarketKeeper
+
 	feemarketDecorator feeMarketCheckDecorator
-	cosmosDecorator    ante.DeductFeeDecorator
+	fallbackDecorator  sdk.AnteDecorator
 }
 
-func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper, ak AccountKeeper, bk BankKeeper, fgk FeeGrantKeeper, txfc ante.TxFeeChecker) FeeMarketCheckDecorator {
+func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper, fallbackDecorator sdk.AnteDecorator) FeeMarketCheckDecorator {
 	return FeeMarketCheckDecorator{
 		feemarketKeeper: fmk,
 		feemarketDecorator: newFeeMarketCheckDecorator(
 			fmk,
 		),
-		cosmosDecorator: ante.NewDeductFeeDecorator(ak, bk, fgk, txfc),
+		fallbackDecorator: fallbackDecorator,
 	}
 }
 
-// AnteHandle calls the feemarket internal antehandler if the keeper is enabled.  If disabled, the Cosmos SDK
+// AnteHandle calls the feemarket internal antehandler if the keeper is enabled.  If disabled, the fallback
 // fee antehandler is fallen back to.
 func (d FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
 	params, err := d.feemarketKeeper.GetParams(ctx)
@@ -57,7 +57,13 @@ func (d FeeMarketCheckDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate
 	if params.Enabled {
 		return d.feemarketDecorator.anteHandle(ctx, tx, simulate, next)
 	}
-	return d.cosmosDecorator.AnteHandle(ctx, tx, simulate, next)
+
+	// only use fallback if not nil
+	if d.fallbackDecorator != nil {
+		return d.fallbackDecorator.AnteHandle(ctx, tx, simulate, next)
+	}
+
+	return next(ctx, tx, simulate)
 }
 
 // anteHandle checks if the tx provides sufficient fee to cover the required fee from the fee market.
