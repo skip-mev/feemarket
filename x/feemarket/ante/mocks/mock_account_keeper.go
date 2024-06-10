@@ -14,40 +14,12 @@ type AccountKeeper struct {
 	mock.Mock
 }
 
-<<<<<<< HEAD
-=======
-// AddressCodec provides a mock function with given fields:
-func (_m *AccountKeeper) AddressCodec() address.Codec {
-	ret := _m.Called()
-
-	var r0 address.Codec
-	if rf, ok := ret.Get(0).(func() address.Codec); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(address.Codec)
-		}
-	}
-
-	return r0
-}
-
->>>>>>> bcd3fc7 (fix: panic protection for `DenomResolver` (#104))
 // GetAccount provides a mock function with given fields: ctx, addr
 func (_m *AccountKeeper) GetAccount(ctx types.Context, addr types.AccAddress) authtypes.AccountI {
 	ret := _m.Called(ctx, addr)
 
-<<<<<<< HEAD
-	if len(ret) == 0 {
-		panic("no return value specified for GetAccount")
-	}
-
 	var r0 authtypes.AccountI
 	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress) authtypes.AccountI); ok {
-=======
-	var r0 types.AccountI
-	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress) types.AccountI); ok {
->>>>>>> bcd3fc7 (fix: panic protection for `DenomResolver` (#104))
 		r0 = rf(ctx, addr)
 	} else {
 		if ret.Get(0) != nil {
@@ -62,17 +34,8 @@ func (_m *AccountKeeper) GetAccount(ctx types.Context, addr types.AccAddress) au
 func (_m *AccountKeeper) GetModuleAccount(ctx types.Context, name string) authtypes.ModuleAccountI {
 	ret := _m.Called(ctx, name)
 
-<<<<<<< HEAD
-	if len(ret) == 0 {
-		panic("no return value specified for GetModuleAccount")
-	}
-
 	var r0 authtypes.ModuleAccountI
 	if rf, ok := ret.Get(0).(func(types.Context, string) authtypes.ModuleAccountI); ok {
-=======
-	var r0 types.ModuleAccountI
-	if rf, ok := ret.Get(0).(func(context.Context, string) types.ModuleAccountI); ok {
->>>>>>> bcd3fc7 (fix: panic protection for `DenomResolver` (#104))
 		r0 = rf(ctx, name)
 	} else {
 		if ret.Get(0) != nil {
@@ -117,17 +80,8 @@ func (_m *AccountKeeper) GetParams(ctx types.Context) authtypes.Params {
 func (_m *AccountKeeper) NewAccountWithAddress(ctx types.Context, addr types.AccAddress) authtypes.AccountI {
 	ret := _m.Called(ctx, addr)
 
-<<<<<<< HEAD
-	if len(ret) == 0 {
-		panic("no return value specified for NewAccountWithAddress")
-	}
-
 	var r0 authtypes.AccountI
 	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress) authtypes.AccountI); ok {
-=======
-	var r0 types.AccountI
-	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress) types.AccountI); ok {
->>>>>>> bcd3fc7 (fix: panic protection for `DenomResolver` (#104))
 		r0 = rf(ctx, addr)
 	} else {
 		if ret.Get(0) != nil {
