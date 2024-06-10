@@ -56,8 +56,8 @@ func (k *Keeper) GetAuthority() string {
 	return k.authority
 }
 
-// ResolveToBaseDenom converts the given coin to the given denomination.
-func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error) {
+// ResolveToDenom converts the given coin to the given denomination.
+func (k *Keeper) ResolveToDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error) {
 	if k.resolver == nil {
 		return sdk.DecCoin{}, types.ErrResolverNotSet
 	}
@@ -68,11 +68,6 @@ func (k *Keeper) ResolveToBaseDenom(ctx sdk.Context, coin sdk.DecCoin, denom str
 // SetDenomResolver sets the keeper's denom resolver.
 func (k *Keeper) SetDenomResolver(resolver types.DenomResolver) {
 	k.resolver = resolver
-}
-
-// GetDenomResolver gets the keeper's denom resolver.
-func (k *Keeper) GetDenomResolver() types.DenomResolver {
-	return k.resolver
 }
 
 // GetState returns the feemarket module's state.

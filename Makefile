@@ -208,6 +208,8 @@ format: use-main
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/skip-mev/feemarket
 
 mocks: use-main
+	@echo "--> generating mocks"
+	@go install github.com/vektra/mockery/v2
 	@go generate ./...
 	make format
 

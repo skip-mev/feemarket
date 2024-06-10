@@ -141,7 +141,7 @@ func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee s
 	}
 
 	feeDec := sdk.NewDecCoinFromCoin(fee)
-	convertedDec, err := dfd.feemarketKeeper.GetDenomResolver().ConvertToDenom(ctx, feeDec, baseDenom)
+	convertedDec, err := dfd.feemarketKeeper.ResolveToDenom(ctx, feeDec, baseDenom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
