@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -36,6 +37,83 @@ func init() {
 	r = rand.New(s)
 }
 
+<<<<<<< HEAD
+=======
+func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
+	return ibc.SidecarConfig{
+		ProcessName: "oracle",
+		Image:       image,
+		HomeDir:     "/oracle",
+		Ports:       []string{"8080", "8081"},
+		StartCmd: []string{
+			"slinky",
+			"--oracle-config", "/oracle/oracle.json",
+		},
+		ValidatorProcess: true,
+		PreStart:         true,
+	}
+}
+
+func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
+	cfg := marketmap.DefaultAPIConfig
+	cfg.Endpoints = []oracleconfig.Endpoint{
+		{
+			URL: url,
+		},
+	}
+
+	// Create the oracle config
+	oracleConfig := oracleconfig.OracleConfig{
+		UpdateInterval: 500 * time.Millisecond,
+		MaxPriceAge:    1 * time.Minute,
+		Host:           "0.0.0.0",
+		Port:           "8080",
+		Providers: map[string]oracleconfig.ProviderConfig{
+			marketmap.Name: {
+				Name: marketmap.Name,
+				API:  cfg,
+				Type: "market_map_provider",
+			},
+		},
+	}
+
+	return oracleConfig
+}
+
+func DefaultMarketMap() mmtypes.MarketMap {
+	return mmtypes.MarketMap{}
+}
+
+func GetOracleSideCar(node *cosmos.ChainNode) *cosmos.SidecarProcess {
+	if len(node.Sidecars) == 0 {
+		panic("no sidecars found")
+	}
+	return node.Sidecars[0]
+}
+
+type TestTxConfig struct {
+	SmallSendsNum          int
+	LargeSendsNum          int
+	TargetIncreaseGasPrice math.LegacyDec
+}
+
+func (tx *TestTxConfig) Validate() error {
+	if tx.SmallSendsNum < 1 || tx.LargeSendsNum < 1 {
+		return fmt.Errorf("sends num should be greater than 1")
+	}
+
+	if tx.TargetIncreaseGasPrice.IsNil() {
+		return fmt.Errorf("target increase gas price is nil")
+	}
+
+	if tx.TargetIncreaseGasPrice.LTE(math.LegacyZeroDec()) {
+		return fmt.Errorf("target increase gas price is less than or equal to 0")
+	}
+
+	return nil
+}
+
+>>>>>>> daca8c8 (test: make extendable (#112))
 // TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
 	suite.Suite
@@ -71,6 +149,8 @@ type TestSuite struct {
 
 	// chain constructor
 	cc ChainConstructor
+
+	txConfig TestTxConfig
 }
 
 // Option is a function that modifies the TestSuite
@@ -111,6 +191,7 @@ func WithChainConstructor(cc ChainConstructor) Option {
 	}
 }
 
+<<<<<<< HEAD
 func NewIntegrationSuite(spec *interchaintest.ChainSpec, opts ...Option) *TestSuite {
 	suite := &TestSuite{
 		spec:      spec,
@@ -118,6 +199,22 @@ func NewIntegrationSuite(spec *interchaintest.ChainSpec, opts ...Option) *TestSu
 		authority: authtypes.NewModuleAddress(govtypes.ModuleName),
 		icc:       DefaultInterchainConstructor,
 		cc:        DefaultChainConstructor,
+=======
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerImage, txCfg TestTxConfig, opts ...Option) *TestSuite {
+	if err := txCfg.Validate(); err != nil {
+		panic(err)
+	}
+
+	suite := &TestSuite{
+		spec:         spec,
+		oracleConfig: DefaultOracleSidecar(oracleImage),
+		denom:        defaultDenom,
+		gasPrices:    "",
+		authority:    authtypes.NewModuleAddress(govtypes.ModuleName),
+		icc:          DefaultInterchainConstructor,
+		cc:           DefaultChainConstructor,
+		txConfig:     txCfg,
+>>>>>>> daca8c8 (test: make extendable (#112))
 	}
 
 	for _, opt := range opts {
@@ -252,15 +349,42 @@ func (s *TestSuite) TestSendTxDecrease() {
 	gas := int64(200000)
 	minBaseFee := sdk.NewDecCoinFromDec(defaultGasPrice.Denom, defaultGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
-	sendAmt := int64(100000)
+	sendAmt := int64(100)
 
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
+<<<<<<< HEAD
 		for {
 			// send with the exact expected fee
 			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 			s.Require().NoError(err)
 			// send with the exact expected defaultGasPrice
+=======
+		sig := make(chan struct{})
+		quit := make(chan struct{})
+		defer close(quit)
+
+		checkPrice := func(c, quit chan struct{}) {
+			select {
+			case <-time.After(500 * time.Millisecond):
+				gasPrice := s.QueryDefaultGasPrice()
+				s.T().Log("gas price", gasPrice.String())
+
+				if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
+					c <- struct{}{}
+				}
+			case <-quit:
+				return
+			}
+		}
+		go checkPrice(sig, quit)
+
+		select {
+		case <-sig:
+			break
+
+		case <-time.After(100 * time.Millisecond):
+>>>>>>> daca8c8 (test: make extendable (#112))
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 
@@ -273,7 +397,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -289,7 +413,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -305,13 +429,14 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 			wg.Wait()
+<<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 
 			gasPrice := s.QueryDefaultGasPrice()
@@ -320,6 +445,8 @@ func (s *TestSuite) TestSendTxDecrease() {
 			if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
 				break
 			}
+=======
+>>>>>>> daca8c8 (test: make extendable (#112))
 		}
 
 		// wait for 5 blocks
@@ -348,17 +475,46 @@ func (s *TestSuite) TestSendTxIncrease() {
 	nodes := cosmosChain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
+<<<<<<< HEAD
 	baseGasPrice := s.QueryDefaultGasPrice()
 	gas := int64(20000100)
 	sendAmt := int64(100)
 
+=======
+>>>>>>> daca8c8 (test: make extendable (#112))
 	params := s.QueryParams()
+
+	gas := int64(params.MaxBlockUtilization)
+	sendAmt := int64(100)
 
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
-		for {
+		sig := make(chan struct{})
+		quit := make(chan struct{})
+		defer close(quit)
+
+		checkPrice := func(c, quit chan struct{}) {
+			select {
+			case <-time.After(500 * time.Millisecond):
+				gasPrice := s.QueryDefaultGasPrice()
+				s.T().Log("gas price", gasPrice.String())
+
+				if gasPrice.Amount.GT(s.txConfig.TargetIncreaseGasPrice) {
+					c <- struct{}{}
+				}
+			case <-quit:
+				return
+			}
+		}
+		go checkPrice(sig, quit)
+
+		select {
+		case <-sig:
+			break
+
+		case <-time.After(100 * time.Millisecond):
 			// send with the exact expected baseGasPrice
-			baseGasPrice = s.QueryDefaultGasPrice()
+			baseGasPrice := s.QueryDefaultGasPrice()
 			minBaseFee := sdk.NewDecCoinFromDec(baseGasPrice.Denom, baseGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
@@ -377,7 +533,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -393,7 +549,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -409,13 +565,14 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
 			wg.Wait()
+<<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
 
 			baseGasPrice = s.QueryDefaultGasPrice()
@@ -424,6 +581,8 @@ func (s *TestSuite) TestSendTxIncrease() {
 			if baseGasPrice.Amount.GT(params.MinBaseGasPrice.Mul(math.LegacyNewDec(10))) {
 				break
 			}
+=======
+>>>>>>> daca8c8 (test: make extendable (#112))
 		}
 
 		// wait for 5 blocks
