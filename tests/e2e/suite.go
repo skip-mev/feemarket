@@ -370,9 +370,30 @@ func (s *TestSuite) TestSendTxDecrease() {
 
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
-		for {
-			// send with the exact expected defaultGasPrice
+		sig := make(chan struct{})
+		quit := make(chan struct{})
+		defer close(quit)
 
+		checkPrice := func(c, quit chan struct{}) {
+			select {
+			case <-time.After(500 * time.Millisecond):
+				gasPrice := s.QueryDefaultGasPrice()
+				s.T().Log("gas price", gasPrice.String())
+
+				if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
+					c <- struct{}{}
+				}
+			case <-quit:
+				return
+			}
+		}
+		go checkPrice(sig, quit)
+
+		select {
+		case <-sig:
+			break
+
+		case <-time.After(100 * time.Millisecond):
 			wg := sync.WaitGroup{}
 			wg.Add(3)
 
@@ -425,12 +446,6 @@ func (s *TestSuite) TestSendTxDecrease() {
 			}()
 
 			wg.Wait()
-			gasPrice := s.QueryDefaultGasPrice()
-			s.T().Log("base defaultGasPrice", gasPrice.String())
-
-			if gasPrice.Amount.Equal(params.MinBaseGasPrice) {
-				break
-			}
 		}
 
 		// wait for 5 blocks
@@ -456,7 +471,6 @@ func (s *TestSuite) TestSendTxIncrease() {
 	nodes := s.chain.Nodes()
 	s.Require().True(len(nodes) > 0)
 
-	baseGasPrice := s.QueryDefaultGasPrice()
 	params := s.QueryParams()
 
 	gas := int64(params.MaxBlockUtilization)
@@ -464,9 +478,32 @@ func (s *TestSuite) TestSendTxIncrease() {
 
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
-		for {
+		sig := make(chan struct{})
+		quit := make(chan struct{})
+		defer close(quit)
+
+		checkPrice := func(c, quit chan struct{}) {
+			select {
+			case <-time.After(500 * time.Millisecond):
+				gasPrice := s.QueryDefaultGasPrice()
+				s.T().Log("gas price", gasPrice.String())
+
+				if gasPrice.Amount.GT(s.txConfig.TargetIncreaseGasPrice) {
+					c <- struct{}{}
+				}
+			case <-quit:
+				return
+			}
+		}
+		go checkPrice(sig, quit)
+
+		select {
+		case <-sig:
+			break
+
+		case <-time.After(100 * time.Millisecond):
 			// send with the exact expected baseGasPrice
-			baseGasPrice = s.QueryDefaultGasPrice()
+			baseGasPrice := s.QueryDefaultGasPrice()
 			minBaseFee := sdk.NewDecCoinFromDec(baseGasPrice.Denom, baseGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
@@ -523,12 +560,6 @@ func (s *TestSuite) TestSendTxIncrease() {
 			}()
 
 			wg.Wait()
-			baseGasPrice = s.QueryDefaultGasPrice()
-			s.T().Log("gas price", baseGasPrice.String())
-
-			if baseGasPrice.Amount.GT(s.txConfig.TargetIncreaseGasPrice) {
-				break
-			}
 		}
 
 		// wait for 5 blocks
