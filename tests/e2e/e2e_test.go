@@ -103,12 +103,18 @@ var (
 			ModifyGenesis:  cosmos.ModifyGenesis(genesisKV),
 		},
 	}
+
+	txCfg = e2e.TestTxConfig{
+		SmallSendsNum: 1,
+		LargeSendsNum: 400,
+	}
 )
 
 func TestE2ETestSuite(t *testing.T) {
 	s := e2e.NewIntegrationSuite(
 		spec,
 		oracleImage,
+		txCfg,
 	)
 
 	suite.Run(t, s)

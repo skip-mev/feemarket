@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -91,6 +92,19 @@ func GetOracleSideCar(node *cosmos.ChainNode) *cosmos.SidecarProcess {
 	return node.Sidecars[0]
 }
 
+type TestTxConfig struct {
+	SmallSendsNum int
+	LargeSendsNum int
+}
+
+func (tx *TestTxConfig) Validate() error {
+	if tx.SmallSendsNum < 1 || tx.LargeSendsNum < 1 {
+		return fmt.Errorf("sends num should be greater than 1")
+	}
+
+	return nil
+}
+
 // TestSuite runs the feemarket e2e test-suite against a given interchaintest specification
 type TestSuite struct {
 	suite.Suite
@@ -131,6 +145,8 @@ type TestSuite struct {
 
 	// chain constructor
 	cc ChainConstructor
+
+	txConfig TestTxConfig
 }
 
 // Option is a function that modifies the TestSuite
@@ -178,7 +194,11 @@ func WithChainConstructor(cc ChainConstructor) Option {
 	}
 }
 
-func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerImage, opts ...Option) *TestSuite {
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerImage, txCfg TestTxConfig, opts ...Option) *TestSuite {
+	if err := txCfg.Validate(); err != nil {
+		panic(err)
+	}
+
 	suite := &TestSuite{
 		spec:         spec,
 		oracleConfig: DefaultOracleSidecar(oracleImage),
@@ -187,6 +207,7 @@ func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerI
 		authority:    authtypes.NewModuleAddress(govtypes.ModuleName),
 		icc:          DefaultInterchainConstructor,
 		cc:           DefaultChainConstructor,
+		txConfig:     txCfg,
 	}
 
 	for _, opt := range opts {
@@ -355,7 +376,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -371,7 +392,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -387,7 +408,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					1,
+					s.txConfig.SmallSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -453,7 +474,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -469,7 +490,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -485,7 +506,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					s.txConfig.LargeSendsNum,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
