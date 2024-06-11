@@ -336,7 +336,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 	gas := int64(200000)
 	minBaseFee := sdk.NewDecCoinFromDec(defaultGasPrice.Denom, defaultGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
-	sendAmt := int64(100000)
+	sendAmt := int64(100)
 
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
@@ -429,10 +429,8 @@ func (s *TestSuite) TestSendTxIncrease() {
 	baseGasPrice := s.QueryDefaultGasPrice()
 	params := s.QueryParams()
 
-
 	gas := int64(params.MaxBlockUtilization)
-	sendAmt := int64(1)
-
+	sendAmt := int64(100)
 
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
@@ -455,7 +453,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					700,
+					400,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -471,7 +469,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					700,
+					400,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -487,7 +485,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					700,
+					400,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
