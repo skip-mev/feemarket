@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/strangelove-ventures/interchaintest/v8"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/suite"
@@ -105,8 +105,9 @@ var (
 	}
 
 	txCfg = e2e.TestTxConfig{
-		SmallSendsNum: 1,
-		LargeSendsNum: 400,
+		SmallSendsNum:          1,
+		LargeSendsNum:          400,
+		TargetIncreaseGasPrice: sdkmath.LegacyMustNewDecFromStr("0.1"),
 	}
 )
 
