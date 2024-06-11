@@ -427,10 +427,12 @@ func (s *TestSuite) TestSendTxIncrease() {
 	s.Require().True(len(nodes) > 0)
 
 	baseGasPrice := s.QueryDefaultGasPrice()
-	gas := int64(20000100)
-	sendAmt := int64(200)
-
 	params := s.QueryParams()
+
+
+	gas := int64(params.MaxBlockUtilization)
+	sendAmt := int64(1)
+
 
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
@@ -453,7 +455,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					700,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -469,7 +471,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					700,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
@@ -485,7 +487,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
-					400,
+					700,
 				)
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
