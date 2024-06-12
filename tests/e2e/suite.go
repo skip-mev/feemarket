@@ -413,7 +413,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
@@ -433,7 +433,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
@@ -453,7 +453,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
@@ -539,7 +539,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
@@ -559,7 +559,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
@@ -579,7 +579,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 				}
 
 				if txResp.CheckTx.Code != 0 {
-					s.T().Log(txResp.CheckTx.Log)
+					s.T().Log(txResp.CheckTx)
 				}
 			}()
 
