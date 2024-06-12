@@ -412,7 +412,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
@@ -432,7 +432,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
@@ -452,7 +452,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
@@ -538,7 +538,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
@@ -558,7 +558,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
@@ -578,7 +578,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 					s.T().Log(err)
 				}
 
-				if txResp.CheckTx.Code != 0 {
+				if txResp != nil && txResp.CheckTx.Code != 0 {
 					s.T().Log(txResp.CheckTx)
 				}
 			}()
