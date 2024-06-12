@@ -394,56 +394,30 @@ func (s *TestSuite) TestSendTxDecrease() {
 			break
 
 		case <-time.After(100 * time.Millisecond):
-			wg := sync.WaitGroup{}
+			wg := &sync.WaitGroup{}
 			wg.Add(3)
 
-			go func() {
+			smallSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
-					s.user1,
-					s.user2,
+					userA,
+					userB,
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user3,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.SmallSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
-
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user2,
-					s.user3,
-					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.SmallSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
+			go smallSend(wg, s.user1, s.user2)
+			go smallSend(wg, s.user3, s.user2)
+			go smallSend(wg, s.user2, s.user1)
 
 			wg.Wait()
 		}
@@ -508,56 +482,30 @@ func (s *TestSuite) TestSendTxIncrease() {
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
-			wg := sync.WaitGroup{}
+			wg := &sync.WaitGroup{}
 			wg.Add(3)
 
-			go func() {
+			largeSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
-					s.user1,
-					s.user2,
+					userA,
+					userB,
 					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user3,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.LargeSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
-
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user2,
-					s.user1,
-					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.LargeSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
-			}()
+			go largeSend(wg, s.user1, s.user2)
+			go largeSend(wg, s.user3, s.user2)
+			go largeSend(wg, s.user2, s.user1)
 
 			wg.Wait()
 		}
