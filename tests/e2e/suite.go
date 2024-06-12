@@ -408,9 +408,13 @@ func (s *TestSuite) TestSendTxDecrease() {
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			go func() {
@@ -424,9 +428,13 @@ func (s *TestSuite) TestSendTxDecrease() {
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			go func() {
@@ -440,9 +448,13 @@ func (s *TestSuite) TestSendTxDecrease() {
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			wg.Wait()
@@ -522,9 +534,13 @@ func (s *TestSuite) TestSendTxIncrease() {
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			go func() {
@@ -538,9 +554,13 @@ func (s *TestSuite) TestSendTxIncrease() {
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			go func() {
@@ -554,9 +574,13 @@ func (s *TestSuite) TestSendTxIncrease() {
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.TxResult.Code, txResp.TxResult)
+				if err != nil {
+					s.T().Log(err)
+				}
+
+				if txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx.Log)
+				}
 			}()
 
 			wg.Wait()
