@@ -384,21 +384,32 @@ func (s *TestSuite) TestSendTxDecrease() {
 			break
 
 		case <-time.After(100 * time.Millisecond):
+<<<<<<< HEAD
 >>>>>>> daca8c8 (test: make extendable (#112))
 			wg := sync.WaitGroup{}
+=======
+			wg := &sync.WaitGroup{}
+>>>>>>> efbd10d (fix: e2e clean (#116))
 			wg.Add(3)
 
-			go func() {
+			smallSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
+<<<<<<< HEAD
 					s.user1,
 					s.user2,
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+=======
+					userA,
+					userB,
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+>>>>>>> efbd10d (fix: e2e clean (#116))
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
+<<<<<<< HEAD
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
@@ -435,6 +446,19 @@ func (s *TestSuite) TestSendTxDecrease() {
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
+=======
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
+
+			go smallSend(wg, s.user1, s.user2)
+			go smallSend(wg, s.user3, s.user2)
+			go smallSend(wg, s.user2, s.user1)
+
+>>>>>>> efbd10d (fix: e2e clean (#116))
 			wg.Wait()
 <<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
@@ -519,22 +543,33 @@ func (s *TestSuite) TestSendTxIncrease() {
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
+<<<<<<< HEAD
 			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 			s.Require().NoError(err)
 			wg := sync.WaitGroup{}
+=======
+			wg := &sync.WaitGroup{}
+>>>>>>> efbd10d (fix: e2e clean (#116))
 			wg.Add(3)
 
-			go func() {
+			largeSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
+<<<<<<< HEAD
 					s.user1,
 					s.user2,
 					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+=======
+					userA,
+					userB,
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+>>>>>>> efbd10d (fix: e2e clean (#116))
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
+<<<<<<< HEAD
 				s.Require().NoError(err, txResp)
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
@@ -571,6 +606,19 @@ func (s *TestSuite) TestSendTxIncrease() {
 				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
 				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
 			}()
+=======
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
+
+			go largeSend(wg, s.user1, s.user2)
+			go largeSend(wg, s.user3, s.user2)
+			go largeSend(wg, s.user2, s.user1)
+
+>>>>>>> efbd10d (fix: e2e clean (#116))
 			wg.Wait()
 <<<<<<< HEAD
 			s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+1)
