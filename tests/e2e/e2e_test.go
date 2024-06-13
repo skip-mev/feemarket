@@ -115,7 +115,6 @@ var (
 func TestE2ETestSuite(t *testing.T) {
 	s := e2e.NewIntegrationSuite(
 		spec,
-		oracleImage,
 		txCfg,
 	)
 
