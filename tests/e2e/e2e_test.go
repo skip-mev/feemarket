@@ -9,16 +9,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-<<<<<<< HEAD
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	ictestutil "github.com/strangelove-ventures/interchaintest/v7/testutil"
-=======
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
->>>>>>> daca8c8 (test: make extendable (#112))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
@@ -121,11 +115,8 @@ var (
 func TestE2ETestSuite(t *testing.T) {
 	s := e2e.NewIntegrationSuite(
 		spec,
-<<<<<<< HEAD
-=======
 		oracleImage,
 		txCfg,
->>>>>>> daca8c8 (test: make extendable (#112))
 	)
 
 	suite.Run(t, s)

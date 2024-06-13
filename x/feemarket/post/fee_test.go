@@ -33,22 +33,9 @@ func TestDeductCoins(t *testing.T) {
 			wantErr: false,
 		},
 		{
-<<<<<<< HEAD
-			name:        "invalid coins negative amount",
-			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
-			wantErr:     true,
-			invalidCoin: true,
-		},
-		{
-			name:        "invalid coins invalid denom",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
-			wantErr:     true,
-			invalidCoin: true,
-=======
 			name:    "valid zero coin",
 			coins:   sdk.NewCoins(sdk.NewCoin("test", math.ZeroInt())),
 			wantErr: false,
->>>>>>> f0997fb (fix: nil check in post (#118))
 		},
 	}
 	for _, tc := range tests {
@@ -81,22 +68,9 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 			wantErr: false,
 		},
 		{
-<<<<<<< HEAD
-			name:        "invalid coins negative amount",
-			coins:       sdk.Coins{sdk.Coin{Denom: "test", Amount: sdk.NewInt(-1)}},
-			wantErr:     true,
-			invalidCoin: true,
-		},
-		{
-			name:        "invalid coins invalid denom",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1)}},
-			wantErr:     true,
-			invalidCoin: true,
-=======
 			name:    "valid zero coin",
 			coins:   sdk.NewCoins(sdk.NewCoin("test", math.ZeroInt())),
 			wantErr: false,
->>>>>>> f0997fb (fix: nil check in post (#118))
 		},
 	}
 	for _, tc := range tests {
@@ -129,16 +103,9 @@ func TestSendTip(t *testing.T) {
 			wantErr: false,
 		},
 		{
-<<<<<<< HEAD
-			name:        "invalid coins",
-			coins:       sdk.Coins{sdk.Coin{Amount: sdk.NewInt(-1)}},
-			wantErr:     true,
-			invalidCoin: true,
-=======
 			name:    "valid zero coin",
 			coins:   sdk.NewCoins(sdk.NewCoin("test", math.ZeroInt())),
 			wantErr: false,
->>>>>>> f0997fb (fix: nil check in post (#118))
 		},
 	}
 	for _, tc := range tests {

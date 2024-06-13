@@ -1,15 +1,10 @@
 package post
 
 import (
-<<<<<<< HEAD
-=======
-	"bytes"
-	"cosmossdk.io/math"
->>>>>>> f0997fb (fix: nil check in post (#118))
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
-
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -163,19 +158,12 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	if feeGranter != nil {
 		if dfd.feegrantKeeper == nil {
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
-<<<<<<< HEAD
 		} else if !feeGranter.Equals(feePayer) {
-			err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
-			if err != nil {
-				return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
-=======
-		} else if !bytes.Equal(feeGranter, feePayer) {
 			if !fee.IsNil() {
 				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
 				if err != nil {
 					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
 				}
->>>>>>> f0997fb (fix: nil check in post (#118))
 			}
 		}
 
@@ -224,15 +212,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 // DeductCoins deducts coins from the given account.
 // Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
-<<<<<<< HEAD
 func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
-	if !coins.IsValid() {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
-	}
-
-=======
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins, distributeFees bool) error {
->>>>>>> f0997fb (fix: nil check in post (#118))
 	targetModuleAcc := feemarkettypes.FeeCollectorName
 	if distributeFees {
 		targetModuleAcc = authtypes.FeeCollectorName
