@@ -1,6 +1,11 @@
 package post
 
 import (
+<<<<<<< HEAD
+=======
+	"bytes"
+	"cosmossdk.io/math"
+>>>>>>> f0997fb (fix: nil check in post (#118))
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -53,11 +58,6 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
-	var (
-		tip     sdk.Coin
-		payCoin sdk.Coin
-	)
-
 	// update fee market params
 	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
@@ -88,6 +88,11 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	feeCoin := feeCoins[0]
 	feeGas := int64(feeTx.GetGas())
 
+	var (
+		tip     = sdk.NewCoin(feeCoin.Denom, math.ZeroInt())
+		payCoin = feeCoin
+	)
+
 	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoins[0].GetDenom())
@@ -106,7 +111,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
-		"fee", feeCoins,
+		"fee", payCoin,
 		"tip", tip,
 	)
 
@@ -158,10 +163,19 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	if feeGranter != nil {
 		if dfd.feegrantKeeper == nil {
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
+<<<<<<< HEAD
 		} else if !feeGranter.Equals(feePayer) {
 			err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
 			if err != nil {
 				return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
+=======
+		} else if !bytes.Equal(feeGranter, feePayer) {
+			if !fee.IsNil() {
+				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
+				if err != nil {
+					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
+				}
+>>>>>>> f0997fb (fix: nil check in post (#118))
 			}
 		}
 
@@ -176,7 +190,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	var events sdk.Events
 
 	// deduct the fees and tip
-	if !fee.Amount.IsNil() && !fee.IsZero() {
+	if !fee.IsNil() {
 		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(fee), distributeFees)
 		if err != nil {
 			return err
@@ -190,7 +204,7 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 	}
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	if !tip.Amount.IsNil() && !tip.IsZero() {
+	if !tip.IsNil() {
 		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), proposer, sdk.NewCoins(tip))
 		if err != nil {
 			return err
@@ -210,11 +224,15 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 // DeductCoins deducts coins from the given account.
 // Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
+<<<<<<< HEAD
 func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
 	if !coins.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
 	}
 
+=======
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins, distributeFees bool) error {
+>>>>>>> f0997fb (fix: nil check in post (#118))
 	targetModuleAcc := feemarkettypes.FeeCollectorName
 	if distributeFees {
 		targetModuleAcc = authtypes.FeeCollectorName
@@ -230,10 +248,6 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI,
 
 // SendTip sends a tip to the current block proposer.
 func SendTip(bankKeeper BankKeeper, ctx sdk.Context, acc, proposer sdk.AccAddress, coins sdk.Coins) error {
-	if !coins.IsValid() {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid coin amount: %s", coins)
-	}
-
 	err := bankKeeper.SendCoins(ctx, acc, proposer, coins)
 	if err != nil {
 		return err
