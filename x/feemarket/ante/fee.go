@@ -135,7 +135,6 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		}
 
 		ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice))
-		return next(ctx, tx, simulate)
 	}
 	return next(ctx, tx, simulate)
 }

@@ -67,7 +67,7 @@ There are two ways to construct a transaction with `gasPrice`:
 
 ### Understanding Fee Deducted
 
-The actual amount of fee deducted from the fee payer is based on gas consumed, not `gasLimit`.
+The actual amount of fee deducted from the fee payer is based on gas consumed, not `gasLimit`.  The total amount deducted (`fee + tip`) will be equal to the amount of fee specified on your transaction.
 
 The amount consumed is equal to the `inferredTip + gasPrice * gasConsumed`, where `inferredTip = feeAmount - gasLimit * gasPrice`  (This may be different than the tip you specified when building the transaction because the `gasPrice` on chain may have changed since when you queried it.)
 
