@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -132,6 +133,28 @@ func NewIntegrationSuite(spec *interchaintest.ChainSpec, txCfg TestTxConfig, opt
 	}
 
 	return suite
+}
+
+type TestTxConfig struct {
+	SmallSendsNum          int
+	LargeSendsNum          int
+	TargetIncreaseGasPrice math.LegacyDec
+}
+
+func (tx *TestTxConfig) Validate() error {
+	if tx.SmallSendsNum < 1 || tx.LargeSendsNum < 1 {
+		return fmt.Errorf("sends num should be greater than 1")
+	}
+
+	if tx.TargetIncreaseGasPrice.IsNil() {
+		return fmt.Errorf("target increase gas price is nil")
+	}
+
+	if tx.TargetIncreaseGasPrice.LTE(math.LegacyZeroDec()) {
+		return fmt.Errorf("target increase gas price is less than or equal to 0")
+	}
+
+	return nil
 }
 
 func (s *TestSuite) WithKeyringOptions(cdc codec.Codec, opts keyring.Option) {
@@ -403,7 +426,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
-			height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+			_, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
 			s.Require().NoError(err)
 			wg := sync.WaitGroup{}
 			wg.Add(3)
