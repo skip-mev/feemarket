@@ -104,7 +104,7 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 	var feeCoin sdk.Coin
 	if simulate && len(feeCoins) == 0 {
-		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.NewInt(0))
+		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
 	} else {
 		feeCoin = feeCoins[0]
 	}
