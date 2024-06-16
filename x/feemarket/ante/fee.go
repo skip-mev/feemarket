@@ -95,14 +95,19 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas() // use provided gas limit
 
-	if len(feeCoins) != 1 {
-		if len(feeCoins) == 0 {
-			return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
-		}
+	if len(feeCoins) == 0 && !simulate {
+		return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
+	}
+	if len(feeCoins) > 1 {
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
-	feeCoin := feeCoins[0]
+	var feeCoin sdk.Coin
+	if simulate && len(feeCoins) == 0 {
+		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.NewInt(0))
+	} else {
+		feeCoin = feeCoins[0]
+	}
 	feeGas := int64(feeTx.GetGas())
 
 	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
