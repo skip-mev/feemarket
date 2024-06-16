@@ -77,6 +77,23 @@ func TestAnteHandle(t *testing.T) {
 			ExpErr:   sdkerrors.ErrOutOfGas,
 		},
 		{
+			Name: "0 gas given should pass in simulate",
+			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := suite.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: nil,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: true,
+			ExpPass:  true,
+			ExpErr:   nil,
+		},
+		{
 			Name: "signer has enough funds, should pass",
 			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := suite.CreateTestAccounts(1)
