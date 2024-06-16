@@ -1,4 +1,4 @@
-# `x/feemarket` Specification
+# `x/feemarket` Module
 
 ## Abstract
 
@@ -7,7 +7,7 @@ This document specifies the feemarket module.
 The feemarket module is an implementation of the Additive Increase Multiplicative Decrease (AIMD) EIP-1559
 feemarket. More information about the implementation can be found [here](./x/feemarket/README.md).
 
-## Upgrading to FeeMarket
+## Upgrading to Feemarket
 
 More information about upgrading your chain to `x/feemarket` can be found in our dedicated [guide](docs/UPGRADING.md).
 
