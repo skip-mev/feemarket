@@ -2,8 +2,9 @@ package post
 
 import (
 	"bytes"
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
 
 	errorsmod "cosmossdk.io/errors"
 

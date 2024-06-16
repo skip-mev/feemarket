@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	_ "github.com/cosmos/cosmos-sdk/x/auth"
+
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
