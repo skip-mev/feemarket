@@ -1,16 +1,11 @@
 package post
 
 import (
-<<<<<<< HEAD
-=======
-	"bytes"
->>>>>>> 9a2a3ee (fix: don't fail post handler on simulate tx with no fee (#122))
 	"fmt"
 
 	"cosmossdk.io/math"
 
 	errorsmod "cosmossdk.io/errors"
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"

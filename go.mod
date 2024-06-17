@@ -18,14 +18,8 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-<<<<<<< HEAD
 	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
-	github.com/spf13/cobra v1.8.0
-=======
-	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
-	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.1
->>>>>>> 9a2a3ee (fix: don't fail post handler on simulate tx with no fee (#122))
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektra/mockery/v2 v2.43.2
