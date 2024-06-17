@@ -19,14 +19,14 @@ require (
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektra/mockery/v2 v2.43.2
 	golang.org/x/tools v0.22.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3
 	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.34.2
 	mvdan.cc/gofumpt v0.6.0
 	pgregory.net/rapid v1.1.0
 )
@@ -339,3 +339,6 @@ replace (
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 )
+
+// simulation and fee UX
+retract [v1.0.0, v1.0.2]

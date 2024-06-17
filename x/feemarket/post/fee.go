@@ -3,8 +3,9 @@ package post
 import (
 	"fmt"
 
-	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
+
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -73,14 +74,20 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	feeCoins := feeTx.GetFee()
 	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
 
-	if len(feeCoins) != 1 {
-		if len(feeCoins) == 0 {
-			return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
-		}
+	if len(feeCoins) == 0 && !simulate {
+		return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
+	}
+	if len(feeCoins) > 1 {
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
-	feeCoin := feeCoins[0]
+	var feeCoin sdk.Coin
+	if simulate && len(feeCoins) == 0 {
+		feeCoin = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
+	} else {
+		feeCoin = feeCoins[0]
+	}
+
 	feeGas := int64(feeTx.GetGas())
 
 	var (
