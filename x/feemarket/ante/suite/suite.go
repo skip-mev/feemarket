@@ -186,7 +186,6 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 
 	if tc.RunPost {
 		newCtx, handleErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
-
 	}
 
 	if tc.ExpPass {
