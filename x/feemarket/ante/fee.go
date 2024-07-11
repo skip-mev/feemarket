@@ -222,6 +222,16 @@ const (
 //	normalizedGasPrice = effectiveGasPrice / currentGasPrice (floor is 1.  The minimum effective gas price can ever be is current gas price)
 //	scaledGasPrice = normalizedGasPrice * 10 ^ gasPricePrecision (amount of decimal places in the normalized gas price to consider when converting to int64).
 func GetTxPriority(fee sdk.Coin, gasLimit int64, currentGasPrice sdk.DecCoin) int64 {
+	// protections from dividing by 0
+
+	if gasLimit == 0 {
+		return 0
+	}
+
+	if currentGasPrice.IsZero() {
+		return fee.Amount.Int64()
+	}
+
 	effectiveGasPrice := fee.Amount.ToLegacyDec().QuoInt64(gasLimit)
 	normalizedGasPrice := effectiveGasPrice.Quo(currentGasPrice.Amount)
 	scaledGasPrice := normalizedGasPrice.MulInt64(int64(math.Pow10(gasPricePrecision)))
