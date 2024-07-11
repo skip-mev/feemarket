@@ -104,7 +104,8 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 
 	var feeCoin sdk.Coin
 	if simulate && len(feeCoins) == 0 {
-		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
+		// if simulating and user did not provider a fee - create a dummy value for them
+		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.OneInt())
 	} else {
 		feeCoin = feeCoins[0]
 	}
@@ -128,19 +129,20 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
-
-		priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)
-		if err != nil {
-			return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
-		}
-
-		baseGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, params.FeeDenom)
-		if err != nil {
-			return ctx, err
-		}
-
-		ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice))
 	}
+
+	priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
+	}
+
+	baseGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, params.FeeDenom)
+	if err != nil {
+		return ctx, err
+	}
+
+	ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice))
+
 	return next(ctx, tx, simulate)
 }
 
