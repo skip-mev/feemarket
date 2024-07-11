@@ -223,11 +223,11 @@ const (
 //	scaledGasPrice = normalizedGasPrice * 10 ^ gasPricePrecision (amount of decimal places in the normalized gas price to consider when converting to int64).
 func GetTxPriority(fee sdk.Coin, gasLimit int64, currentGasPrice sdk.DecCoin) int64 {
 	// protections from dividing by 0
-
 	if gasLimit == 0 {
 		return 0
 	}
 
+	// if the gas price is 0, just use a raw amount
 	if currentGasPrice.IsZero() {
 		return fee.Amount.Int64()
 	}
