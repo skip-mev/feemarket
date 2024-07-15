@@ -83,7 +83,8 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 	var feeCoin sdk.Coin
 	if simulate && len(feeCoins) == 0 {
-		feeCoin = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
+		// if simulating and user did not provider a fee - create a dummy value for them
+		feeCoin = sdk.NewCoin(params.FeeDenom, math.OneInt())
 	} else {
 		feeCoin = feeCoins[0]
 	}
