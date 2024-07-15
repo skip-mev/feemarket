@@ -126,15 +126,11 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 33339
+		expectedConsumedGas = 31690
 		gasLimit            = expectedConsumedGas
 	)
 
-<<<<<<< HEAD
 	// exact cost of transaction
-	gasLimit := uint64(25635)
-=======
->>>>>>> efe52f2 (fix: gas sim (#129))
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
 	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
 	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
