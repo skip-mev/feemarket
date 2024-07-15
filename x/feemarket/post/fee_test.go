@@ -124,12 +124,12 @@ func TestSendTip(t *testing.T) {
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
 	const (
-		baseDenom       = "stake"
-		resolvableDenom = "atom"
+		baseDenom           = "stake"
+		resolvableDenom     = "atom"
+		expectedConsumedGas = 33339
+		gasLimit            = expectedConsumedGas
 	)
 
-	// exact cost of transaction
-	gasLimit := uint64(27284)
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
 	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
 	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
@@ -204,11 +204,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip",
@@ -223,11 +224,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip",
@@ -242,11 +244,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFeeWithTip,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - simulate",
@@ -261,11 +264,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFeeWithTip,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",
@@ -280,11 +284,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validResolvableFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate",
@@ -299,11 +304,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validResolvableFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom",
@@ -318,11 +324,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validResolvableFeeWithTip,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom - simulate",
@@ -337,11 +344,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validResolvableFeeWithTip,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "0 gas given should pass in simulate - no fee",
@@ -354,11 +362,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  false,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           false,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "0 gas given should pass in simulate - fee",
@@ -371,11 +380,12 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  false,
-			Simulate: true,
-			ExpPass:  true,
-			ExpErr:   nil,
+			RunAnte:           true,
+			RunPost:           false,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "no fee - fail",

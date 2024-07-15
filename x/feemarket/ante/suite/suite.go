@@ -133,13 +133,14 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 
 // TestCase represents a test case used in test tables.
 type TestCase struct {
-	Name     string
-	Malleate func(*TestSuite) TestCaseArgs
-	RunAnte  bool
-	RunPost  bool
-	Simulate bool
-	ExpPass  bool
-	ExpErr   error
+	Name              string
+	Malleate          func(*TestSuite) TestCaseArgs
+	RunAnte           bool
+	RunPost           bool
+	Simulate          bool
+	ExpPass           bool
+	ExpErr            error
+	ExpectConsumedGas uint64
 }
 
 type TestCaseArgs struct {
@@ -193,6 +194,11 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		require.NotNil(t, newCtx)
 
 		s.Ctx = newCtx
+		if tc.RunPost {
+			consumedGas := newCtx.GasMeter().GasConsumed()
+			require.Equal(t, tc.ExpectConsumedGas, consumedGas)
+		}
+
 	} else {
 		switch {
 		case txErr != nil:
