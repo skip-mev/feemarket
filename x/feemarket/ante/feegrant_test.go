@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 
 	"cosmossdk.io/x/feegrant"
@@ -128,7 +130,12 @@ func TestEscrowFunds(t *testing.T) {
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
 			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.FeeGrantKeeper,
-				s.FeeMarketKeeper)
+				s.FeeMarketKeeper, authante.NewDeductFeeDecorator(
+					s.AccountKeeper,
+					s.BankKeeper,
+					s.FeeGrantKeeper,
+					nil,
+				))
 			feeAnteHandler := sdk.ChainAnteDecorators(dfd)
 
 			signer, feeAcc := stc.malleate(s)

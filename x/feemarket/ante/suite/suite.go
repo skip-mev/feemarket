@@ -107,12 +107,12 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
 			s.AccountKeeper,
 			s.BankKeeper,
-			s.FeeGrantKeeper,
+			feeGrantKeeper,
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				s.AccountKeeper,
 				s.BankKeeper,
-				s.FeeGrantKeeper,
+				feeGrantKeeper,
 				nil,
 			),
 		),

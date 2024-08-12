@@ -39,8 +39,6 @@ func newFeeMarketCheckDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeep
 // CONTRACT: Tx must implement FeeTx interface
 type FeeMarketCheckDecorator struct {
 	feemarketKeeper FeeMarketKeeper
-	feegrantKeeper  FeeGrantKeeper
-	bankKeeper      BankKeeper
 
 	feemarketDecorator feeMarketCheckDecorator
 	fallbackDecorator  sdk.AnteDecorator
