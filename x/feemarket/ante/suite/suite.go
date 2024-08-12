@@ -96,6 +96,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 func (s *TestSuite) SetupHandlers(mock bool) {
 	bankKeeper := s.BankKeeper
 	feeGrantKeeper := s.FeeGrantKeeper
+
 	if mock {
 		bankKeeper = s.MockBankKeeper
 		feeGrantKeeper = s.MockFeeGrantKeeper
@@ -106,7 +107,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
 			s.AccountKeeper,
-			s.BankKeeper,
+			bankKeeper,
 			feeGrantKeeper,
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(

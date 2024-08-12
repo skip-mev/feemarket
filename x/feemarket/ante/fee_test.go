@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,8 +27,8 @@ func TestAnteHandle(t *testing.T) {
 	testCases := []antesuite.TestCase{
 		{
 			Name: "0 gas given should fail",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -44,8 +46,8 @@ func TestAnteHandle(t *testing.T) {
 		// when --gas=auto is set, cosmos-sdk sets gas=0 and simulate=true
 		{
 			Name: "--gas=auto behaviour test",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -60,8 +62,8 @@ func TestAnteHandle(t *testing.T) {
 		},
 		{
 			Name: "0 gas given should fail with resolvable denom",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -77,8 +79,8 @@ func TestAnteHandle(t *testing.T) {
 		},
 		{
 			Name: "0 gas given should pass in simulate - no fee",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -94,8 +96,8 @@ func TestAnteHandle(t *testing.T) {
 		},
 		{
 			Name: "0 gas given should pass in simulate - fee",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -111,8 +113,10 @@ func TestAnteHandle(t *testing.T) {
 		},
 		{
 			Name: "signer has enough funds, should pass",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil)
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
@@ -127,8 +131,10 @@ func TestAnteHandle(t *testing.T) {
 		},
 		{
 			Name: "signer has enough funds in resolvable denom, should pass",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil)
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
