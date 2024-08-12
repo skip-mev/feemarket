@@ -22,13 +22,6 @@ type AccountKeeper interface {
 	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 }
 
-// FeeGrantKeeper defines the expected feegrant keeper.
-//
-//go:generate mockery --name FeeGrantKeeper --filename mock_feegrant_keeper.go
-type FeeGrantKeeper interface {
-	UseGrantedFees(ctx context.Context, granter, grantee sdk.AccAddress, fee sdk.Coins, msgs []sdk.Msg) error
-}
-
 // BankKeeper defines the contract needed for supply related APIs.
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go

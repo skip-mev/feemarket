@@ -1,4 +1,4 @@
-package post_test
+package ante_test
 
 import (
 	"context"
@@ -6,12 +6,9 @@ import (
 	"testing"
 	"time"
 
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
+
 	"cosmossdk.io/x/feegrant"
-
-	"github.com/stretchr/testify/mock"
-
-	"github.com/stretchr/testify/require"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -23,13 +20,14 @@ import (
 	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
-	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-func TestDeductFeesNoDelegation(t *testing.T) {
+func TestEscrowFunds(t *testing.T) {
 	cases := map[string]struct {
 		fee      int64
 		valid    bool
@@ -129,8 +127,9 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
-			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper)
-			feePostHandler := sdk.ChainPostDecorators(dfd)
+			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.FeeGrantKeeper,
+				s.FeeMarketKeeper)
+			feeAnteHandler := sdk.ChainAnteDecorators(dfd)
 
 			signer, feeAcc := stc.malleate(s)
 
@@ -146,7 +145,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			var defaultGenTxGas uint64 = 10
 			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
-			_, err = feePostHandler(s.Ctx, tx, false, true) // tests only feegrant post
+			_, err = feeAnteHandler(s.Ctx, tx, false) // tests only feegrant post
 			if tc.valid {
 				require.NoError(t, err)
 			} else {

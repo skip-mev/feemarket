@@ -105,6 +105,9 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
+			s.AccountKeeper,
+			s.BankKeeper,
+			s.FeeGrantKeeper,
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				s.AccountKeeper,
@@ -123,7 +126,6 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		feemarketpost.NewFeeMarketDeductDecorator(
 			s.AccountKeeper,
 			bankKeeper,
-			feeGrantKeeper,
 			s.FeeMarketKeeper,
 		),
 	}

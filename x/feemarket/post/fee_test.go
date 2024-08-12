@@ -41,10 +41,10 @@ func TestDeductCoins(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
-			acc := s.CreateTestAccounts(1)[0]
-			s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), types.FeeCollectorName, tc.coins).Return(nil).Once()
+			s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, types.FeeEscrowName, types.FeeCollectorName,
+				tc.coins).Return(nil).Once()
 
-			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins, false); (err != nil) != tc.wantErr {
+			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, tc.coins, false); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -79,7 +79,7 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 			acc := s.CreateTestAccounts(1)[0]
 			s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), authtypes.FeeCollectorName, tc.coins).Return(nil).Once()
 
-			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, acc.Account, tc.coins, true); (err != nil) != tc.wantErr {
+			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, tc.coins, true); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -114,7 +114,7 @@ func TestSendTip(t *testing.T) {
 			accs := s.CreateTestAccounts(2)
 			s.MockBankKeeper.On("SendCoins", s.Ctx, mock.Anything, mock.Anything, tc.coins).Return(nil).Once()
 
-			if err := post.SendTip(s.MockBankKeeper, s.Ctx, accs[0].Account.GetAddress(), accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
+			if err := post.SendTip(s.MockBankKeeper, s.Ctx, accs[1].Account.GetAddress(), tc.coins); (err != nil) != tc.wantErr {
 				s.Errorf(err, "SendTip() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})

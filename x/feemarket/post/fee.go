@@ -24,15 +24,13 @@ import (
 type FeeMarketDeductDecorator struct {
 	accountKeeper   AccountKeeper
 	bankKeeper      BankKeeper
-	feegrantKeeper  FeeGrantKeeper
 	feemarketKeeper FeeMarketKeeper
 }
 
-func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper) FeeMarketDeductDecorator {
+func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fmk FeeMarketKeeper) FeeMarketDeductDecorator {
 	return FeeMarketDeductDecorator{
 		accountKeeper:   ak,
 		bankKeeper:      bk,
-		feegrantKeeper:  fk,
 		feemarketKeeper: fmk,
 	}
 }
