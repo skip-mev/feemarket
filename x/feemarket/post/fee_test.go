@@ -76,8 +76,8 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
-			acc := s.CreateTestAccounts(1)[0]
-			s.MockBankKeeper.On("SendCoinsFromAccountToModule", s.Ctx, acc.Account.GetAddress(), authtypes.FeeCollectorName, tc.coins).Return(nil).Once()
+			s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeEscrowName, authtypes.FeeCollectorName,
+				tc.coins).Return(nil).Once()
 
 			if err := post.DeductCoins(s.MockBankKeeper, s.Ctx, tc.coins, true); (err != nil) != tc.wantErr {
 				s.Errorf(err, "DeductCoins() error = %v, wantErr %v", err, tc.wantErr)

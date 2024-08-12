@@ -17,13 +17,13 @@ require (
 	cosmossdk.io/x/feegrant v0.1.1
 	cosmossdk.io/x/nft v0.1.1
 	cosmossdk.io/x/tx v0.13.4
-	cosmossdk.io/x/upgrade v0.1.3
+	cosmossdk.io/x/upgrade v0.1.4
 	github.com/client9/misspell v0.3.4
 	github.com/cometbft/cometbft v0.38.11
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.9
-	github.com/cosmos/gogoproto v1.5.0
+	github.com/cosmos/gogoproto v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
