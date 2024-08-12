@@ -19,14 +19,24 @@ replace (
 
 require (
 	cosmossdk.io/math v1.3.0
+<<<<<<< HEAD
 	github.com/cometbft/cometbft v0.37.5
 	github.com/cosmos/cosmos-sdk v0.47.11
 	github.com/skip-mev/chaintestutil v0.0.0-20231207155412-975710cc9051
 	github.com/skip-mev/feemarket v0.0.0-00010101000000-000000000000
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0
+=======
+	github.com/cometbft/cometbft v0.38.8
+	github.com/cosmos/cosmos-sdk v0.50.7
+	github.com/pelletier/go-toml/v2 v2.2.2
+	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
+	github.com/skip-mev/feemarket v1.0.1
+	github.com/skip-mev/slinky v1.0.0
+	github.com/strangelove-ventures/interchaintest/v8 v8.4.0
+>>>>>>> f2f6773 (chore(deps): bump the go_modules group across 2 directories with 3 updates (#127))
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 )
 
 require (
@@ -133,7 +143,12 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+<<<<<<< HEAD
 	github.com/hashicorp/go-getter v1.7.1 // indirect
+=======
+	github.com/hashicorp/go-getter v1.7.5 // indirect
+	github.com/hashicorp/go-hclog v1.5.0 // indirect
+>>>>>>> f2f6773 (chore(deps): bump the go_modules group across 2 directories with 3 updates (#127))
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
@@ -203,7 +218,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/cobra v1.8.0 // indirect
+	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -233,6 +248,7 @@ require (
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
+<<<<<<< HEAD
 	golang.org/x/tools v0.21.0 // indirect
 	google.golang.org/api v0.169.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
@@ -240,6 +256,14 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240318140521-94a12d6c2237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
+=======
+	golang.org/x/tools v0.22.0 // indirect
+	google.golang.org/api v0.180.0 // indirect
+	google.golang.org/genproto v0.0.0-20240401170217-c3f982113cda // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
+>>>>>>> f2f6773 (chore(deps): bump the go_modules group across 2 directories with 3 updates (#127))
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

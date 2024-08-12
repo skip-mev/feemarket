@@ -10,8 +10,13 @@ require (
 	cosmossdk.io/log v1.3.1
 	cosmossdk.io/math v1.3.0
 	github.com/client9/misspell v0.3.4
+<<<<<<< HEAD
 	github.com/cometbft/cometbft v0.37.5
 	github.com/cometbft/cometbft-db v0.8.0
+=======
+	github.com/cometbft/cometbft v0.38.8
+	github.com/cosmos/cosmos-db v1.0.2
+>>>>>>> f2f6773 (chore(deps): bump the go_modules group across 2 directories with 3 updates (#127))
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.47.12
 	github.com/cosmos/gogoproto v1.5.0
@@ -25,7 +30,7 @@ require (
 	github.com/vektra/mockery/v2 v2.43.2
 	golang.org/x/tools v0.22.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.34.2
 	mvdan.cc/gofumpt v0.6.0
 	pgregory.net/rapid v1.1.0
@@ -170,11 +175,17 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+<<<<<<< HEAD
 	github.com/hashicorp/go-getter v1.7.1 // indirect
+=======
+	github.com/hashicorp/go-getter v1.7.5 // indirect
+	github.com/hashicorp/go-hclog v1.5.0 // indirect
+>>>>>>> f2f6773 (chore(deps): bump the go_modules group across 2 directories with 3 updates (#127))
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
