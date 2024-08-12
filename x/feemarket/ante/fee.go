@@ -176,6 +176,8 @@ func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee s
 	return sdk.NewCoin(baseDenom, convertedDec.Amount.TruncateInt()), nil
 }
 
+// EscrowFunds escrows the fully provided fee from the payer account during tx execution.
+// The actual fee is deducted in the post handler along with the tip.
 func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coin) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
