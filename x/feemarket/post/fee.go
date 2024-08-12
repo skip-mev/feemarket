@@ -145,14 +145,6 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	if addr := dfd.accountKeeper.GetModuleAddress(feemarkettypes.FeeCollectorName); addr == nil {
-		return fmt.Errorf("fee collector module account (%s) has not been set", feemarkettypes.FeeCollectorName)
-	}
-
-	if addr := dfd.accountKeeper.GetModuleAddress(authtypes.FeeCollectorName); addr == nil {
-		return fmt.Errorf("default fee collector module account (%s) has not been set", authtypes.FeeCollectorName)
-	}
-
 	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting feemarket params: %v", err)

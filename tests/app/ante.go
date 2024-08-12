@@ -45,6 +45,9 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewValidateMemoDecorator(options.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
 		feemarketante.NewFeeMarketCheckDecorator( // fee market check replaces fee deduct decorator
+			options.AccountKeeper,
+			options.BaseOptions.BankKeeper,
+			options.BaseOptions.FeegrantKeeper,
 			options.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				options.AccountKeeper,
