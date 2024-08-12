@@ -1,7 +1,6 @@
 package post
 
 import (
-	"bytes"
 	"fmt"
 
 	"cosmossdk.io/math"
@@ -120,7 +119,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		"tip", tip,
 	)
 
-	if err := dfd.DeductFeeAndTip(ctx, tx, payCoin, tip); err != nil {
+	if err := dfd.DeductFeeAndTip(ctx, payCoin, tip); err != nil {
 		return ctx, err
 	}
 
@@ -139,49 +138,17 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 // DeductFeeAndTip deducts the provided fee and tip from the fee payer.
 // If the tx uses a feegranter, the fee granter address will pay the fee instead of the tx signer.
-func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.Tx, fee, tip sdk.Coin) error {
-	feeTx, ok := sdkTx.(sdk.FeeTx)
-	if !ok {
-		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
-	}
-
+func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, fee, tip sdk.Coin) error {
 	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting feemarket params: %v", err)
-	}
-
-	feePayer := feeTx.FeePayer()
-	feeGranter := feeTx.FeeGranter()
-	deductFeesFrom := feePayer
-	distributeFees := params.DistributeFees
-
-	// if feegranter set deduct fee from feegranter account.
-	// this works with only when feegrant enabled.
-	if feeGranter != nil {
-		if dfd.feegrantKeeper == nil {
-			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
-		} else if !bytes.Equal(feeGranter, feePayer) {
-			if !fee.IsNil() {
-				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
-				if err != nil {
-					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
-				}
-			}
-		}
-
-		deductFeesFrom = feeGranter
-	}
-
-	deductFeesFromAcc := dfd.accountKeeper.GetAccount(ctx, deductFeesFrom)
-	if deductFeesFromAcc == nil {
-		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
 	var events sdk.Events
 
 	// deduct the fees and tip
 	if !fee.IsNil() {
-		err := DeductCoins(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(fee), distributeFees)
+		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(fee), params.DistributeFees)
 		if err != nil {
 			return err
 		}
@@ -189,13 +156,12 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeFeePay,
 			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFromAcc.String()),
 		))
 	}
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 	if !tip.IsNil() {
-		err := SendTip(dfd.bankKeeper, ctx, deductFeesFromAcc.GetAddress(), proposer, sdk.NewCoins(tip))
+		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.NewCoins(tip))
 		if err != nil {
 			return err
 		}
@@ -203,7 +169,6 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeTipPay,
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
-			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFromAcc.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
 		))
 	}
@@ -214,13 +179,14 @@ func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, sdkTx sdk.T
 
 // DeductCoins deducts coins from the given account.
 // Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins, distributeFees bool) error {
+func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, coins sdk.Coins, distributeFees bool) error {
 	targetModuleAcc := feemarkettypes.FeeCollectorName
 	if distributeFees {
 		targetModuleAcc = authtypes.FeeCollectorName
 	}
+	sourceModuleAcc := feemarkettypes.FeeEscrowName
 
-	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
+	err := bankKeeper.SendCoinsFromModuleToModule(ctx, sourceModuleAcc, targetModuleAcc, coins)
 	if err != nil {
 		return err
 	}
@@ -229,8 +195,10 @@ func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins
 }
 
 // SendTip sends a tip to the current block proposer.
-func SendTip(bankKeeper BankKeeper, ctx sdk.Context, acc, proposer sdk.AccAddress, coins sdk.Coins) error {
-	err := bankKeeper.SendCoins(ctx, acc, proposer, coins)
+func SendTip(bankKeeper BankKeeper, ctx sdk.Context, proposer sdk.AccAddress, coins sdk.Coins) error {
+	sourceModuleAcc := feemarkettypes.FeeEscrowName
+
+	err := bankKeeper.SendCoinsFromModuleToAccount(ctx, sourceModuleAcc, proposer, coins)
 	if err != nil {
 		return err
 	}
