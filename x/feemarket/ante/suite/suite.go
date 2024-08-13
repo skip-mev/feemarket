@@ -179,21 +179,23 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	tx, txErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
 
 	var (
-		newCtx    sdk.Context
-		handleErr error
+		newCtx  sdk.Context
+		anteErr error
+		postErr error
 	)
 
 	if tc.RunAnte {
-		newCtx, handleErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
+		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
 	}
 
-	if tc.RunPost {
-		newCtx, handleErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
+	if tc.RunPost && anteErr == nil {
+		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
 	}
 
 	if tc.ExpPass {
 		require.NoError(t, txErr)
-		require.NoError(t, handleErr)
+		require.NoError(t, anteErr)
+		require.NoError(t, postErr)
 		require.NotNil(t, newCtx)
 
 		s.Ctx = newCtx
@@ -208,9 +210,15 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			require.Error(t, txErr)
 			require.ErrorIs(t, txErr, tc.ExpErr)
 
-		case handleErr != nil:
-			require.Error(t, handleErr)
-			require.ErrorIs(t, handleErr, tc.ExpErr)
+		case anteErr != nil:
+			require.Error(t, anteErr)
+			require.NoError(t, postErr)
+			require.ErrorIs(t, anteErr, tc.ExpErr)
+
+		case postErr != nil:
+			require.NoError(t, anteErr)
+			require.Error(t, postErr)
+			require.ErrorIs(t, postErr, tc.ExpErr)
 
 		default:
 			t.Fatal("expected one of txErr, handleErr to be an error")

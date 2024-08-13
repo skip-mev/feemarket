@@ -136,12 +136,12 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
+	}
 
-		// escrow the entire amount that the account provided as fee (feeCoin)
-		err = dfd.EscrowFunds(ctx, tx, feeCoin)
-		if err != nil {
-			return ctx, errorsmod.Wrapf(err, "error escrowing funds")
-		}
+	// escrow the entire amount that the account provided as fee (feeCoin)
+	err = dfd.EscrowFunds(ctx, tx, feeCoin)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "error escrowing funds")
 	}
 
 	priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)

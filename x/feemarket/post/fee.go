@@ -117,7 +117,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		"tip", tip,
 	)
 
-	if err := dfd.DeductFeeAndTip(ctx, payCoin, tip); err != nil {
+	if err := dfd.PayOutFeeAndTip(ctx, payCoin, tip); err != nil {
 		return ctx, err
 	}
 
@@ -134,9 +134,9 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	return next(ctx, tx, simulate, success)
 }
 
-// DeductFeeAndTip deducts the provided fee and tip from the fee payer.
+// PayOutFeeAndTip deducts the provided fee and tip from the fee payer.
 // If the tx uses a feegranter, the fee granter address will pay the fee instead of the tx signer.
-func (dfd FeeMarketDeductDecorator) DeductFeeAndTip(ctx sdk.Context, fee, tip sdk.Coin) error {
+func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sdk.Coin) error {
 	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting feemarket params: %v", err)

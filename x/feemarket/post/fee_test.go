@@ -144,9 +144,7 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
-				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName,
-					types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
+					types.FeeEscrowName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -164,8 +162,8 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has no funds - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -194,14 +192,16 @@ func TestPostHandle(t *testing.T) {
 			RunPost:  true,
 			Simulate: false,
 			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+			ExpErr:   sdkerrors.ErrOutOfGas,
 		},
 		{
 			Name: "0 gas given should pass - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -245,9 +245,9 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(nil)
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -267,8 +267,10 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has enough funds, should pass with tip - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -289,9 +291,9 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(nil)
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -311,8 +313,10 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -333,9 +337,9 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(nil)
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -355,8 +359,10 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has enough funds, should pass with tip - resolvable denom - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", mock.Anything, types.FeeEscrowName, types.FeeCollectorName,
-					mock.Anything).Return(nil)
+					mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeEscrowName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
@@ -374,9 +380,10 @@ func TestPostHandle(t *testing.T) {
 		},
 		{
 			Name: "0 gas given should pass in simulate - no fee",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
-
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  0,
@@ -392,9 +399,10 @@ func TestPostHandle(t *testing.T) {
 		},
 		{
 			Name: "0 gas given should pass in simulate - fee",
-			Malleate: func(suite *antesuite.TestSuite) antesuite.TestCaseArgs {
-				accs := suite.CreateTestAccounts(1)
-
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeEscrowName, mock.Anything).Return(nil).Once()
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  0,
@@ -440,7 +448,7 @@ func TestPostHandle(t *testing.T) {
 			RunPost:  true,
 			Simulate: false,
 			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInvalidGasLimit,
+			ExpErr:   sdkerrors.ErrOutOfGas,
 		},
 	}
 
