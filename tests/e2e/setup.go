@@ -370,7 +370,8 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 }
 
 func (s *TestSuite) SendCoinsMultiBroadcastAsync(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins,
-	gas int64, numMsg int, bumpSequence bool) (*coretypes.ResultBroadcastTx, error) {
+	gas int64, numMsg int, bumpSequence bool,
+) (*coretypes.ResultBroadcastTx, error) {
 	msgs := make([]sdk.Msg, numMsg)
 	for i := 0; i < numMsg; i++ {
 		msgs[i] = &banktypes.MsgSend{
@@ -481,7 +482,8 @@ func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyNa
 
 // CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
 func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee string, gas int64,
-	bumpSequence bool, msgs ...sdk.Msg) []byte {
+	bumpSequence bool, msgs ...sdk.Msg,
+) []byte {
 	bc := cosmos.NewBroadcaster(s.T(), chain)
 
 	ctx := context.Background()
