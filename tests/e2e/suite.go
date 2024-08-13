@@ -412,6 +412,12 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().True(txResp.TxResult.Code != 0)
 		s.T().Log(txResp.TxResult.Log)
 		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+
+		// ensure that balance is deducted for any tx passing checkTx
+		newBalance := s.QueryBalance(s.user3)
+		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
+			balance.Amount.Int64(),
+			newBalance.Amount.Int64()))
 	})
 
 	s.Run("submit a tx for full balance - fail tx", func() {
@@ -437,6 +443,12 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().True(txResp.TxResult.Code != 0)
 		s.T().Log(txResp.TxResult.Log)
 		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+
+		// ensure that balance is deducted for any tx passing checkTx
+		newBalance := s.QueryBalance(s.user3)
+		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
+			balance.Amount.Int64(),
+			newBalance.Amount.Int64()))
 	})
 
 	s.Run("submit a tx with fee greater than full balance - fail checktx", func() {
@@ -456,6 +468,11 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().True(txResp.CheckTx.Code != 0)
 		s.T().Log(txResp.CheckTx.Log)
 		s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
+
+		newBalance := s.QueryBalance(s.user1)
+		s.Require().True(newBalance.Equal(balance), fmt.Sprintf("new balance: %d, original balance: %d",
+			balance.Amount.Int64(),
+			newBalance.Amount.Int64()))
 	})
 }
 
