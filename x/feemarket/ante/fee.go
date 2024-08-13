@@ -177,7 +177,7 @@ func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee s
 
 // EscrowFunds escrows the fully provided fee from the payer account during tx execution.
 // The actual fee is deducted in the post handler along with the tip.
-func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, fee sdk.Coin) error {
+func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, providedFee sdk.Coin) error {
 	feeTx, ok := sdkTx.(sdk.FeeTx)
 	if !ok {
 		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
@@ -193,8 +193,8 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, fe
 		if dfd.feegrantKeeper == nil {
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
 		} else if !bytes.Equal(feeGranter, feePayer) {
-			if !fee.IsNil() {
-				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
+			if !providedFee.IsNil() {
+				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(providedFee), sdkTx.GetMsgs())
 				if err != nil {
 					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
 				}
@@ -209,7 +209,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, fe
 		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
-	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(fee))
+	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(providedFee))
 }
 
 // escrow deducts coins to the escrow.

@@ -353,6 +353,112 @@ func (s *TestSuite) TestQueryGasPrice() {
 	})
 }
 
+func (s *TestSuite) TestSendTxFailures() {
+	sendAmt := int64(100)
+	gas := int64(200000)
+
+	s.Run("submit tx with no gas attached", func() {
+		// send one tx with no  gas or fee attached
+		txResp, err := s.SendCoinsMultiBroadcast(
+			context.Background(),
+			s.user1,
+			s.user3,
+			sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+			sdk.NewCoins(),
+			0,
+			1,
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(txResp)
+		s.Require().True(txResp.CheckTx.Code != 0)
+		s.T().Log(txResp.CheckTx.Log)
+		s.Require().Contains(txResp.CheckTx.Log, "out of gas")
+	})
+
+	s.Run("submit tx with no fee", func() {
+		// send one tx with no  gas or fee attached
+		txResp, err := s.SendCoinsMultiBroadcast(
+			context.Background(),
+			s.user1,
+			s.user3,
+			sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+			sdk.NewCoins(),
+			gas,
+			1,
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(txResp)
+		s.Require().True(txResp.CheckTx.Code != 0)
+		s.T().Log(txResp.CheckTx.Log)
+		s.Require().Contains(txResp.CheckTx.Log, "no fee coin provided")
+	})
+
+	s.Run("fail a tx that uses full balance in fee - fail tx", func() {
+		balance := s.QueryBalance(s.user3)
+
+		// send one tx with no  gas or fee attached
+		txResp, err := s.SendCoinsMultiBroadcast(
+			context.Background(),
+			s.user3,
+			s.user1,
+			sdk.NewCoins(balance),
+			sdk.NewCoins(balance),
+			gas,
+			1,
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(txResp)
+		s.Require().True(txResp.CheckTx.Code == 0)
+		s.Require().True(txResp.TxResult.Code != 0)
+		s.T().Log(txResp.TxResult.Log)
+		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+	})
+
+	s.Run("submit a tx for full balance - fail tx", func() {
+		balance := s.QueryBalance(s.user1)
+
+		defaultGasPrice := s.QueryDefaultGasPrice()
+		minBaseFee := sdk.NewDecCoinFromDec(defaultGasPrice.Denom, defaultGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
+		minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt().Add(math.
+			NewInt(100))))
+		// send one tx with no  gas or fee attached
+		txResp, err := s.SendCoinsMultiBroadcast(
+			context.Background(),
+			s.user1,
+			s.user3,
+			sdk.NewCoins(balance),
+			minBaseFeeCoins,
+			gas,
+			1,
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(txResp)
+		s.Require().True(txResp.CheckTx.Code == 0)
+		s.Require().True(txResp.TxResult.Code != 0)
+		s.T().Log(txResp.TxResult.Log)
+		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+	})
+
+	s.Run("submit a tx with fee greater than full balance - fail checktx", func() {
+		balance := s.QueryBalance(s.user1)
+		// send one tx with no  gas or fee attached
+		txResp, err := s.SendCoinsMultiBroadcast(
+			context.Background(),
+			s.user1,
+			s.user3,
+			sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+			sdk.NewCoins(balance.AddAmount(math.NewInt(110000))),
+			gas,
+			1,
+		)
+		s.Require().NoError(err)
+		s.Require().NotNil(txResp)
+		s.Require().True(txResp.CheckTx.Code != 0)
+		s.T().Log(txResp.CheckTx.Log)
+		s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
+	})
+}
+
 // TestSendTxDecrease tests that the feemarket will decrease until it hits the min gas price
 // when gas utilization is below the target block utilization.
 func (s *TestSuite) TestSendTxDecrease() {

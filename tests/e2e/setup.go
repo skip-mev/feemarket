@@ -82,13 +82,36 @@ func (s *TestSuite) QueryParams() types.Params {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.Params(context.Background(), &types.ParamsRequest{})
 	s.Require().NoError(err)
 
 	return resp.Params
+}
+
+func (s *TestSuite) QueryBalance(user ibc.Wallet) sdk.Coin {
+	s.T().Helper()
+
+	// get grpc address
+	grpcAddr := s.chain.GetHostGRPCAddress()
+
+	// create the client
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	s.Require().NoError(err)
+
+	// create the bank client
+	c := banktypes.NewQueryClient(cc)
+
+	resp, err := c.Balance(context.Background(), &banktypes.QueryBalanceRequest{
+		Address: user.FormattedAddress(),
+		Denom:   defaultDenom,
+	})
+	s.Require().NoError(err)
+	s.Require().NotNil(*resp.Balance)
+
+	return *resp.Balance
 }
 
 func (s *TestSuite) QueryState() types.State {
@@ -100,7 +123,7 @@ func (s *TestSuite) QueryState() types.State {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.State(context.Background(), &types.StateRequest{})
@@ -119,7 +142,7 @@ func (s *TestSuite) QueryDefaultGasPrice() sdk.DecCoin {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.GasPrice(context.Background(), &types.GasPriceRequest{
