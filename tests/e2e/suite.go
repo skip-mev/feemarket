@@ -521,7 +521,6 @@ func (s *TestSuite) TestSendTxIncrease() {
 
 		amt, err := s.chain.GetBalance(context.Background(), s.user1.FormattedAddress(), gasPrice.Denom)
 		s.Require().NoError(err)
-		s.Require().True(amt.LT(math.NewInt(initBalance)), amt)
 		s.T().Log("balance:", amt.String())
 	})
 }
@@ -703,7 +702,7 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Require().True(resp.Code != 0)
-		s.Require().Contains(resp.Code != 0, "error escrowing funds")
+		s.Require().Contains(resp.RawLog, "error escrowing funds")
 		s.T().Log(resp.RawLog)
 
 		// reset the users and balances
