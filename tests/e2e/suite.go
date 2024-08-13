@@ -469,6 +469,7 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.T().Log(txResp.CheckTx.Log)
 		s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
 
+		// ensure that no balance is deducted for a tx failing checkTx
 		newBalance := s.QueryBalance(s.user1)
 		s.Require().True(newBalance.Equal(balance), fmt.Sprintf("new balance: %d, original balance: %d",
 			balance.Amount.Int64(),
