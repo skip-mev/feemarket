@@ -3,6 +3,8 @@ package suite
 import (
 	"testing"
 
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+
 	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -40,13 +42,15 @@ type TestSuite struct {
 	TxBuilder   client.TxBuilder
 
 	AccountKeeper   feemarketante.AccountKeeper
-	FeeMarketKeeper feemarketpost.FeeMarketKeeper
+	FeeMarketKeeper *feemarketkeeper.Keeper
 	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
 	EncCfg             TestEncodingConfig
+
+	MsgServer feemarkettypes.MsgServer
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -88,6 +92,8 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 
+	s.MsgServer = feemarketkeeper.NewMsgServer(s.FeeMarketKeeper)
+
 	s.SetupHandlers(mock)
 	s.SetT(t)
 	return s
@@ -112,7 +118,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				s.AccountKeeper,
-				s.BankKeeper,
+				bankKeeper,
 				feeGrantKeeper,
 				nil,
 			),
@@ -138,7 +144,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 type TestCase struct {
 	Name              string
 	Malleate          func(*TestSuite) TestCaseArgs
-	StateUpdate       func(*TestCase)
+	StateUpdate       func(*TestSuite)
 	RunAnte           bool
 	RunPost           bool
 	Simulate          bool
@@ -188,8 +194,10 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	if tc.RunAnte {
 		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
 	}
+
+	// perform mid-tx state update if configured
 	if tc.StateUpdate != nil {
-		tc.StateUpdate(&tc)
+		tc.StateUpdate(s)
 	}
 
 	if tc.RunPost && anteErr == nil {

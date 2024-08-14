@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -302,6 +304,46 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+		},
+		{
+			Name: "fee market is enabled during the transaction - should pass and skip deduction until next block",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				// disable fee market before tx
+				s.Ctx = s.Ctx.WithBlockHeight(10)
+				disabledParams := types.DefaultParams()
+				disabledParams.Enabled = false
+				err := s.FeeMarketKeeper.SetParams(s.Ctx, disabledParams)
+				s.Require().NoError(err)
+
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					authtypes.FeeCollectorName, mock.Anything).Return(nil).Once()
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			StateUpdate: func(s *antesuite.TestSuite) {
+				// enable the fee market
+				enabledParams := types.DefaultParams()
+				req := &types.MsgParams{
+					Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+					Params:    enabledParams,
+				}
+
+				_, err := s.MsgServer.Params(s.Ctx, req)
+				s.Require().NoError(err)
+				s.Require().Equal(int64(10), s.FeeMarketKeeper.GetEnabledHeight())
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: 38778, // extra gas consumed because msg server is run
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",
