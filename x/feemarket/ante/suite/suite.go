@@ -138,6 +138,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 type TestCase struct {
 	Name              string
 	Malleate          func(*TestSuite) TestCaseArgs
+	StateUpdate       func(*TestCase)
 	RunAnte           bool
 	RunPost           bool
 	Simulate          bool
@@ -186,6 +187,9 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 
 	if tc.RunAnte {
 		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
+	}
+	if tc.StateUpdate != nil {
+		tc.StateUpdate(&tc)
 	}
 
 	if tc.RunPost && anteErr == nil {
