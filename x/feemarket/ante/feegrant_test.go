@@ -152,7 +152,7 @@ func TestEscrowFunds(t *testing.T) {
 			var defaultGenTxGas uint64 = 10
 			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
-			_, err = feeAnteHandler(s.Ctx, tx, false) // tests only feegrant post
+			_, err = feeAnteHandler(s.Ctx, tx, false) // tests only feegrant ante
 			if tc.valid {
 				require.NoError(t, err)
 			} else {
