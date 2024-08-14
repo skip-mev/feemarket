@@ -13,6 +13,7 @@ const (
 const (
 	prefixParams = iota + 1
 	prefixState
+	prefixEnableHeight = 3
 )
 
 var (
@@ -21,6 +22,9 @@ var (
 
 	// KeyState is the store key for the feemarket module's data.
 	KeyState = []byte{prefixState}
+
+	// KeyEnabledHeight is the store key for the feemarket module's enabled height.
+	KeyEnabledHeight = []byte{prefixEnableHeight}
 
 	EventTypeFeePay      = "fee_pay"
 	EventTypeTipPay      = "tip_pay"

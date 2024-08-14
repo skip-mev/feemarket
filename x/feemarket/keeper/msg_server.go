@@ -13,11 +13,11 @@ var _ types.MsgServer = (*MsgServer)(nil)
 
 // MsgServer is the server API for x/feemarket Msg service.
 type MsgServer struct {
-	k Keeper
+	k *Keeper
 }
 
 // NewMsgServer returns the MsgServer implementation.
-func NewMsgServer(k Keeper) types.MsgServer {
+func NewMsgServer(k *Keeper) types.MsgServer {
 	return &MsgServer{k}
 }
 

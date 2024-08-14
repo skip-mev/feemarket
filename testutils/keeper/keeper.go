@@ -46,7 +46,7 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	require.NoError(t, tk.Initializer.LoadLatest())
 
 	// initialize msg servers
-	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(*feeMarketKeeper)
+	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(feeMarketKeeper)
 
 	ctx := sdk.NewContext(tk.Initializer.StateStore, tmproto.Header{
 		Time:   testkeeper.ExampleTimestamp,

@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -38,14 +39,11 @@ func NewKeeper(
 	}
 
 	k := &Keeper{
-		cdc:       cdc,
-		storeKey:  storeKey,
-		ak:        authKeeper,
-		resolver:  resolver,
-		authority: authority,
-		// default enabled height to -1
-		// when the market is disabled, this value is not used
-		// when the market is enabled, this value will be set to the block height it was enabled at
+		cdc:           cdc,
+		storeKey:      storeKey,
+		ak:            authKeeper,
+		resolver:      resolver,
+		authority:     authority,
 		enabledHeight: -1,
 	}
 

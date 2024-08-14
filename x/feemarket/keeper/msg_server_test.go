@@ -40,6 +40,44 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		s.Require().Error(err)
 	})
 
+	s.Run("sets enabledHeight when transitioning from disabled -> enabled", func() {
+		s.ctx = s.ctx.WithBlockHeight(s.ctx.BlockHeight())
+		enabledParams := types.DefaultParams()
+
+		req := &types.MsgParams{
+			Authority: s.authorityAccount.String(),
+			Params:    enabledParams,
+		}
+		_, err := s.msgServer.Params(s.ctx, req)
+		s.Require().NoError(err)
+
+		disableParams := types.DefaultParams()
+		disableParams.Enabled = false
+
+		req = &types.MsgParams{
+			Authority: s.authorityAccount.String(),
+			Params:    disableParams,
+		}
+		_, err = s.msgServer.Params(s.ctx, req)
+		s.Require().NoError(err)
+
+		gotHeight := s.feeMarketKeeper.GetEnabledHeight()
+		s.Require().Equal(s.ctx.BlockHeight(), gotHeight)
+
+		// now that the markets are disabled, enable and check block height
+		s.ctx = s.ctx.WithBlockHeight(s.ctx.BlockHeight() + 10)
+
+		req = &types.MsgParams{
+			Authority: s.authorityAccount.String(),
+			Params:    enabledParams,
+		}
+		_, err = s.msgServer.Params(s.ctx, req)
+		s.Require().NoError(err)
+
+		newHeight := s.feeMarketKeeper.GetEnabledHeight()
+		s.Require().Equal(s.ctx.BlockHeight(), newHeight)
+	})
+
 	s.Run("resets state after new params request", func() {
 		params, err := s.feeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)

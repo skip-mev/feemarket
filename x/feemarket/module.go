@@ -116,7 +116,7 @@ func (AppModule) ConsensusVersion() uint64 { return ConsensusVersion }
 
 // RegisterServices registers the module's services with the app's module configurator.
 func (am AppModule) RegisterServices(cfc module.Configurator) {
-	types.RegisterMsgServer(cfc.MsgServer(), keeper.NewMsgServer(am.k))
+	types.RegisterMsgServer(cfc.MsgServer(), keeper.NewMsgServer(&am.k))
 	types.RegisterQueryServer(cfc.QueryServer(), keeper.NewQueryServer(am.k))
 }
 
