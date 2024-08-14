@@ -30,6 +30,16 @@ func (ms MsgServer) Params(goCtx context.Context, msg *types.MsgParams) (*types.
 		return nil, fmt.Errorf("invalid authority to execute message")
 	}
 
+	gotParams, err := ms.k.GetParams(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting params: %w", err)
+	}
+
+	// if going from disabled -> enabled, set enabled height
+	if !gotParams.Enabled && msg.Params.Enabled {
+		ms.k.SetEnabledHeight(ctx.BlockHeight())
+	}
+
 	params := msg.Params
 	if err := ms.k.SetParams(ctx, params); err != nil {
 		return nil, fmt.Errorf("error setting params: %w", err)

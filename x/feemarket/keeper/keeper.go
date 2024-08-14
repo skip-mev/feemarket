@@ -21,6 +21,8 @@ type Keeper struct {
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
 	authority string
+
+	enabledHeight int64
 }
 
 // NewKeeper constructs a new feemarket keeper.
@@ -41,6 +43,10 @@ func NewKeeper(
 		ak:        authKeeper,
 		resolver:  resolver,
 		authority: authority,
+		// default enabled height to -1
+		// when the market is disabled, this value is not used
+		// when the market is enabled, this value will be set to the block height it was enabled at
+		enabledHeight: -1,
 	}
 
 	return k
@@ -54,6 +60,16 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority
+}
+
+// GetEnabledHeight returns the height at which the feemarket was enabled.
+func (k *Keeper) GetEnabledHeight() int64 {
+	return k.enabledHeight
+}
+
+// SetEnabledHeight sets the height at which the feemarket was enabled.
+func (k *Keeper) SetEnabledHeight(height int64) {
+	k.enabledHeight = height
 }
 
 // ResolveToDenom converts the given coin to the given denomination.

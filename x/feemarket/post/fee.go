@@ -64,6 +64,11 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return next(ctx, tx, simulate, success)
 	}
 
+	// if the current height is that which enabled the feemarket or lower, skip deduction
+	if ctx.BlockHeight() <= dfd.feemarketKeeper.GetEnabledHeight() {
+		return next(ctx, tx, simulate, success)
+	}
+
 	// update fee market state
 	state, err := dfd.feemarketKeeper.GetState(ctx)
 	if err != nil {

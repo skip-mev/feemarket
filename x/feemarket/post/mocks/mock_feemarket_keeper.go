@@ -15,6 +15,24 @@ type FeeMarketKeeper struct {
 	mock.Mock
 }
 
+// GetEnabledHeight provides a mock function with given fields:
+func (_m *FeeMarketKeeper) GetEnabledHeight() int64 {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEnabledHeight")
+	}
+
+	var r0 int64
+	if rf, ok := ret.Get(0).(func() int64); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	return r0
+}
+
 // GetMinGasPrice provides a mock function with given fields: ctx, denom
 func (_m *FeeMarketKeeper) GetMinGasPrice(ctx types.Context, denom string) (types.DecCoin, error) {
 	ret := _m.Called(ctx, denom)
