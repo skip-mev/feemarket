@@ -50,7 +50,7 @@ func TestEscrowFunds(t *testing.T) {
 			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(nil)
+					types.FeeCollectorName, mock.Anything).Return(nil)
 
 				return accs[0], nil
 			},
@@ -78,7 +78,7 @@ func TestEscrowFunds(t *testing.T) {
 				accs := s.CreateTestAccounts(2)
 				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(nil)
+					types.FeeCollectorName, mock.Anything).Return(nil)
 
 				return accs[0], accs[1].Account.GetAddress()
 			},
@@ -117,7 +117,7 @@ func TestEscrowFunds(t *testing.T) {
 				accs := s.CreateTestAccounts(2)
 				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(),
-					types.FeeEscrowName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
+					types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},

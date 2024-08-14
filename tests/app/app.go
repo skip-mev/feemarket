@@ -121,7 +121,6 @@ var (
 		govtypes.ModuleName:             {authtypes.Burner},
 		feemarkettypes.ModuleName:       {authtypes.Burner},
 		feemarkettypes.FeeCollectorName: {authtypes.Burner},
-		feemarkettypes.FeeEscrowName:    nil,
 	}
 )
 

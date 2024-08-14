@@ -8,9 +8,6 @@ const (
 
 	// FeeCollectorName is the root string for the fee market fee collector account address.
 	FeeCollectorName = "feemarket-fee-collector"
-
-	// FeeEscrowName is the root string for the fee market fee escrow account address.
-	FeeEscrowName = "feemarket-escrow"
 )
 
 const (

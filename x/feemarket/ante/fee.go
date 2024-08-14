@@ -214,7 +214,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 
 // escrow deducts coins to the escrow.
 func escrow(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins) error {
-	targetModuleAcc := feemarkettypes.FeeEscrowName
+	targetModuleAcc := feemarkettypes.FeeCollectorName
 	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
 	if err != nil {
 		return err

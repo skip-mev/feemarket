@@ -176,27 +176,21 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 }
 
 // DeductCoins deducts coins from the given account.
-// Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
+// Coins can be sent to the default fee collector (
+// causes coins to be distributed to stakers) or kept in the fee collector account (soft burn).
 func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, coins sdk.Coins, distributeFees bool) error {
-	targetModuleAcc := feemarkettypes.FeeCollectorName
 	if distributeFees {
-		targetModuleAcc = authtypes.FeeCollectorName
+		err := bankKeeper.SendCoinsFromModuleToModule(ctx, feemarkettypes.FeeCollectorName, authtypes.FeeCollectorName, coins)
+		if err != nil {
+			return err
+		}
 	}
-	sourceModuleAcc := feemarkettypes.FeeEscrowName
-
-	err := bankKeeper.SendCoinsFromModuleToModule(ctx, sourceModuleAcc, targetModuleAcc, coins)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 // SendTip sends a tip to the current block proposer.
 func SendTip(bankKeeper BankKeeper, ctx sdk.Context, proposer sdk.AccAddress, coins sdk.Coins) error {
-	sourceModuleAcc := feemarkettypes.FeeEscrowName
-
-	err := bankKeeper.SendCoinsFromModuleToAccount(ctx, sourceModuleAcc, proposer, coins)
+	err := bankKeeper.SendCoinsFromModuleToAccount(ctx, feemarkettypes.FeeCollectorName, proposer, coins)
 	if err != nil {
 		return err
 	}
