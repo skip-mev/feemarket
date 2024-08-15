@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
@@ -22,8 +23,6 @@ type Keeper struct {
 	// The address that is capable of executing a MsgParams message.
 	// Typically, this will be the governance module's address.
 	authority string
-
-	enabledHeight int64
 }
 
 // NewKeeper constructs a new feemarket keeper.
@@ -39,12 +38,11 @@ func NewKeeper(
 	}
 
 	k := &Keeper{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		ak:            authKeeper,
-		resolver:      resolver,
-		authority:     authority,
-		enabledHeight: -1,
+		cdc:       cdc,
+		storeKey:  storeKey,
+		ak:        authKeeper,
+		resolver:  resolver,
+		authority: authority,
 	}
 
 	return k
@@ -61,13 +59,22 @@ func (k *Keeper) GetAuthority() string {
 }
 
 // GetEnabledHeight returns the height at which the feemarket was enabled.
-func (k *Keeper) GetEnabledHeight() int64 {
-	return k.enabledHeight
+func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	key := types.KeyEnabledHeight
+	bz := store.Get(key)
+
+	return strconv.ParseInt(string(bz), 10, 64)
 }
 
 // SetEnabledHeight sets the height at which the feemarket was enabled.
-func (k *Keeper) SetEnabledHeight(height int64) {
-	k.enabledHeight = height
+func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := []byte(strconv.FormatInt(height, 10))
+
+	store.Set(types.KeyState, bz)
 }
 
 // ResolveToDenom converts the given coin to the given denomination.
