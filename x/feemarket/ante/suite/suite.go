@@ -92,6 +92,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 
+	s.FeeMarketKeeper.SetEnabledHeight(s.Ctx, -1)
 	s.MsgServer = feemarketkeeper.NewMsgServer(s.FeeMarketKeeper)
 
 	s.SetupHandlers(mock)

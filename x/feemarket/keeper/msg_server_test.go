@@ -61,7 +61,8 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		_, err = s.msgServer.Params(s.ctx, req)
 		s.Require().NoError(err)
 
-		gotHeight := s.feeMarketKeeper.GetEnabledHeight()
+		gotHeight, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
 		s.Require().Equal(s.ctx.BlockHeight(), gotHeight)
 
 		// now that the markets are disabled, enable and check block height
@@ -74,7 +75,8 @@ func (s *KeeperTestSuite) TestMsgParams() {
 		_, err = s.msgServer.Params(s.ctx, req)
 		s.Require().NoError(err)
 
-		newHeight := s.feeMarketKeeper.GetEnabledHeight()
+		newHeight, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
 		s.Require().Equal(s.ctx.BlockHeight(), newHeight)
 	})
 

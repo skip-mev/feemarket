@@ -74,7 +74,7 @@ func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) {
 
 	bz := []byte(strconv.FormatInt(height, 10))
 
-	store.Set(types.KeyState, bz)
+	store.Set(types.KeyEnabledHeight, bz)
 }
 
 // ResolveToDenom converts the given coin to the given denomination.

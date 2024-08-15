@@ -154,7 +154,7 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 32018
+		expectedConsumedGas = 35117
 		gasLimit            = expectedConsumedGas
 	)
 
@@ -336,14 +336,17 @@ func TestPostHandle(t *testing.T) {
 
 				_, err := s.MsgServer.Params(s.Ctx, req)
 				s.Require().NoError(err)
-				s.Require().Equal(int64(10), s.FeeMarketKeeper.GetEnabledHeight())
+
+				height, err := s.FeeMarketKeeper.GetEnabledHeight(s.Ctx)
+				s.Require().NoError(err)
+				s.Require().Equal(int64(10), height)
 			},
 			RunAnte:           true,
 			RunPost:           true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 38778, // extra gas consumed because msg server is run
+			ExpectConsumedGas: 44976, // extra gas consumed because msg server is run
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",

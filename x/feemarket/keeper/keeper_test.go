@@ -54,7 +54,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.feeMarketKeeper = tk.FeeMarketKeeper
 	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
-	s.feeMarketKeeper.SetEnabledHeight(-1)
+	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
 }
 
 func (s *KeeperTestSuite) TestState() {
@@ -122,9 +122,10 @@ func (s *KeeperTestSuite) TestParams() {
 
 func (s *KeeperTestSuite) TestEnabledHeight() {
 	s.Run("get and set values", func() {
-		s.feeMarketKeeper.SetEnabledHeight(10)
+		s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
 
-		got := s.feeMarketKeeper.GetEnabledHeight()
+		got, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
 		s.Require().Equal(int64(10), got)
 	})
 }

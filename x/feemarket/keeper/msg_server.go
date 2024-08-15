@@ -37,7 +37,7 @@ func (ms MsgServer) Params(goCtx context.Context, msg *types.MsgParams) (*types.
 
 	// if going from disabled -> enabled, set enabled height
 	if !gotParams.Enabled && msg.Params.Enabled {
-		ms.k.SetEnabledHeight(ctx.BlockHeight())
+		ms.k.SetEnabledHeight(ctx, ctx.BlockHeight())
 	}
 
 	params := msg.Params
