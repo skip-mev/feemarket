@@ -64,6 +64,9 @@ func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
 
 	key := types.KeyEnabledHeight
 	bz := store.Get(key)
+	if bz == nil {
+		return -1, nil
+	}
 
 	return strconv.ParseInt(string(bz), 10, 64)
 }
