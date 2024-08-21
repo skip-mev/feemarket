@@ -31,9 +31,17 @@ type FeeGrantKeeper interface {
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
 type BankKeeper interface {
+<<<<<<< HEAD
 	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
 	SendCoins(ctx sdk.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+=======
+	IsSendEnabledCoins(ctx context.Context, coins ...sdk.Coin) error
+	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
+	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.

@@ -3,6 +3,12 @@ package suite
 import (
 	"testing"
 
+<<<<<<< HEAD
+=======
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+
+	txsigning "cosmossdk.io/x/tx/signing"
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -33,13 +39,19 @@ type TestSuite struct {
 	TxBuilder   client.TxBuilder
 
 	AccountKeeper   feemarketante.AccountKeeper
-	FeeMarketKeeper feemarketpost.FeeMarketKeeper
+	FeeMarketKeeper *feemarketkeeper.Keeper
 	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
+<<<<<<< HEAD
 	EncCfg             encoding.TestEncodingConfig
+=======
+	EncCfg             TestEncodingConfig
+
+	MsgServer feemarkettypes.MsgServer
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.
@@ -81,6 +93,9 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 
+	s.FeeMarketKeeper.SetEnabledHeight(s.Ctx, -1)
+	s.MsgServer = feemarketkeeper.NewMsgServer(s.FeeMarketKeeper)
+
 	s.SetupHandlers(mock)
 	s.SetT(t)
 	return s
@@ -89,6 +104,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 func (s *TestSuite) SetupHandlers(mock bool) {
 	bankKeeper := s.BankKeeper
 	feeGrantKeeper := s.FeeGrantKeeper
+
 	if mock {
 		bankKeeper = s.MockBankKeeper
 		feeGrantKeeper = s.MockFeeGrantKeeper
@@ -98,11 +114,14 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
+			s.AccountKeeper,
+			bankKeeper,
+			feeGrantKeeper,
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				s.AccountKeeper,
-				s.BankKeeper,
-				s.FeeGrantKeeper,
+				bankKeeper,
+				feeGrantKeeper,
 				nil,
 			),
 		),
@@ -116,7 +135,6 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		feemarketpost.NewFeeMarketDeductDecorator(
 			s.AccountKeeper,
 			bankKeeper,
-			feeGrantKeeper,
 			s.FeeMarketKeeper,
 		),
 	}
@@ -128,6 +146,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 type TestCase struct {
 	Name              string
 	Malleate          func(*TestSuite) TestCaseArgs
+	StateUpdate       func(*TestSuite)
 	RunAnte           bool
 	RunPost           bool
 	Simulate          bool
@@ -169,21 +188,28 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	tx, txErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
 
 	var (
-		newCtx    sdk.Context
-		handleErr error
+		newCtx  sdk.Context
+		anteErr error
+		postErr error
 	)
 
 	if tc.RunAnte {
-		newCtx, handleErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
+		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
 	}
 
-	if tc.RunPost {
-		newCtx, handleErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
+	// perform mid-tx state update if configured
+	if tc.StateUpdate != nil {
+		tc.StateUpdate(s)
+	}
+
+	if tc.RunPost && anteErr == nil {
+		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
 	}
 
 	if tc.ExpPass {
 		require.NoError(t, txErr)
-		require.NoError(t, handleErr)
+		require.NoError(t, anteErr)
+		require.NoError(t, postErr)
 		require.NotNil(t, newCtx)
 
 		s.Ctx = newCtx
@@ -198,9 +224,15 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			require.Error(t, txErr)
 			require.ErrorIs(t, txErr, tc.ExpErr)
 
-		case handleErr != nil:
-			require.Error(t, handleErr)
-			require.ErrorIs(t, handleErr, tc.ExpErr)
+		case anteErr != nil:
+			require.Error(t, anteErr)
+			require.NoError(t, postErr)
+			require.ErrorIs(t, anteErr, tc.ExpErr)
+
+		case postErr != nil:
+			require.NoError(t, anteErr)
+			require.Error(t, postErr)
+			require.ErrorIs(t, postErr, tc.ExpErr)
 
 		default:
 			t.Fatal("expected one of txErr, handleErr to be an error")

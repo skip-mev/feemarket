@@ -1,16 +1,20 @@
-package post_test
+package ante_test
 
 import (
 	"math/rand"
 	"testing"
 	"time"
 
+<<<<<<< HEAD:x/feemarket/post/feegrant_test.go
 	"github.com/stretchr/testify/mock"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"github.com/stretchr/testify/require"
 
+=======
+	"cosmossdk.io/x/feegrant"
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135)):x/feemarket/ante/feegrant_test.go
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -20,16 +24,27 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+<<<<<<< HEAD:x/feemarket/post/feegrant_test.go
 	"github.com/cosmos/cosmos-sdk/x/feegrant"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
+=======
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
+
+	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
+	"github.com/skip-mev/feemarket/x/feemarket/types"
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135)):x/feemarket/ante/feegrant_test.go
 )
 
-func TestDeductFeesNoDelegation(t *testing.T) {
+func TestEscrowFunds(t *testing.T) {
 	cases := map[string]struct {
 		fee      int64
 		valid    bool
@@ -50,8 +65,8 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			valid: true,
 			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeCollectorName, mock.Anything).Return(nil)
 
 				return accs[0], nil
 			},
@@ -78,8 +93,8 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := s.CreateTestAccounts(2)
 				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoins", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(),
+					types.FeeCollectorName, mock.Anything).Return(nil)
 
 				return accs[0], accs[1].Account.GetAddress()
 			},
@@ -117,7 +132,8 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			malleate: func(s *antesuite.TestSuite) (antesuite.TestAccount, sdk.AccAddress) {
 				accs := s.CreateTestAccounts(2)
 				s.MockFeeGrantKeeper.On("UseGrantedFees", mock.Anything, accs[1].Account.GetAddress(), accs[0].Account.GetAddress(), mock.Anything, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(), types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[1].Account.GetAddress(),
+					types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds)
 				return accs[0], accs[1].Account.GetAddress()
 			},
 		},
@@ -129,8 +145,14 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
-			dfd := feemarketpost.NewFeeMarketDeductDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper, s.FeeMarketKeeper)
-			feePostHandler := sdk.ChainPostDecorators(dfd)
+			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper,
+				s.FeeMarketKeeper, authante.NewDeductFeeDecorator(
+					s.AccountKeeper,
+					s.MockBankKeeper,
+					s.MockFeeGrantKeeper,
+					nil,
+				))
+			feeAnteHandler := sdk.ChainAnteDecorators(dfd)
 
 			signer, feeAcc := stc.malleate(s)
 
@@ -146,7 +168,7 @@ func TestDeductFeesNoDelegation(t *testing.T) {
 			var defaultGenTxGas uint64 = 10
 			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
-			_, err = feePostHandler(s.Ctx, tx, false, true) // tests only feegrant post
+			_, err = feeAnteHandler(s.Ctx, tx, false) // tests only feegrant ante
 			if tc.valid {
 				require.NoError(t, err)
 			} else {

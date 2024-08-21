@@ -4,10 +4,25 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+<<<<<<< HEAD
+=======
+	txsigning "cosmossdk.io/x/tx/signing"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/address"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+	"github.com/cosmos/cosmos-sdk/std"
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+<<<<<<< HEAD
 	"github.com/skip-mev/chaintestutil/encoding"
+=======
+	"github.com/cosmos/gogoproto/proto"
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/app"
@@ -47,6 +62,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.feeMarketKeeper = tk.FeeMarketKeeper
 	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
+	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
 }
 
 func (s *KeeperTestSuite) TestState() {
@@ -111,3 +127,70 @@ func (s *KeeperTestSuite) TestParams() {
 		s.Require().EqualValues(params, gotParams)
 	})
 }
+<<<<<<< HEAD
+=======
+
+func (s *KeeperTestSuite) TestEnabledHeight() {
+	s.Run("get and set values", func() {
+		s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
+
+		got, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(int64(10), got)
+	})
+}
+
+// TestEncodingConfig specifies the concrete encoding types to use for a given app.
+// This is provided for compatibility between protobuf and amino implementations.
+type TestEncodingConfig struct {
+	InterfaceRegistry codectypes.InterfaceRegistry
+	Codec             codec.Codec
+	TxConfig          client.TxConfig
+	Amino             *codec.LegacyAmino
+}
+
+// MakeTestEncodingConfig creates a test EncodingConfig for a test configuration.
+func MakeTestEncodingConfig() TestEncodingConfig {
+	amino := codec.NewLegacyAmino()
+
+	interfaceRegistry := InterfaceRegistry()
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+
+	std.RegisterLegacyAminoCodec(amino)
+	std.RegisterInterfaces(interfaceRegistry)
+
+	return TestEncodingConfig{
+		InterfaceRegistry: interfaceRegistry,
+		Codec:             cdc,
+		TxConfig:          txCfg,
+		Amino:             amino,
+	}
+}
+
+func InterfaceRegistry() codectypes.InterfaceRegistry {
+	interfaceRegistry, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
+		ProtoFiles: proto.HybridResolver,
+		SigningOptions: txsigning.Options{
+			AddressCodec: address.Bech32Codec{
+				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
+			},
+			ValidatorAddressCodec: address.Bech32Codec{
+				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// always register
+	cryptocodec.RegisterInterfaces(interfaceRegistry)
+	authtypes.RegisterInterfaces(interfaceRegistry)
+
+	// call extra registry functions
+	types.RegisterInterfaces(interfaceRegistry)
+
+	return interfaceRegistry
+}
+>>>>>>> 1aac4a6 (feat: pre deduct funds (#135))

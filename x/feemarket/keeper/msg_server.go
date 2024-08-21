@@ -13,11 +13,11 @@ var _ types.MsgServer = (*MsgServer)(nil)
 
 // MsgServer is the server API for x/feemarket Msg service.
 type MsgServer struct {
-	k Keeper
+	k *Keeper
 }
 
 // NewMsgServer returns the MsgServer implementation.
-func NewMsgServer(k Keeper) types.MsgServer {
+func NewMsgServer(k *Keeper) types.MsgServer {
 	return &MsgServer{k}
 }
 
@@ -28,6 +28,16 @@ func (ms MsgServer) Params(goCtx context.Context, msg *types.MsgParams) (*types.
 
 	if msg.Authority != ms.k.GetAuthority() {
 		return nil, fmt.Errorf("invalid authority to execute message")
+	}
+
+	gotParams, err := ms.k.GetParams(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting params: %w", err)
+	}
+
+	// if going from disabled -> enabled, set enabled height
+	if !gotParams.Enabled && msg.Params.Enabled {
+		ms.k.SetEnabledHeight(ctx, ctx.BlockHeight())
 	}
 
 	params := msg.Params
