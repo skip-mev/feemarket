@@ -76,6 +76,42 @@ func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAd
 	return r0
 }
 
+// SendCoinsFromModuleToAccount provides a mock function with given fields: ctx, senderModule, recipientAddr, amt
+func (_m *BankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr types.AccAddress, amt types.Coins) error {
+	ret := _m.Called(ctx, senderModule, recipientAddr, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsFromModuleToAccount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, types.AccAddress, types.Coins) error); ok {
+		r0 = rf(ctx, senderModule, recipientAddr, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendCoinsFromModuleToModule provides a mock function with given fields: ctx, senderModule, recipientModule, amt
+func (_m *BankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderModule string, recipientModule string, amt types.Coins) error {
+	ret := _m.Called(ctx, senderModule, recipientModule, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsFromModuleToModule")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, types.Coins) error); ok {
+		r0 = rf(ctx, senderModule, recipientModule, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewBankKeeper creates a new instance of BankKeeper. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewBankKeeper(t interface {

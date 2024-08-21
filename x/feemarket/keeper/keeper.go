@@ -2,9 +2,11 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -54,6 +56,28 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetAuthority returns the address that is capable of executing a MsgUpdateParams message.
 func (k *Keeper) GetAuthority() string {
 	return k.authority
+}
+
+// GetEnabledHeight returns the height at which the feemarket was enabled.
+func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	key := types.KeyEnabledHeight
+	bz := store.Get(key)
+	if bz == nil {
+		return -1, nil
+	}
+
+	return strconv.ParseInt(string(bz), 10, 64)
+}
+
+// SetEnabledHeight sets the height at which the feemarket was enabled.
+func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := []byte(strconv.FormatInt(height, 10))
+
+	store.Set(types.KeyEnabledHeight, bz)
 }
 
 // ResolveToDenom converts the given coin to the given denomination.

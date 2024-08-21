@@ -13,6 +13,7 @@ import (
 // AnteHandlerOptions are the options required for constructing an SDK AnteHandler with the fee market injected.
 type AnteHandlerOptions struct {
 	BaseOptions     authante.HandlerOptions
+	BankKeeper      feemarketante.BankKeeper
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper feemarketante.FeeMarketKeeper
 }
@@ -26,7 +27,7 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 	}
 
 	if options.BaseOptions.BankKeeper == nil {
-		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "bank keeper is required for ante builder")
+		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "base options bank keeper is required for ante builder")
 	}
 
 	if options.BaseOptions.SignModeHandler == nil {
@@ -37,6 +38,10 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feemarket keeper is required for ante builder")
 	}
 
+	if options.BankKeeper == nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "bank keeper keeper is required for ante builder")
+	}
+
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		authante.NewExtensionOptionsDecorator(options.BaseOptions.ExtensionOptionChecker),
@@ -45,6 +50,9 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		authante.NewValidateMemoDecorator(options.AccountKeeper),
 		authante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
 		feemarketante.NewFeeMarketCheckDecorator( // fee market check replaces fee deduct decorator
+			options.AccountKeeper,
+			options.BankKeeper,
+			options.BaseOptions.FeegrantKeeper,
 			options.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
 				options.AccountKeeper,

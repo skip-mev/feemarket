@@ -22,13 +22,6 @@ type AccountKeeper interface {
 	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 }
 
-// FeeGrantKeeper defines the expected feegrant keeper.
-//
-//go:generate mockery --name FeeGrantKeeper --filename mock_feegrant_keeper.go
-type FeeGrantKeeper interface {
-	UseGrantedFees(ctx context.Context, granter, grantee sdk.AccAddress, fee sdk.Coins, msgs []sdk.Msg) error
-}
-
 // BankKeeper defines the contract needed for supply related APIs.
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
@@ -36,6 +29,8 @@ type BankKeeper interface {
 	IsSendEnabledCoins(ctx context.Context, coins ...sdk.Coin) error
 	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.
@@ -48,4 +43,5 @@ type FeeMarketKeeper interface {
 	SetState(ctx sdk.Context, state feemarkettypes.State) error
 	ResolveToDenom(ctx sdk.Context, coin sdk.DecCoin, denom string) (sdk.DecCoin, error)
 	GetMinGasPrice(ctx sdk.Context, denom string) (sdk.DecCoin, error)
+	GetEnabledHeight(ctx sdk.Context) (int64, error)
 }

@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -10,13 +11,11 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/std"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/cosmos/gogoproto/proto"
-
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/suite"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
@@ -55,6 +54,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.feeMarketKeeper = tk.FeeMarketKeeper
 	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
+	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
 }
 
 func (s *KeeperTestSuite) TestState() {
@@ -117,6 +117,16 @@ func (s *KeeperTestSuite) TestParams() {
 		s.Require().NoError(err)
 
 		s.Require().EqualValues(params, gotParams)
+	})
+}
+
+func (s *KeeperTestSuite) TestEnabledHeight() {
+	s.Run("get and set values", func() {
+		s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
+
+		got, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(int64(10), got)
 	})
 }
 

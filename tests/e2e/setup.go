@@ -82,13 +82,36 @@ func (s *TestSuite) QueryParams() types.Params {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.Params(context.Background(), &types.ParamsRequest{})
 	s.Require().NoError(err)
 
 	return resp.Params
+}
+
+func (s *TestSuite) QueryBalance(user ibc.Wallet) sdk.Coin {
+	s.T().Helper()
+
+	// get grpc address
+	grpcAddr := s.chain.GetHostGRPCAddress()
+
+	// create the client
+	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	s.Require().NoError(err)
+
+	// create the bank client
+	c := banktypes.NewQueryClient(cc)
+
+	resp, err := c.Balance(context.Background(), &banktypes.QueryBalanceRequest{
+		Address: user.FormattedAddress(),
+		Denom:   defaultDenom,
+	})
+	s.Require().NoError(err)
+	s.Require().NotNil(*resp.Balance)
+
+	return *resp.Balance
 }
 
 func (s *TestSuite) QueryState() types.State {
@@ -100,7 +123,7 @@ func (s *TestSuite) QueryState() types.State {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.State(context.Background(), &types.StateRequest{})
@@ -119,7 +142,7 @@ func (s *TestSuite) QueryDefaultGasPrice() sdk.DecCoin {
 	cc, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	s.Require().NoError(err)
 
-	// create the oracle client
+	// create the feemarket client
 	c := types.NewQueryClient(cc)
 
 	resp, err := c.GasPrice(context.Background(), &types.GasPriceRequest{
@@ -339,11 +362,30 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 		}
 	}
 
-	tx := s.CreateTx(s.chain, sender, fees.String(), gas, msgs...)
+	tx := s.CreateTx(s.chain, sender, fees.String(), gas, false, msgs...)
 
 	// get an rpc endpoint for the chain
 	c := s.chain.Nodes()[0].Client
 	return c.BroadcastTxCommit(ctx, tx)
+}
+
+func (s *TestSuite) SendCoinsMultiBroadcastAsync(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins,
+	gas int64, numMsg int, bumpSequence bool,
+) (*coretypes.ResultBroadcastTx, error) {
+	msgs := make([]sdk.Msg, numMsg)
+	for i := 0; i < numMsg; i++ {
+		msgs[i] = &banktypes.MsgSend{
+			FromAddress: sender.FormattedAddress(),
+			ToAddress:   receiver.FormattedAddress(),
+			Amount:      amt,
+		}
+	}
+
+	tx := s.CreateTx(s.chain, sender, fees.String(), gas, bumpSequence, msgs...)
+
+	// get an rpc endpoint for the chain
+	c := s.chain.Nodes()[0].Client
+	return c.BroadcastTxAsync(ctx, tx)
 }
 
 // SendCoins creates a executes a SendCoins message and broadcasts the transaction.
@@ -383,7 +425,14 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
 	}
 
-	_, err = s.SendCoins(
+	s.FundUser(ctx, chain, amount, user)
+	return user, nil
+}
+
+func (s *TestSuite) FundUser(ctx context.Context, chain ibc.Chain, amount int64, user ibc.Wallet) {
+	chainCfg := chain.Config()
+
+	_, err := s.SendCoins(
 		ctx,
 		interchaintest.FaucetAccountKeyName,
 		interchaintest.FaucetAccountKeyName,
@@ -393,7 +442,6 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 		1000000,
 	)
 	s.Require().NoError(err, "failed to get funds from faucet")
-	return user, nil
 }
 
 // GetAndFundTestUsers generates and funds chain users with the native chain denom.
@@ -433,7 +481,9 @@ func (s *TestSuite) ExecTx(ctx context.Context, chain *cosmos.CosmosChain, keyNa
 }
 
 // CreateTx creates a new transaction to be signed by the given user, including a provided set of messages
-func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee string, gas int64, msgs ...sdk.Msg) []byte {
+func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee string, gas int64,
+	bumpSequence bool, msgs ...sdk.Msg,
+) []byte {
 	bc := cosmos.NewBroadcaster(s.T(), chain)
 
 	ctx := context.Background()
@@ -457,6 +507,9 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 
 	// update sequence number
 	txf = txf.WithSequence(txf.Sequence())
+	if bumpSequence {
+		txf = txf.WithSequence(txf.Sequence() + 1)
+	}
 
 	// sign the tx
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)

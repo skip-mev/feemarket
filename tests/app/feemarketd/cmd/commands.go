@@ -5,16 +5,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/skip-mev/feemarket/tests/app"
-
-	cmtcfg "github.com/cometbft/cometbft/config"
-	dbm "github.com/cosmos/cosmos-db"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
-
+	cmtcfg "github.com/cometbft/cometbft/config"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -30,6 +24,10 @@ import (
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/skip-mev/feemarket/tests/app"
 )
 
 // initCometBFTConfig helps to override default CometBFT Config values.
