@@ -93,7 +93,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	var feeCoin sdk.Coin
 	if simulate && len(feeCoins) == 0 {
 		// if simulating and user did not provider a fee - create a dummy value for them
-		feeCoin = sdk.NewCoin(params.FeeDenom, math.OneInt())
+		feeCoin = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
 	} else {
 		feeCoin = feeCoins[0]
 	}
@@ -156,7 +156,7 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 
 	// deduct the fees and tip
 	if !fee.IsNil() {
-		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(fee), params.DistributeFees)
+		err := DeductCoins(dfd.bankKeeper, ctx, sdk.Coins{fee}, params.DistributeFees)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 	if !tip.IsNil() {
-		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.NewCoins(tip))
+		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.Coins{tip})
 		if err != nil {
 			return err
 		}

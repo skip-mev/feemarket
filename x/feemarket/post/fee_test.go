@@ -153,7 +153,7 @@ func TestPostHandleMock(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 35117
+		expectedConsumedGas = 37147
 		gasLimit            = expectedConsumedGas
 	)
 
@@ -243,6 +243,7 @@ func TestPostHandleMock(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip",
@@ -351,7 +352,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 44976, // extra gas consumed because msg server is run
+			ExpectConsumedGas: 47006, // extra gas consumed because msg server is run
 			Mock:              true,
 		},
 		{
@@ -537,8 +538,10 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 35117
-		gasLimit            = expectedConsumedGas
+		expectedConsumedGas = 74476
+
+		expectedConsumedGasResolve = 74260
+		gasLimit                   = expectedConsumedGasResolve
 	)
 
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
@@ -553,8 +556,6 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has no funds",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -570,11 +571,9 @@ func TestPostHandle(t *testing.T) {
 			Mock:     false,
 		},
 		{
-			Name: "signer has no funds - simulate",
+			Name: "signer has no funds - simulate - pass",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(sdkerrors.ErrInsufficientFunds).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -582,12 +581,13 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: true,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInsufficientFunds,
-			Mock:     false,
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			Mock:              false,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "0 gas given should fail",
@@ -611,9 +611,6 @@ func TestPostHandle(t *testing.T) {
 			Name: "0 gas given should pass - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -626,16 +623,19 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 50676,
 			Mock:              false,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil)
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -652,12 +652,39 @@ func TestPostHandle(t *testing.T) {
 			Mock:              false,
 		},
 		{
+			Name: "signer has does not have enough funds for fee and tip - fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
 			Name: "signer has enough funds, should pass with tip",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFeeWithTip,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -677,9 +704,6 @@ func TestPostHandle(t *testing.T) {
 			Name: "signer has enough funds, should pass with tip - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -700,15 +724,18 @@ func TestPostHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
 				// disable fee market before tx
 				s.Ctx = s.Ctx.WithBlockHeight(10)
 				disabledParams := types.DefaultParams()
 				disabledParams.Enabled = false
 				err := s.FeeMarketKeeper.SetParams(s.Ctx, disabledParams)
 				s.Require().NoError(err)
-
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					authtypes.FeeCollectorName, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -736,17 +763,19 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 44976, // extra gas consumed because msg server is run
+			ExpectConsumedGas: 58199, // extra gas consumed because msg server is run, but bank keepers are skipped
 			Mock:              false,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything,
-					mock.Anything).Return(nil).Once()
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -759,16 +788,19 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedGasResolve,
 			Mock:              false,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -785,12 +817,58 @@ func TestPostHandle(t *testing.T) {
 			Mock:              false,
 		},
 		{
+			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate - no balance",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "signer does not have enough funds, fail - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFeeWithTip,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFeeWithTip,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -803,16 +881,13 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedGasResolve,
 			Mock:              false,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
@@ -832,8 +907,7 @@ func TestPostHandle(t *testing.T) {
 			Name: "0 gas given should pass in simulate - no fee",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
+
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  0,
@@ -852,8 +926,7 @@ func TestPostHandle(t *testing.T) {
 			Name: "0 gas given should pass in simulate - fee",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
-				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
-					types.FeeCollectorName, mock.Anything).Return(nil).Once()
+
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  0,

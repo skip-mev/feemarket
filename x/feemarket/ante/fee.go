@@ -109,18 +109,18 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
-	var feeCoin sdk.Coin
+	var payCoin sdk.Coin
 	if simulate {
 		// if simulating - create a dummy zero value for the user
-		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
+		payCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
 	} else {
-		feeCoin = feeCoins[0]
+		payCoin = feeCoins[0]
 	}
 	feeGas := int64(feeTx.GetGas())
 
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, payCoin.GetDenom())
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoin.GetDenom())
+		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", payCoin.GetDenom())
 	}
 
 	ctx.Logger().Info("fee deduct ante handle",
@@ -132,19 +132,19 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	ctx = ctx.WithMinGasPrices(sdk.NewDecCoins(minGasPrice))
 
 	if !simulate {
-		_, _, err := CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, true)
+		_, _, err := CheckTxFee(ctx, minGasPrice, payCoin, feeGas, true)
 		if err != nil {
 			return ctx, errorsmod.Wrapf(err, "error checking fee")
 		}
 	}
 
 	// escrow the entire amount that the account provided as fee (feeCoin)
-	err = dfd.EscrowFunds(ctx, tx, feeCoin)
+	err = dfd.EscrowFunds(ctx, tx, payCoin)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "error escrowing funds")
 	}
 
-	priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)
+	priorityFee, err := dfd.resolveTxPriorityCoins(ctx, payCoin, params.FeeDenom)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
 	}
@@ -194,7 +194,8 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
 		} else if !bytes.Equal(feeGranter, feePayer) {
 			if !providedFee.IsNil() {
-				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(providedFee), sdkTx.GetMsgs())
+				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.Coins{providedFee},
+					sdkTx.GetMsgs())
 				if err != nil {
 					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
 				}
@@ -209,7 +210,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
-	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(providedFee))
+	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.Coins{providedFee})
 }
 
 // escrow deducts coins to the escrow.
