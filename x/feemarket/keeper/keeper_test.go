@@ -4,7 +4,13 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/skip-mev/chaintestutil/encoding"
@@ -47,6 +53,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.feeMarketKeeper = tk.FeeMarketKeeper
 	s.msgServer = tm.FeeMarketMsgServer
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
+	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
 }
 
 func (s *KeeperTestSuite) TestState() {
@@ -110,4 +117,55 @@ func (s *KeeperTestSuite) TestParams() {
 
 		s.Require().EqualValues(params, gotParams)
 	})
+}
+
+func (s *KeeperTestSuite) TestEnabledHeight() {
+	s.Run("get and set values", func() {
+		s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
+
+		got, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
+		s.Require().NoError(err)
+		s.Require().Equal(int64(10), got)
+	})
+}
+
+// TestEncodingConfig specifies the concrete encoding types to use for a given app.
+// This is provided for compatibility between protobuf and amino implementations.
+type TestEncodingConfig struct {
+	InterfaceRegistry codectypes.InterfaceRegistry
+	Codec             codec.Codec
+	TxConfig          client.TxConfig
+	Amino             *codec.LegacyAmino
+}
+
+// MakeTestEncodingConfig creates a test EncodingConfig for a test configuration.
+func MakeTestEncodingConfig() TestEncodingConfig {
+	amino := codec.NewLegacyAmino()
+
+	interfaceRegistry := InterfaceRegistry()
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+
+	std.RegisterLegacyAminoCodec(amino)
+	std.RegisterInterfaces(interfaceRegistry)
+
+	return TestEncodingConfig{
+		InterfaceRegistry: interfaceRegistry,
+		Codec:             cdc,
+		TxConfig:          txCfg,
+		Amino:             amino,
+	}
+}
+
+func InterfaceRegistry() codectypes.InterfaceRegistry {
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+
+	// always register
+	cryptocodec.RegisterInterfaces(interfaceRegistry)
+	authtypes.RegisterInterfaces(interfaceRegistry)
+
+	// call extra registry functions
+	types.RegisterInterfaces(interfaceRegistry)
+
+	return interfaceRegistry
 }

@@ -34,6 +34,8 @@ type BankKeeper interface {
 	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
 	SendCoins(ctx sdk.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.

@@ -1,23 +1,31 @@
 package ante
 
 import (
+	"bytes"
 	"math"
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 type feeMarketCheckDecorator struct {
 	feemarketKeeper FeeMarketKeeper
+	bankKeeper      BankKeeper
+	feegrantKeeper  FeeGrantKeeper
+	accountKeeper   AccountKeeper
 }
 
-func newFeeMarketCheckDecorator(fmk FeeMarketKeeper) feeMarketCheckDecorator {
+func newFeeMarketCheckDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper) feeMarketCheckDecorator {
 	return feeMarketCheckDecorator{
 		feemarketKeeper: fmk,
+		bankKeeper:      bk,
+		feegrantKeeper:  fk,
+		accountKeeper:   ak,
 	}
 }
 
@@ -37,11 +45,11 @@ type FeeMarketCheckDecorator struct {
 	fallbackDecorator  sdk.AnteDecorator
 }
 
-func NewFeeMarketCheckDecorator(fmk FeeMarketKeeper, fallbackDecorator sdk.AnteDecorator) FeeMarketCheckDecorator {
+func NewFeeMarketCheckDecorator(ak AccountKeeper, bk BankKeeper, fk FeeGrantKeeper, fmk FeeMarketKeeper, fallbackDecorator sdk.AnteDecorator) FeeMarketCheckDecorator {
 	return FeeMarketCheckDecorator{
 		feemarketKeeper: fmk,
 		feemarketDecorator: newFeeMarketCheckDecorator(
-			fmk,
+			ak, bk, fk, fmk,
 		),
 		fallbackDecorator: fallbackDecorator,
 	}
@@ -131,6 +139,12 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		}
 	}
 
+	// escrow the entire amount that the account provided as fee (feeCoin)
+	err = dfd.EscrowFunds(ctx, tx, feeCoin)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "error escrowing funds")
+	}
+
 	priorityFee, err := dfd.resolveTxPriorityCoins(ctx, feeCoin, params.FeeDenom)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "error resolving fee priority")
@@ -160,6 +174,54 @@ func (dfd feeMarketCheckDecorator) resolveTxPriorityCoins(ctx sdk.Context, fee s
 
 	// truncate down
 	return sdk.NewCoin(baseDenom, convertedDec.Amount.TruncateInt()), nil
+}
+
+// EscrowFunds escrows the fully provided fee from the payer account during tx execution.
+// The actual fee is deducted in the post handler along with the tip.
+func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, providedFee sdk.Coin) error {
+	feeTx, ok := sdkTx.(sdk.FeeTx)
+	if !ok {
+		return errorsmod.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+	}
+
+	feePayer := feeTx.FeePayer()
+	feeGranter := feeTx.FeeGranter()
+	deductFeesFrom := feePayer
+
+	// if feegranter set deduct fee from feegranter account.
+	// this works with only when feegrant enabled.
+	if feeGranter != nil {
+		if dfd.feegrantKeeper == nil {
+			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
+		} else if !bytes.Equal(feeGranter, feePayer) {
+			if !providedFee.IsNil() {
+				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(providedFee), sdkTx.GetMsgs())
+				if err != nil {
+					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
+				}
+			}
+		}
+
+		deductFeesFrom = feeGranter
+	}
+
+	deductFeesFromAcc := dfd.accountKeeper.GetAccount(ctx, deductFeesFrom)
+	if deductFeesFromAcc == nil {
+		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
+	}
+
+	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(providedFee))
+}
+
+// escrow deducts coins to the escrow.
+func escrow(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins) error {
+	targetModuleAcc := feemarkettypes.FeeCollectorName
+	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // CheckTxFee implements the logic for the fee market to check if a Tx has provided sufficient

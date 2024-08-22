@@ -268,6 +268,7 @@ func New(
 	anteOptions := AnteHandlerOptions{
 		BaseOptions:     anteHandlerOptions,
 		AccountKeeper:   app.AccountKeeper,
+		BankKeeper:      app.BankKeeper,
 		FeeMarketKeeper: &app.FeeMarketKeeper,
 	}
 	anteHandler, err := NewAnteHandler(anteOptions)
@@ -278,7 +279,6 @@ func New(
 	postHandlerOptions := PostHandlerOptions{
 		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
-		FeeGrantKeeper:  app.FeeGrantKeeper,
 		FeeMarketKeeper: &app.FeeMarketKeeper,
 	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
