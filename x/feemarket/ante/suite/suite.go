@@ -1,8 +1,9 @@
 package suite
 
 import (
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"testing"
+
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -85,7 +86,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	return accounts
 }
 
-func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) error {
+func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 	s.T().Helper()
 
 	oldState := s.BankKeeper.ExportGenesis(s.Ctx)
@@ -100,8 +101,6 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) error {
 
 	oldState.Balances = balances
 	s.BankKeeper.InitGenesis(s.Ctx, oldState)
-
-	return nil
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.

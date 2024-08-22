@@ -311,6 +311,12 @@ func TestAnteHandle(t *testing.T) {
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
 					GasLimit:  gasLimit,
@@ -325,9 +331,39 @@ func TestAnteHandle(t *testing.T) {
 			Mock:     false,
 		},
 		{
+			Name: "signer has insufficient funds, should fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					// no balance
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  false,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
 			Name: "signer has enough funds in resolvable denom, should pass",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFeeDifferentDenom,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
