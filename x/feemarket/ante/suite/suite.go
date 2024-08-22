@@ -1,6 +1,7 @@
 package suite
 
 import (
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"testing"
 
 	txsigning "cosmossdk.io/x/tx/signing"
@@ -60,6 +61,11 @@ type TestAccount struct {
 	Priv    cryptotypes.PrivKey
 }
 
+type TestAccountBalance struct {
+	TestAccount
+	sdk.Coins
+}
+
 func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	s.T().Helper()
 
@@ -79,8 +85,21 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	return accounts
 }
 
-func (s *TestSuite) SetAccountBalances(account TestAccount, balance sdk.Coins) error {
+func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) error {
 	s.T().Helper()
+
+	oldState := s.BankKeeper.ExportGenesis(s.Ctx)
+
+	balances := make([]banktypes.Balance, len(accounts))
+	for i, acc := range accounts {
+		balances[i] = banktypes.Balance{
+			Address: acc.Account.GetAddress().String(),
+			Coins:   acc.Coins,
+		}
+	}
+
+	oldState.Balances = balances
+	s.BankKeeper.InitGenesis(s.Ctx, oldState)
 
 	return nil
 }
@@ -109,6 +128,9 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.SetupHandlers(mock)
 	s.SetT(t)
+
+	s.BankKeeper.InitGenesis(s.Ctx, &banktypes.GenesisState{})
+
 	return s
 }
 
