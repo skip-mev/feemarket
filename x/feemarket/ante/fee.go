@@ -110,9 +110,9 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 	}
 
 	var feeCoin sdk.Coin
-	if simulate && len(feeCoins) == 0 {
-		// if simulating and user did not provider a fee - create a dummy value for them
-		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.OneInt())
+	if simulate {
+		// if simulating - create a dummy zero value for the user
+		feeCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
 	} else {
 		feeCoin = feeCoins[0]
 	}
