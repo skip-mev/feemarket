@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +16,7 @@ type BankKeeper struct {
 }
 
 // IsSendEnabledCoins provides a mock function with given fields: ctx, coins
-func (_m *BankKeeper) IsSendEnabledCoins(ctx types.Context, coins ...types.Coin) error {
+func (_m *BankKeeper) IsSendEnabledCoins(ctx context.Context, coins ...types.Coin) error {
 	_va := make([]interface{}, len(coins))
 	for _i := range coins {
 		_va[_i] = coins[_i]
@@ -29,7 +31,7 @@ func (_m *BankKeeper) IsSendEnabledCoins(ctx types.Context, coins ...types.Coin)
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(types.Context, ...types.Coin) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, ...types.Coin) error); ok {
 		r0 = rf(ctx, coins...)
 	} else {
 		r0 = ret.Error(0)
@@ -39,7 +41,7 @@ func (_m *BankKeeper) IsSendEnabledCoins(ctx types.Context, coins ...types.Coin)
 }
 
 // SendCoins provides a mock function with given fields: ctx, from, to, amt
-func (_m *BankKeeper) SendCoins(ctx types.Context, from types.AccAddress, to types.AccAddress, amt types.Coins) error {
+func (_m *BankKeeper) SendCoins(ctx context.Context, from types.AccAddress, to types.AccAddress, amt types.Coins) error {
 	ret := _m.Called(ctx, from, to, amt)
 
 	if len(ret) == 0 {
@@ -47,7 +49,7 @@ func (_m *BankKeeper) SendCoins(ctx types.Context, from types.AccAddress, to typ
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress, types.AccAddress, types.Coins) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress, types.AccAddress, types.Coins) error); ok {
 		r0 = rf(ctx, from, to, amt)
 	} else {
 		r0 = ret.Error(0)
@@ -57,7 +59,7 @@ func (_m *BankKeeper) SendCoins(ctx types.Context, from types.AccAddress, to typ
 }
 
 // SendCoinsFromAccountToModule provides a mock function with given fields: ctx, senderAddr, recipientModule, amt
-func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx types.Context, senderAddr types.AccAddress, recipientModule string, amt types.Coins) error {
+func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr types.AccAddress, recipientModule string, amt types.Coins) error {
 	ret := _m.Called(ctx, senderAddr, recipientModule, amt)
 
 	if len(ret) == 0 {
@@ -65,7 +67,7 @@ func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx types.Context, senderAddr
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(types.Context, types.AccAddress, string, types.Coins) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, types.AccAddress, string, types.Coins) error); ok {
 		r0 = rf(ctx, senderAddr, recipientModule, amt)
 	} else {
 		r0 = ret.Error(0)
@@ -115,8 +117,7 @@ func (_m *BankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderMod
 func NewBankKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *BankKeeper {
+}) *BankKeeper {
 	mock := &BankKeeper{}
 	mock.Mock.Test(t)
 

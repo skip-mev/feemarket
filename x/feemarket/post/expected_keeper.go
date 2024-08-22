@@ -1,6 +1,8 @@
 package post
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -20,31 +22,15 @@ type AccountKeeper interface {
 	NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
 }
 
-<<<<<<< HEAD
-// FeeGrantKeeper defines the expected feegrant keeper.
-//
-//go:generate mockery --name FeeGrantKeeper --filename mock_feegrant_keeper.go
-type FeeGrantKeeper interface {
-	UseGrantedFees(ctx sdk.Context, granter, grantee sdk.AccAddress, fee sdk.Coins, msgs []sdk.Msg) error
-}
-
-=======
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 // BankKeeper defines the contract needed for supply related APIs.
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
 type BankKeeper interface {
-<<<<<<< HEAD
-	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
-	SendCoins(ctx sdk.Context, from, to sdk.AccAddress, amt sdk.Coins) error
-	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
-=======
 	IsSendEnabledCoins(ctx context.Context, coins ...sdk.Coin) error
 	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
 	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
 	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.

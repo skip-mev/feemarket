@@ -1,14 +1,9 @@
 package suite
 
 import (
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"testing"
 
-<<<<<<< HEAD
-=======
-	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
-
-	txsigning "cosmossdk.io/x/tx/signing"
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -26,6 +21,7 @@ import (
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 )
 
@@ -45,13 +41,10 @@ type TestSuite struct {
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-<<<<<<< HEAD
-	EncCfg             encoding.TestEncodingConfig
-=======
-	EncCfg             TestEncodingConfig
+
+	EncCfg TestEncodingConfig
 
 	MsgServer feemarkettypes.MsgServer
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 }
 
 // TestAccount represents an account used in the tests in x/auth/ante.

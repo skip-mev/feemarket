@@ -26,16 +26,10 @@ func TestDeductCoins(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-<<<<<<< HEAD
-			name:    "valid",
-			coins:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(10))),
-			wantErr: false,
-=======
 			name:           "valid",
 			coins:          sdk.NewCoins(sdk.NewCoin("test", math.NewInt(10))),
 			distributeFees: false,
 			wantErr:        false,
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 		},
 		{
 			name:           "valid no coins",

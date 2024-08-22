@@ -5,21 +5,10 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD:x/feemarket/post/feegrant_test.go
-	"github.com/stretchr/testify/mock"
-
-	"github.com/skip-mev/feemarket/x/feemarket/types"
-
-	"github.com/stretchr/testify/require"
-
-=======
-	"cosmossdk.io/x/feegrant"
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135)):x/feemarket/ante/feegrant_test.go
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
@@ -28,20 +17,12 @@ import (
 	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-<<<<<<< HEAD:x/feemarket/post/feegrant_test.go
 	"github.com/cosmos/cosmos-sdk/x/feegrant"
-
-	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
-	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
-=======
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
-
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135)):x/feemarket/ante/feegrant_test.go
 )
 
 func TestEscrowFunds(t *testing.T) {

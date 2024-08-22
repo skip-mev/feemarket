@@ -151,36 +151,6 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 		return fmt.Errorf("error getting feemarket params: %v", err)
 	}
 
-<<<<<<< HEAD
-	feePayer := feeTx.FeePayer()
-	feeGranter := feeTx.FeeGranter()
-	deductFeesFrom := feePayer
-	distributeFees := params.DistributeFees
-
-	// if feegranter set deduct fee from feegranter account.
-	// this works with only when feegrant enabled.
-	if feeGranter != nil {
-		if dfd.feegrantKeeper == nil {
-			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
-		} else if !feeGranter.Equals(feePayer) {
-			if !fee.IsNil() {
-				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(fee), sdkTx.GetMsgs())
-				if err != nil {
-					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
-				}
-			}
-		}
-
-		deductFeesFrom = feeGranter
-	}
-
-	deductFeesFromAcc := dfd.accountKeeper.GetAccount(ctx, deductFeesFrom)
-	if deductFeesFromAcc == nil {
-		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
-	}
-
-=======
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	var events sdk.Events
 
 	// deduct the fees and tip
@@ -193,10 +163,6 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeFeePay,
 			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-<<<<<<< HEAD
-			sdk.NewAttribute(sdk.AttributeKeyFeePayer, deductFeesFrom.String()),
-=======
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 		))
 	}
 
@@ -210,10 +176,6 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 		events = append(events, sdk.NewEvent(
 			feemarkettypes.EventTypeTipPay,
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
-<<<<<<< HEAD
-			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayer, deductFeesFrom.String()),
-=======
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
 		))
 	}
@@ -223,15 +185,9 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 }
 
 // DeductCoins deducts coins from the given account.
-<<<<<<< HEAD
-// Coins can be sent to the default fee collector (causes coins to be distributed to stakers) or sent to the feemarket fee collector account (causes coins to be burned).
-func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins, distributeFees bool) error {
-	targetModuleAcc := feemarkettypes.FeeCollectorName
-=======
 // Coins can be sent to the default fee collector (
 // causes coins to be distributed to stakers) or kept in the fee collector account (soft burn).
 func DeductCoins(bankKeeper BankKeeper, ctx sdk.Context, coins sdk.Coins, distributeFees bool) error {
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	if distributeFees {
 		err := bankKeeper.SendCoinsFromModuleToModule(ctx, feemarkettypes.FeeCollectorName, authtypes.FeeCollectorName, coins)
 		if err != nil {

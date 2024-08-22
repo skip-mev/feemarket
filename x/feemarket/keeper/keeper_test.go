@@ -4,25 +4,16 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-<<<<<<< HEAD
-=======
-	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/address"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/std"
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-<<<<<<< HEAD
 	"github.com/skip-mev/chaintestutil/encoding"
-=======
-	"github.com/cosmos/gogoproto/proto"
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/app"
@@ -127,8 +118,6 @@ func (s *KeeperTestSuite) TestParams() {
 		s.Require().EqualValues(params, gotParams)
 	})
 }
-<<<<<<< HEAD
-=======
 
 func (s *KeeperTestSuite) TestEnabledHeight() {
 	s.Run("get and set values", func() {
@@ -169,20 +158,7 @@ func MakeTestEncodingConfig() TestEncodingConfig {
 }
 
 func InterfaceRegistry() codectypes.InterfaceRegistry {
-	interfaceRegistry, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
-		ProtoFiles: proto.HybridResolver,
-		SigningOptions: txsigning.Options{
-			AddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
-			},
-			ValidatorAddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-			},
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
 
 	// always register
 	cryptocodec.RegisterInterfaces(interfaceRegistry)
@@ -193,4 +169,3 @@ func InterfaceRegistry() codectypes.InterfaceRegistry {
 
 	return interfaceRegistry
 }
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
