@@ -3,8 +3,9 @@
 package mocks
 
 import (
-	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	mock "github.com/stretchr/testify/mock"
+
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 
 	types "github.com/cosmos/cosmos-sdk/types"
 )
@@ -195,7 +196,8 @@ func (_m *FeeMarketKeeper) SetState(ctx types.Context, state feemarkettypes.Stat
 func NewFeeMarketKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *FeeMarketKeeper {
+},
+) *FeeMarketKeeper {
 	mock := &FeeMarketKeeper{}
 	mock.Mock.Test(t)
 

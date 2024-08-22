@@ -154,11 +154,7 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-<<<<<<< HEAD
-		expectedConsumedGas = 31690
-=======
-		expectedConsumedGas = 35117
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
+		expectedConsumedGas = 33468
 		gasLimit            = expectedConsumedGas
 	)
 
@@ -351,7 +347,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 44976, // extra gas consumed because msg server is run
+			ExpectConsumedGas: 43327, // extra gas consumed because msg server is run
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",

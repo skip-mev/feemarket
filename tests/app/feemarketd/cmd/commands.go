@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"cosmossdk.io/log"
-	confixcmd "cosmossdk.io/tools/confix/cmd"
 	cmtcfg "github.com/cometbft/cometbft/config"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -110,7 +109,6 @@ func initRootCmd(
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
 		debug.Cmd(),
-		confixcmd.ConfigCommand(),
 		pruning.Cmd(newApp, app.DefaultNodeHome),
 		snapshot.Cmd(newApp),
 	)

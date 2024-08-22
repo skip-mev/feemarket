@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )

@@ -74,7 +74,7 @@ func (_m *BankKeeper) SendCoinsFromAccountToModule(ctx types.Context, senderAddr
 }
 
 // SendCoinsFromModuleToAccount provides a mock function with given fields: ctx, senderModule, recipientAddr, amt
-func (_m *BankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr types.AccAddress, amt types.Coins) error {
+func (_m *BankKeeper) SendCoinsFromModuleToAccount(ctx types.Context, senderModule string, recipientAddr types.AccAddress, amt types.Coins) error {
 	ret := _m.Called(ctx, senderModule, recipientAddr, amt)
 
 	if len(ret) == 0 {
@@ -82,7 +82,7 @@ func (_m *BankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderMo
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, types.AccAddress, types.Coins) error); ok {
+	if rf, ok := ret.Get(0).(func(types.Context, string, types.AccAddress, types.Coins) error); ok {
 		r0 = rf(ctx, senderModule, recipientAddr, amt)
 	} else {
 		r0 = ret.Error(0)
@@ -92,7 +92,7 @@ func (_m *BankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderMo
 }
 
 // SendCoinsFromModuleToModule provides a mock function with given fields: ctx, senderModule, recipientModule, amt
-func (_m *BankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderModule string, recipientModule string, amt types.Coins) error {
+func (_m *BankKeeper) SendCoinsFromModuleToModule(ctx types.Context, senderModule string, recipientModule string, amt types.Coins) error {
 	ret := _m.Called(ctx, senderModule, recipientModule, amt)
 
 	if len(ret) == 0 {
@@ -100,7 +100,7 @@ func (_m *BankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderMod
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, types.Coins) error); ok {
+	if rf, ok := ret.Get(0).(func(types.Context, string, string, types.Coins) error); ok {
 		r0 = rf(ctx, senderModule, recipientModule, amt)
 	} else {
 		r0 = ret.Error(0)

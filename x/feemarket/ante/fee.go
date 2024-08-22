@@ -8,6 +8,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -213,7 +214,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 }
 
 // escrow deducts coins to the escrow.
-func escrow(bankKeeper BankKeeper, ctx sdk.Context, acc sdk.AccountI, coins sdk.Coins) error {
+func escrow(bankKeeper BankKeeper, ctx sdk.Context, acc authtypes.AccountI, coins sdk.Coins) error {
 	targetModuleAcc := feemarkettypes.FeeCollectorName
 	err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), targetModuleAcc, coins)
 	if err != nil {

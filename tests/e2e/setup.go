@@ -362,11 +362,7 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 		}
 	}
 
-<<<<<<< HEAD
-	tx := s.CreateTx(cc, sender, fees.String(), gas, msgs...)
-=======
 	tx := s.CreateTx(s.chain, sender, fees.String(), gas, false, msgs...)
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 
 	// get an rpc endpoint for the chain
 	c := cc.Nodes()[0].Client
