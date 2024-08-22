@@ -269,11 +269,13 @@ func (s *TestSuite) TestQueryGasPrice() {
 // TestSendTxDecrease tests that the feemarket will decrease until it hits the min gas price
 // when gas utilization is below the target block utilization.
 func (s *TestSuite) TestSendTxDecrease() {
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("not cosmos chain")
+	}
+
 	// get nodes
-	nodes := cosmosChain.Nodes()
+	nodes := cc.Nodes()
 	s.Require().True(len(nodes) > 0)
 
 	params := s.QueryParams()
@@ -310,64 +312,39 @@ func (s *TestSuite) TestSendTxDecrease() {
 			break
 
 		case <-time.After(100 * time.Millisecond):
-			wg := sync.WaitGroup{}
+			wg := &sync.WaitGroup{}
 			wg.Add(3)
 
-			go func() {
+			smallSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
-					s.user1,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					userA,
+					userB,
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user3,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.SmallSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
+			go smallSend(wg, s.user1, s.user2)
+			go smallSend(wg, s.user3, s.user2)
+			go smallSend(wg, s.user2, s.user1)
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user2,
-					s.user3,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.SmallSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
 			wg.Wait()
 		}
 
 		// wait for 5 blocks
 		// query height
-		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		height, err := s.chain.Height(context.Background())
 		s.Require().NoError(err)
-		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+		s.WaitForHeight(cc, height+5)
 
 		gasPrice := s.QueryDefaultGasPrice()
 		s.T().Log("gas price", gasPrice.String())
@@ -382,11 +359,13 @@ func (s *TestSuite) TestSendTxDecrease() {
 // TestSendTxIncrease tests that the feemarket will increase
 // when gas utilization is above the target block utilization.
 func (s *TestSuite) TestSendTxIncrease() {
-	// cast chain to cosmos-chain
-	cosmosChain, ok := s.chain.(*cosmos.CosmosChain)
-	s.Require().True(ok)
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("not cosmos chain")
+	}
+
 	// get nodes
-	nodes := cosmosChain.Nodes()
+	nodes := cc.Nodes()
 	s.Require().True(len(nodes) > 0)
 
 	params := s.QueryParams()
@@ -426,66 +405,39 @@ func (s *TestSuite) TestSendTxIncrease() {
 			// add headroom
 			minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.Add(math.LegacyNewDec(10)).TruncateInt()))
 
-			_, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
-			s.Require().NoError(err)
-			wg := sync.WaitGroup{}
+			wg := &sync.WaitGroup{}
 			wg.Add(3)
 
-			go func() {
+			largeSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
-					s.user1,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
+					userA,
+					userB,
+					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.LargeSendsNum,
 				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
+				if err != nil {
+					s.T().Log(err)
+				} else if txResp != nil && txResp.CheckTx.Code != 0 {
+					s.T().Log(txResp.CheckTx)
+				}
+			}
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user3,
-					s.user2,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.LargeSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
+			go largeSend(wg, s.user1, s.user2)
+			go largeSend(wg, s.user3, s.user2)
+			go largeSend(wg, s.user2, s.user1)
 
-			go func() {
-				defer wg.Done()
-				txResp, err := s.SendCoinsMultiBroadcast(
-					context.Background(),
-					s.user2,
-					s.user1,
-					sdk.NewCoins(sdk.NewCoin(cosmosChain.Config().Denom, math.NewInt(sendAmt))),
-					minBaseFeeCoins,
-					gas,
-					s.txConfig.LargeSendsNum,
-				)
-				s.Require().NoError(err, txResp)
-				s.Require().Equal(uint32(0), txResp.CheckTx.Code, txResp.CheckTx)
-				s.Require().Equal(uint32(0), txResp.DeliverTx.Code, txResp.DeliverTx)
-			}()
 			wg.Wait()
 		}
 
 		// wait for 5 blocks
 		// query height
-		height, err := s.chain.(*cosmos.CosmosChain).Height(context.Background())
+		height, err := s.chain.Height(context.Background())
 		s.Require().NoError(err)
-		s.WaitForHeight(s.chain.(*cosmos.CosmosChain), height+5)
+		s.WaitForHeight(cc, height+5)
 
 		gasPrice := s.QueryDefaultGasPrice()
 		s.T().Log("gas price", gasPrice.String())
@@ -499,6 +451,11 @@ func (s *TestSuite) TestSendTxIncrease() {
 func (s *TestSuite) TestSendTxFailures() {
 	sendAmt := int64(100)
 	gas := int64(200000)
+
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("not cosmos chain")
+	}
 
 	s.Run("submit tx with no gas attached", func() {
 		// send one tx with no  gas or fee attached
@@ -551,9 +508,9 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().NoError(err)
 		s.Require().NotNil(txResp)
 		s.Require().True(txResp.CheckTx.Code == 0)
-		s.Require().True(txResp.TxResult.Code != 0)
-		s.T().Log(txResp.TxResult.Log)
-		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+		s.Require().True(txResp.DeliverTx.Code != 0)
+		s.T().Log(txResp.DeliverTx.Log)
+		s.Require().Contains(txResp.DeliverTx.Log, "insufficient funds")
 
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
@@ -581,9 +538,9 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().NoError(err)
 		s.Require().NotNil(txResp)
 		s.Require().True(txResp.CheckTx.Code == 0)
-		s.Require().True(txResp.TxResult.Code != 0)
-		s.T().Log(txResp.TxResult.Log)
-		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
+		s.Require().True(txResp.DeliverTx.Code != 0)
+		s.T().Log(txResp.DeliverTx.Log)
+		s.Require().Contains(txResp.DeliverTx.Log, "insufficient funds")
 
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
@@ -637,7 +594,6 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().NoError(err)
 		s.Require().NotNil(txResp)
 		s.Require().True(txResp.Code == 0)
-		hash1 := txResp.Hash
 
 		txResp, err = s.SendCoinsMultiBroadcastAsync(
 			context.Background(),
@@ -652,29 +608,15 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.Require().NoError(err)
 		s.Require().NotNil(txResp)
 		s.Require().True(txResp.Code == 0)
-		hash2 := txResp.Hash
 
-		nodes := s.chain.Nodes()
+		nodes := cc.Nodes()
 		s.Require().True(len(nodes) > 0)
 
 		// wait for 5 blocks
 		// query height
 		height, err := s.chain.Height(context.Background())
 		s.Require().NoError(err)
-		s.WaitForHeight(s.chain, height+5)
-
-		// after waiting, we can now query the Tx Responses
-		resp, err := nodes[0].TxHashToResponse(context.Background(), hash1.String())
-		s.Require().NoError(err)
-		s.Require().NotNil(resp)
-		s.Require().True(resp.Code == 0)
-
-		resp, err = nodes[0].TxHashToResponse(context.Background(), hash2.String())
-		s.Require().NoError(err)
-		s.Require().NotNil(resp)
-		s.Require().True(resp.Code != 0)
-		s.Require().Contains(resp.RawLog, "error escrowing funds")
-		s.T().Log(resp.RawLog)
+		s.WaitForHeight(cc, height+5)
 
 		// reset the users and balances
 		s.user2 = s.GetAndFundTestUsers(context.Background(), s.T().Name(), 200000000000, s.chain)

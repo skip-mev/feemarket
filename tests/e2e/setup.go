@@ -362,7 +362,7 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 		}
 	}
 
-	tx := s.CreateTx(s.chain, sender, fees.String(), gas, false, msgs...)
+	tx := s.CreateTx(cc, sender, fees.String(), gas, false, msgs...)
 
 	// get an rpc endpoint for the chain
 	c := cc.Nodes()[0].Client
@@ -372,6 +372,11 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 func (s *TestSuite) SendCoinsMultiBroadcastAsync(ctx context.Context, sender, receiver ibc.Wallet, amt, fees sdk.Coins,
 	gas int64, numMsg int, bumpSequence bool,
 ) (*coretypes.ResultBroadcastTx, error) {
+	cc, ok := s.chain.(*cosmos.CosmosChain)
+	if !ok {
+		panic("unable to assert ibc.Chain as CosmosChain")
+	}
+
 	msgs := make([]sdk.Msg, numMsg)
 	for i := 0; i < numMsg; i++ {
 		msgs[i] = &banktypes.MsgSend{
@@ -381,10 +386,10 @@ func (s *TestSuite) SendCoinsMultiBroadcastAsync(ctx context.Context, sender, re
 		}
 	}
 
-	tx := s.CreateTx(s.chain, sender, fees.String(), gas, bumpSequence, msgs...)
+	tx := s.CreateTx(cc, sender, fees.String(), gas, bumpSequence, msgs...)
 
 	// get an rpc endpoint for the chain
-	c := s.chain.Nodes()[0].Client
+	c := cc.Nodes()[0].Client
 	return c.BroadcastTxAsync(ctx, tx)
 }
 
