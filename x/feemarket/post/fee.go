@@ -15,6 +15,9 @@ import (
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
+// BankSendGasConsumption is the gas consumption of the bank sends that occur during feemarket handler execution.
+const BankSendGasConsumption = 23800
+
 // FeeMarketDeductDecorator deducts fees from the fee payer based off of the current state of the feemarket.
 // The fee payer is the fee granter (if specified) or first signer of the tx.
 // If the fee payer does not have the funds to pay for the fees, return an InsufficientFunds error.
@@ -120,6 +123,9 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		if err != nil {
 			return ctx, err
 		}
+	} else {
+		// consume the gas that would be consumed during normal execution
+		ctx.GasMeter().ConsumeGas(BankSendGasConsumption, "simulation send gas consumption")
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
@@ -156,7 +162,7 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 
 	// deduct the fees and tip
 	if !fee.IsNil() {
-		err := DeductCoins(dfd.bankKeeper, ctx, sdk.Coins{fee}, params.DistributeFees)
+		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(fee), params.DistributeFees)
 		if err != nil {
 			return err
 		}
@@ -169,7 +175,7 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 	if !tip.IsNil() {
-		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.Coins{tip})
+		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.NewCoins(tip))
 		if err != nil {
 			return err
 		}

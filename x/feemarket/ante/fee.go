@@ -194,7 +194,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 			return sdkerrors.ErrInvalidRequest.Wrap("fee grants are not enabled")
 		} else if !bytes.Equal(feeGranter, feePayer) {
 			if !providedFee.IsNil() {
-				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.Coins{providedFee},
+				err := dfd.feegrantKeeper.UseGrantedFees(ctx, feeGranter, feePayer, sdk.NewCoins(providedFee),
 					sdkTx.GetMsgs())
 				if err != nil {
 					return errorsmod.Wrapf(err, "%s does not allow to pay fees for %s", feeGranter, feePayer)
@@ -210,7 +210,7 @@ func (dfd feeMarketCheckDecorator) EscrowFunds(ctx sdk.Context, sdkTx sdk.Tx, pr
 		return sdkerrors.ErrUnknownAddress.Wrapf("fee payer address: %s does not exist", deductFeesFrom)
 	}
 
-	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.Coins{providedFee})
+	return escrow(dfd.bankKeeper, ctx, deductFeesFromAcc, sdk.NewCoins(providedFee))
 }
 
 // escrow deducts coins to the escrow.
