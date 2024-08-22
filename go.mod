@@ -25,7 +25,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.9
 	github.com/cosmos/gogoproto v1.6.0
 	github.com/golang/protobuf v1.5.4
-	github.com/golangci/golangci-lint v1.60.2
+	github.com/golangci/golangci-lint v1.59.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
 	github.com/spf13/cast v1.6.0
