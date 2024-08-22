@@ -4,13 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-<<<<<<< HEAD
 	"github.com/cometbft/cometbft/libs/log"
-=======
-	"cosmossdk.io/log"
-	storetypes "cosmossdk.io/store/types"
-
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"

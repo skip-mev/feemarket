@@ -268,12 +268,8 @@ func New(
 	anteOptions := AnteHandlerOptions{
 		BaseOptions:     anteHandlerOptions,
 		AccountKeeper:   app.AccountKeeper,
-<<<<<<< HEAD
-		FeeMarketKeeper: &app.FeeMarketKeeper,
-=======
 		BankKeeper:      app.BankKeeper,
 		FeeMarketKeeper: app.FeeMarketKeeper,
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	}
 	anteHandler, err := NewAnteHandler(anteOptions)
 	if err != nil {
@@ -283,12 +279,7 @@ func New(
 	postHandlerOptions := PostHandlerOptions{
 		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
-<<<<<<< HEAD
-		FeeGrantKeeper:  app.FeeGrantKeeper,
-		FeeMarketKeeper: &app.FeeMarketKeeper,
-=======
 		FeeMarketKeeper: app.FeeMarketKeeper,
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
 	if err != nil {

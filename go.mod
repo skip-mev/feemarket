@@ -3,7 +3,6 @@ module github.com/skip-mev/feemarket
 go 1.22.6
 
 require (
-<<<<<<< HEAD
 	cosmossdk.io/api v0.3.1
 	cosmossdk.io/core v0.5.1
 	cosmossdk.io/depinject v1.0.0-alpha.4
@@ -14,31 +13,8 @@ require (
 	github.com/cometbft/cometbft v0.37.5
 	github.com/cometbft/cometbft-db v0.8.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
-	github.com/cosmos/cosmos-sdk v0.47.12
+	github.com/cosmos/cosmos-sdk v0.47.13
 	github.com/cosmos/gogoproto v1.5.0
-=======
-	cosmossdk.io/api v0.7.5
-	cosmossdk.io/client/v2 v2.0.0-00010101000000-000000000000
-	cosmossdk.io/core v0.11.1
-	cosmossdk.io/depinject v1.0.0
-	cosmossdk.io/errors v1.0.1
-	cosmossdk.io/log v1.3.1
-	cosmossdk.io/math v1.3.0
-	cosmossdk.io/store v1.1.0
-	cosmossdk.io/tools/confix v0.1.1
-	cosmossdk.io/x/circuit v0.1.1
-	cosmossdk.io/x/evidence v0.1.1
-	cosmossdk.io/x/feegrant v0.1.1
-	cosmossdk.io/x/nft v0.1.1
-	cosmossdk.io/x/tx v0.13.4
-	cosmossdk.io/x/upgrade v0.1.4
-	github.com/client9/misspell v0.3.4
-	github.com/cometbft/cometbft v0.38.11
-	github.com/cosmos/cosmos-db v1.0.2
-	github.com/cosmos/cosmos-proto v1.0.0-beta.5
-	github.com/cosmos/cosmos-sdk v0.50.9
-	github.com/cosmos/gogoproto v1.6.0
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	github.com/golang/protobuf v1.5.4
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
@@ -49,11 +25,7 @@ require (
 	github.com/vektra/mockery/v2 v2.43.2
 	golang.org/x/tools v0.24.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3
-<<<<<<< HEAD
-	google.golang.org/grpc v1.64.0
-=======
 	google.golang.org/grpc v1.65.0
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	google.golang.org/protobuf v1.34.2
 	mvdan.cc/gofumpt v0.6.0
 	pgregory.net/rapid v1.1.0
@@ -233,12 +205,7 @@ require (
 	github.com/ldez/tagliatelle v0.5.0 // indirect
 	github.com/leonklingele/grouper v1.1.2 // indirect
 	github.com/lib/pq v1.10.9 // indirect
-<<<<<<< HEAD
-	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/linxGnu/grocksdb v1.8.4 // indirect
-=======
 	github.com/linxGnu/grocksdb v1.8.14 // indirect
->>>>>>> 1aac4a6 (feat: pre deduct funds (#135))
 	github.com/lufeee/execinquery v1.2.1 // indirect
 	github.com/macabu/inamedparam v0.1.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
