@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/mock"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
@@ -509,7 +508,7 @@ func TestPostHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, tc.Mock)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 

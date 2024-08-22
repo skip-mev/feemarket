@@ -3,8 +3,6 @@ package suite
 import (
 	"testing"
 
-	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
-
 	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -21,9 +19,12 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
@@ -43,7 +44,7 @@ type TestSuite struct {
 
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
-	BankKeeper      feemarketante.BankKeeper
+	BankKeeper      bankkeeper.Keeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
 	MockBankKeeper     *mocks.BankKeeper
@@ -60,6 +61,8 @@ type TestAccount struct {
 }
 
 func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
+	s.T().Helper()
+
 	var accounts []TestAccount
 
 	for i := 0; i < numAccs; i++ {
@@ -76,6 +79,12 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	return accounts
 }
 
+func (s *TestSuite) SetAccountBalances(account TestAccount, balance sdk.Coins) error {
+	s.T().Helper()
+
+	return nil
+}
+
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
@@ -86,6 +95,9 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
+	s.BankKeeper = testKeepers.BankKeeper
+	s.FeeGrantKeeper = testKeepers.FeeGrantKeeper
+
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
 
@@ -152,6 +164,7 @@ type TestCase struct {
 	ExpPass           bool
 	ExpErr            error
 	ExpectConsumedGas uint64
+	Mock              bool
 }
 
 type TestCaseArgs struct {

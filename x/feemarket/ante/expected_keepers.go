@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/core/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -35,11 +36,7 @@ type FeeGrantKeeper interface {
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
 type BankKeeper interface {
-	IsSendEnabledCoins(ctx context.Context, coins ...sdk.Coin) error
-	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
-	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
-	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
-	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+	bankkeeper.Keeper
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.
