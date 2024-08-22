@@ -16,7 +16,7 @@ import (
 )
 
 // BankSendGasConsumption is the gas consumption of the bank sends that occur during feemarket handler execution.
-const BankSendGasConsumption = 23800
+const BankSendGasConsumption = 12490
 
 // FeeMarketDeductDecorator deducts fees from the fee payer based off of the current state of the feemarket.
 // The fee payer is the fee granter (if specified) or first signer of the tx.
@@ -93,24 +93,20 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
-	var feeCoin sdk.Coin
-	if simulate && len(feeCoins) == 0 {
-		// if simulating and user did not provider a fee - create a dummy value for them
-		feeCoin = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
-	} else {
-		feeCoin = feeCoins[0]
+	// if simulating and user did not provider a fee - create a dummy value for them
+	var (
+		tip     = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
+		payCoin = sdk.NewCoin(params.FeeDenom, math.ZeroInt())
+	)
+	if !simulate {
+		payCoin = feeCoins[0]
 	}
 
 	feeGas := int64(feeTx.GetGas())
 
-	var (
-		tip     = sdk.NewCoin(feeCoin.Denom, math.ZeroInt())
-		payCoin = feeCoin
-	)
-
-	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, feeCoin.GetDenom())
+	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, payCoin.GetDenom())
 	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", feeCoins[0].GetDenom())
+		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", payCoin.GetDenom())
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
@@ -119,13 +115,10 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	)
 
 	if !simulate {
-		payCoin, tip, err = ante.CheckTxFee(ctx, minGasPrice, feeCoin, feeGas, false)
+		payCoin, tip, err = ante.CheckTxFee(ctx, minGasPrice, payCoin, feeGas, false)
 		if err != nil {
 			return ctx, err
 		}
-	} else {
-		// consume the gas that would be consumed during normal execution
-		ctx.GasMeter().ConsumeGas(BankSendGasConsumption, "simulation send gas consumption")
 	}
 
 	ctx.Logger().Info("fee deduct post handle",
@@ -145,6 +138,11 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	err = dfd.feemarketKeeper.SetState(ctx, state)
 	if err != nil {
 		return ctx, errorsmod.Wrapf(err, "unable to set fee market state")
+	}
+
+	if simulate {
+		// consume the gas that would be consumed during normal execution
+		ctx.GasMeter().ConsumeGas(BankSendGasConsumption, "simulation send gas consumption")
 	}
 
 	return next(ctx, tx, simulate, success)

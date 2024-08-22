@@ -151,10 +151,11 @@ func TestSendTip(t *testing.T) {
 func TestPostHandleMock(t *testing.T) {
 	// Same data for every test case
 	const (
-		baseDenom           = "stake"
-		resolvableDenom     = "atom"
-		expectedConsumedGas = 37147
-		gasLimit            = expectedConsumedGas
+		baseDenom              = "stake"
+		resolvableDenom        = "atom"
+		expectedConsumedGas    = 10631
+		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
+		gasLimit               = expectedConsumedSimGas
 	)
 
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
@@ -242,7 +243,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -308,7 +309,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -352,7 +353,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 47006, // extra gas consumed because msg server is run
+			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but deduction is skipped
 			Mock:              true,
 		},
 		{
@@ -397,7 +398,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -441,7 +442,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -461,7 +462,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -481,7 +482,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -538,10 +539,11 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 74476
+		expectedConsumedGas = 36650
 
-		expectedConsumedGasResolve = 74260
-		gasLimit                   = expectedConsumedGasResolve
+		expectedConsumedGasResolve = 36524 // slight difference due to denom resolver
+
+		gasLimit = 100000
 	)
 
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
@@ -648,7 +650,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 36650,
 			Mock:              false,
 		},
 		{
@@ -697,7 +699,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 36650,
 			Mock:              false,
 		},
 		{
@@ -763,7 +765,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 58199, // extra gas consumed because msg server is run, but bank keepers are skipped
+			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but bank keepers are skipped
 			Mock:              false,
 		},
 		{
@@ -813,11 +815,11 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGasResolve,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
-			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate - no balance",
+			Name: "signer has no balance, should pass, no tip - resolvable denom - simulate",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
 				accs := s.CreateTestAccounts(1)
 

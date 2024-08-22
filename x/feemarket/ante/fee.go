@@ -109,13 +109,12 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrTooManyFeeCoins, "got length %d", len(feeCoins))
 	}
 
-	var payCoin sdk.Coin
-	if simulate {
-		// if simulating - create a dummy zero value for the user
-		payCoin = sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
-	} else {
+	// if simulating - create a dummy zero value for the user
+	payCoin := sdk.NewCoin(params.FeeDenom, sdkmath.ZeroInt())
+	if !simulate {
 		payCoin = feeCoins[0]
 	}
+
 	feeGas := int64(feeTx.GetGas())
 
 	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, payCoin.GetDenom())

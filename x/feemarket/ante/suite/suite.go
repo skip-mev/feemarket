@@ -1,6 +1,7 @@
 package suite
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	"testing"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -225,6 +226,9 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		anteErr error
 		postErr error
 	)
+
+	// reset gas meter
+	s.Ctx = s.Ctx.WithGasMeter(storetypes.NewGasMeter(NewTestGasLimit()))
 
 	if tc.RunAnte {
 		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
