@@ -1,8 +1,9 @@
 package suite
 
 import (
-	storetypes "cosmossdk.io/store/types"
 	"testing"
+
+	storetypes "cosmossdk.io/store/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 

@@ -37,7 +37,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
-	mvdan.cc/gofumpt v0.7.0
+	mvdan.cc/gofumpt v0.6.0
 	pgregory.net/rapid v1.1.0
 )
 
