@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/mock"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
@@ -149,13 +148,21 @@ func TestSendTip(t *testing.T) {
 	}
 }
 
-func TestPostHandle(t *testing.T) {
+func TestPostHandleMock(t *testing.T) {
 	// Same data for every test case
 	const (
+<<<<<<< HEAD
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
 		expectedConsumedGas = 33468
 		gasLimit            = expectedConsumedGas
+=======
+		baseDenom              = "stake"
+		resolvableDenom        = "atom"
+		expectedConsumedGas    = 10631
+		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
+		gasLimit               = expectedConsumedSimGas
+>>>>>>> f1f216e (fix: allow for no bank balances in all simulations (#137))
 	)
 
 	// exact cost of transaction
@@ -185,6 +192,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     true,
 		},
 		{
 			Name: "signer has no funds - simulate",
@@ -204,6 +212,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate: true,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     true,
 		},
 		{
 			Name: "0 gas given should fail",
@@ -221,6 +230,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrOutOfGas,
+			Mock:     true,
 		},
 		{
 			Name: "0 gas given should pass - simulate",
@@ -241,7 +251,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip",
@@ -263,6 +274,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip",
@@ -284,6 +296,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - simulate",
@@ -304,7 +317,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "fee market is enabled during the transaction - should pass and skip deduction until next block",
@@ -347,7 +361,12 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
+<<<<<<< HEAD
 			ExpectConsumedGas: 43327, // extra gas consumed because msg server is run
+=======
+			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but deduction is skipped
+			Mock:              true,
+>>>>>>> f1f216e (fix: allow for no bank balances in all simulations (#137))
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom",
@@ -370,6 +389,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate",
@@ -390,7 +410,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom",
@@ -412,6 +433,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom - simulate",
@@ -432,7 +454,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "0 gas given should pass in simulate - no fee",
@@ -451,7 +474,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "0 gas given should pass in simulate - fee",
@@ -470,7 +494,8 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: expectedConsumedSimGas,
+			Mock:              true,
 		},
 		{
 			Name: "no fee - fail",
@@ -488,6 +513,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   types.ErrNoFeeCoins,
+			Mock:     true,
 		},
 		{
 			Name: "no gas limit - fail",
@@ -505,12 +531,471 @@ func TestPostHandle(t *testing.T) {
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrOutOfGas,
+			Mock:     true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
+			args := tc.Malleate(s)
+
+			s.RunTestCase(t, tc, args)
+		})
+	}
+}
+
+func TestPostHandle(t *testing.T) {
+	// Same data for every test case
+	const (
+		baseDenom           = "stake"
+		resolvableDenom     = "atom"
+		expectedConsumedGas = 36650
+
+		expectedConsumedGasResolve = 36524 // slight difference due to denom resolver
+
+		gasLimit = 100000
+	)
+
+	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
+	validFeeAmountWithTip := validFeeAmount.Add(math.LegacyNewDec(100))
+	validFee := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmount.TruncateInt()))
+	validFeeWithTip := sdk.NewCoins(sdk.NewCoin(baseDenom, validFeeAmountWithTip.TruncateInt()))
+	validResolvableFee := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmount.TruncateInt()))
+	validResolvableFeeWithTip := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmountWithTip.TruncateInt()))
+
+	testCases := []antesuite.TestCase{
+		{
+			Name: "signer has no funds",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
+			Name: "signer has no funds - simulate - pass",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			Mock:              false,
+			ExpectConsumedGas: expectedConsumedGas,
+		},
+		{
+			Name: "0 gas given should fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrOutOfGas,
+			Mock:     false,
+		},
+		{
+			Name: "0 gas given should pass - simulate",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "signer has enough funds, should pass, no tip",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: 36650,
+			Mock:              false,
+		},
+		{
+			Name: "signer has does not have enough funds for fee and tip - fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validFeeWithTip,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: 36650,
+			Mock:              false,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip - simulate",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "fee market is enabled during the transaction - should pass and skip deduction until next block",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				// disable fee market before tx
+				s.Ctx = s.Ctx.WithBlockHeight(10)
+				disabledParams := types.DefaultParams()
+				disabledParams.Enabled = false
+				err := s.FeeMarketKeeper.SetParams(s.Ctx, disabledParams)
+				s.Require().NoError(err)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			StateUpdate: func(s *antesuite.TestSuite) {
+				// enable the fee market
+				enabledParams := types.DefaultParams()
+				req := &types.MsgParams{
+					Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+					Params:    enabledParams,
+				}
+
+				_, err := s.MsgServer.Params(s.Ctx, req)
+				s.Require().NoError(err)
+
+				height, err := s.FeeMarketKeeper.GetEnabledHeight(s.Ctx)
+				s.Require().NoError(err)
+				s.Require().Equal(int64(10), height)
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but bank keepers are skipped
+			Mock:              false,
+		},
+		{
+			Name: "signer has enough funds, should pass, no tip - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGasResolve,
+			Mock:              false,
+		},
+		{
+			Name: "signer has enough funds, should pass, no tip - resolvable denom - simulate",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "signer has no balance, should pass, no tip - resolvable denom - simulate",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "signer does not have enough funds, fail - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFee,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFeeWithTip,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrInsufficientFunds,
+			Mock:     false,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip - resolvable denom",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				balance := antesuite.TestAccountBalance{
+					TestAccount: accs[0],
+					Coins:       validResolvableFeeWithTip,
+				}
+				s.SetAccountBalances([]antesuite.TestAccountBalance{balance})
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGasResolve,
+			Mock:              false,
+		},
+		{
+			Name: "signer has enough funds, should pass with tip - resolvable denom - simulate",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validResolvableFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "0 gas given should pass in simulate - no fee",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: nil,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           false,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "0 gas given should pass in simulate - fee",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: validFee,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           false,
+			Simulate:          true,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              false,
+		},
+		{
+			Name: "no fee - fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  1000000000,
+					FeeAmount: nil,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   types.ErrNoFeeCoins,
+			Mock:     false,
+		},
+		{
+			Name: "no gas limit - fail",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  0,
+					FeeAmount: nil,
+				}
+			},
+			RunAnte:  true,
+			RunPost:  true,
+			Simulate: false,
+			ExpPass:  false,
+			ExpErr:   sdkerrors.ErrOutOfGas,
+			Mock:     false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
+			s := antesuite.SetupTestSuite(t, tc.Mock)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
