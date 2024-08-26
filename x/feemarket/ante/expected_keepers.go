@@ -3,6 +3,7 @@ package ante
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -31,11 +32,15 @@ type FeeGrantKeeper interface {
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
 type BankKeeper interface {
+<<<<<<< HEAD
 	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
 	SendCoins(ctx sdk.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
 	SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error
 	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+=======
+	bankkeeper.Keeper
+>>>>>>> f1f216e (fix: allow for no bank balances in all simulations (#137))
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.

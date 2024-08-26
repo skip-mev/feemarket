@@ -3,6 +3,14 @@ package suite
 import (
 	"testing"
 
+<<<<<<< HEAD
+=======
+	storetypes "cosmossdk.io/store/types"
+
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	txsigning "cosmossdk.io/x/tx/signing"
+>>>>>>> f1f216e (fix: allow for no bank balances in all simulations (#137))
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -17,8 +25,15 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+<<<<<<< HEAD
+=======
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	"github.com/cosmos/gogoproto/proto"
+>>>>>>> f1f216e (fix: allow for no bank balances in all simulations (#137))
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
@@ -39,7 +54,7 @@ type TestSuite struct {
 
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
-	BankKeeper      feemarketante.BankKeeper
+	BankKeeper      bankkeeper.Keeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
 	MockBankKeeper     *mocks.BankKeeper
@@ -56,7 +71,14 @@ type TestAccount struct {
 	Priv    cryptotypes.PrivKey
 }
 
+type TestAccountBalance struct {
+	TestAccount
+	sdk.Coins
+}
+
 func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
+	s.T().Helper()
+
 	var accounts []TestAccount
 
 	for i := 0; i < numAccs; i++ {
@@ -73,6 +95,23 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	return accounts
 }
 
+func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
+	s.T().Helper()
+
+	oldState := s.BankKeeper.ExportGenesis(s.Ctx)
+
+	balances := make([]banktypes.Balance, len(accounts))
+	for i, acc := range accounts {
+		balances[i] = banktypes.Balance{
+			Address: acc.Account.GetAddress().String(),
+			Coins:   acc.Coins,
+		}
+	}
+
+	oldState.Balances = balances
+	s.BankKeeper.InitGenesis(s.Ctx, oldState)
+}
+
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
@@ -83,6 +122,9 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.AccountKeeper = testKeepers.AccountKeeper
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
+	s.BankKeeper = testKeepers.BankKeeper
+	s.FeeGrantKeeper = testKeepers.FeeGrantKeeper
+
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
 
@@ -94,6 +136,9 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 
 	s.SetupHandlers(mock)
 	s.SetT(t)
+
+	s.BankKeeper.InitGenesis(s.Ctx, &banktypes.GenesisState{})
+
 	return s
 }
 
@@ -149,6 +194,7 @@ type TestCase struct {
 	ExpPass           bool
 	ExpErr            error
 	ExpectConsumedGas uint64
+	Mock              bool
 }
 
 type TestCaseArgs struct {
@@ -188,6 +234,9 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		anteErr error
 		postErr error
 	)
+
+	// reset gas meter
+	s.Ctx = s.Ctx.WithGasMeter(storetypes.NewGasMeter(NewTestGasLimit()))
 
 	if tc.RunAnte {
 		newCtx, anteErr = s.AnteHandler(s.Ctx, tx, tc.Simulate)
