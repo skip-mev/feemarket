@@ -49,6 +49,12 @@ var (
 
 	// DefaultAIMDFeeDenom is the Cosmos SDK default bond denom.
 	DefaultAIMDFeeDenom = DefaultFeeDenom
+
+	// DefaultAIMDEnabled is the default enabled.
+	DefaultAIMDEnabled = true
+
+	// DefaultAIMDEnableTips is the default enable tips.
+	DefaultAIMDEnableTips = true
 )
 
 // DefaultAIMDParams returns a default set of parameters that implements
@@ -67,8 +73,8 @@ func DefaultAIMDParams() Params {
 		DefaultAIMDMinLearningRate,
 		DefaultAIMDMaxLearningRate,
 		DefaultAIMDFeeDenom,
-		true,
-		false,
+		DefaultAIMDEnabled,
+		DefaultAIMDEnableTips,
 	)
 }
 
