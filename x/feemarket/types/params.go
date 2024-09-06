@@ -20,6 +20,7 @@ func NewParams(
 	maxLearningRate math.LegacyDec,
 	feeDenom string,
 	enabled bool,
+	BurnAllFees bool,
 ) Params {
 	return Params{
 		Alpha:               alpha,
@@ -33,6 +34,7 @@ func NewParams(
 		Window:              window,
 		FeeDenom:            feeDenom,
 		Enabled:             enabled,
+		BurnAllFees:         BurnAllFees,
 	}
 }
 

@@ -38,6 +38,7 @@ AIMD EIP-1559 introduces a few new parameters to the EIP-1559 fee market:
 * **`MaxLearningRate`**: This is the maximum learning rate that can be applied to the base fee. This must be a value that is between `[0, 1]`.
 * **`MinLearningRate`**: This is the minimum learning rate that can be applied to the base fee. This must be a value that is between `[0, 1]`.
 * **`Delta`**: This is a trailing constant that is used to smooth the learning rate. In order to further converge the long term net gas usage and net gas goal, we introduce another integral term which tracks how much gas off from 0 gas we’re at. We add a constant c which basically forces the fee to slowly trend in some direction until this has gone to 0.
+* **`BurnAllFees`**: This is a boolean that determines whether all fees are burned instead of being distributed. When set to `true`, it overrides the `DistributeFees` parameter.
 
 The calculation for the updated base fee for the next block is as follows:
 
