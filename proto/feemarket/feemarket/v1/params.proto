@@ -90,9 +90,6 @@ message Params {
   // distributed to all stakers.
   bool distribute_fees = 12;
 
-  // BurnAllFees is a boolean that determines whether all fees are burned instead of being distributed.
-  bool burn_all_fees = 13;
-
   // EnableTips is a boolean that determines whether tips are enabled.
-  bool enable_tips = 14;
+  bool enable_tips = 13;
 }
