@@ -199,7 +199,6 @@ func TestPostHandleMock(t *testing.T) {
 				accs := s.CreateTestAccounts(1)
 				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
 					types.FeeCollectorName, mock.Anything).Return(nil).Once()
-				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
 
 				params := types.DefaultParams()
 				params.EnableTips = false
@@ -407,7 +406,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but deduction is skipped
+			ExpectConsumedGas: 15412, // extra gas consumed because msg server is run, but deduction is skipped
 			Mock:              true,
 		},
 		{
