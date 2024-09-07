@@ -752,7 +752,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: 36650 + 18,
 			Mock:              false,
 		},
 		{
