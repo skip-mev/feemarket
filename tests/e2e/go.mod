@@ -1,8 +1,6 @@
 module github.com/skip-mev/feemarket/tests/e2e
 
-go 1.22.6
-
-toolchain go1.23.0
+go 1.23.0
 
 replace (
 	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.0.0-beta.1.0.20240124105859-5ad1805d0e79
