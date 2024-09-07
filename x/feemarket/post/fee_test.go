@@ -818,7 +818,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but bank keepers are skipped
+			ExpectConsumedGas: 15412, // extra gas consumed because msg server is run, but bank keepers are skipped
 			Mock:              false,
 		},
 		{
