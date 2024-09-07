@@ -1,6 +1,6 @@
 module github.com/skip-mev/feemarket
 
-go 1.23.0
+go 1.22.6
 
 require (
 	cosmossdk.io/api v0.7.5
