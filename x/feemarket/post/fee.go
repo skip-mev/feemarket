@@ -158,21 +158,23 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 
 	var events sdk.Events
 
-	// deduct the fees and tip
-	if !fee.IsNil() {
-		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(fee), params.DistributeFees)
+	// Combine fee and tip if tips are not enabled
+	totalFee := fee
+	if !params.EnableTips && !tip.IsNil() {
+		totalFee = totalFee.Add(tip)
+	}
+
+	// Deduct the total fee (which may include the tip)
+	if !totalFee.IsNil() {
+		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(totalFee), params.DistributeFees)
 		if err != nil {
 			return err
 		}
-
-		events = append(events, sdk.NewEvent(
-			feemarkettypes.EventTypeFeePay,
-			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-		))
 	}
 
-	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	if !tip.IsNil() {
+	// Process the tip separately if tips are enabled
+	if params.EnableTips && !tip.IsNil() {
+		proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.NewCoins(tip))
 		if err != nil {
 			return err

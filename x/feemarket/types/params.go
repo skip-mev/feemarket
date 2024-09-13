@@ -20,6 +20,7 @@ func NewParams(
 	maxLearningRate math.LegacyDec,
 	feeDenom string,
 	enabled bool,
+	enableTips bool,
 ) Params {
 	return Params{
 		Alpha:               alpha,
@@ -33,6 +34,7 @@ func NewParams(
 		Window:              window,
 		FeeDenom:            feeDenom,
 		Enabled:             enabled,
+		EnableTips:          enableTips,
 	}
 }
 
@@ -80,6 +82,10 @@ func (p *Params) ValidateBasic() error {
 
 	if p.FeeDenom == "" {
 		return fmt.Errorf("fee denom must be set")
+	}
+
+	if p.EnableTips && !p.Enabled {
+		return fmt.Errorf("tips cannot be enabled when the fee market is disabled")
 	}
 
 	return nil

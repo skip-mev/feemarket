@@ -36,14 +36,15 @@ var additionalMaccPerms = map[string][]string{
 }
 
 // NewTestSetup returns initialized instances of all the keepers and message servers of the modules
-func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
+func NewTestSetup(tb testing.TB, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
+	tb.Helper()
 	options = append(options, testkeeper.WithAdditionalModuleAccounts(additionalMaccPerms))
 
-	_, tk, tms := testkeeper.NewTestSetup(t, options...)
+	_, tk, tms := testkeeper.NewTestSetup(tb, options...)
 
 	// initialize extra keeper
 	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper)
-	require.NoError(t, tk.Initializer.LoadLatest())
+	require.NoError(tb, tk.Initializer.LoadLatest())
 
 	// initialize msg servers
 	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(feeMarketKeeper)
@@ -54,9 +55,9 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	}, false, log.NewNopLogger())
 
 	err := feeMarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
-	require.NoError(t, err)
+	require.NoError(tb, err)
 	err = feeMarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
-	require.NoError(t, err)
+	require.NoError(tb, err)
 
 	testKeepers := TestKeepers{
 		TestKeepers:     tk,

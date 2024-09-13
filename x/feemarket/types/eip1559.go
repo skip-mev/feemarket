@@ -42,6 +42,12 @@ var (
 
 	// DefaultFeeDenom is the Cosmos SDK default bond denom.
 	DefaultFeeDenom = sdk.DefaultBondDenom
+
+	// DefaultEnabled: is the fee market enabled.
+	DefaultEnabled = true
+
+	// DefaultEnableTips is the default enable tips.
+	DefaultEnableTips = true
 )
 
 // DefaultParams returns a default set of parameters that implements
@@ -59,7 +65,8 @@ func DefaultParams() Params {
 		DefaultMinLearningRate,
 		DefaultMaxLearningRate,
 		DefaultFeeDenom,
-		true,
+		DefaultEnabled,
+		DefaultEnableTips,
 	)
 }
 

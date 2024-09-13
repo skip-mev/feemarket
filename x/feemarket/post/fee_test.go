@@ -153,7 +153,7 @@ func TestPostHandleMock(t *testing.T) {
 	const (
 		baseDenom              = "stake"
 		resolvableDenom        = "atom"
-		expectedConsumedGas    = 10631
+		expectedConsumedGas    = 10649
 		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
 		gasLimit               = expectedConsumedSimGas
 	)
@@ -166,6 +166,59 @@ func TestPostHandleMock(t *testing.T) {
 	validResolvableFeeWithTip := sdk.NewCoins(sdk.NewCoin(resolvableDenom, validFeeAmountWithTip.TruncateInt()))
 
 	testCases := []antesuite.TestCase{
+		{
+			Name: "tips enabled, should pass with tip to proposer",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeCollectorName, mock.Anything).Return(nil).Once()
+				s.MockBankKeeper.On("SendCoinsFromModuleToAccount", mock.Anything, types.FeeCollectorName, mock.Anything, mock.Anything).Return(nil).Once()
+
+				params := types.DefaultParams()
+				params.EnableTips = true
+				err := s.FeeMarketKeeper.SetParams(s.Ctx, params)
+				s.Require().NoError(err)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas,
+			Mock:              true,
+		},
+		{
+			Name: "tips disabled, should pass with tip to fee collector",
+			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
+				accs := s.CreateTestAccounts(1)
+				s.MockBankKeeper.On("SendCoinsFromAccountToModule", mock.Anything, accs[0].Account.GetAddress(),
+					types.FeeCollectorName, mock.Anything).Return(nil).Once()
+
+				params := types.DefaultParams()
+				params.EnableTips = false
+				err := s.FeeMarketKeeper.SetParams(s.Ctx, params)
+				s.Require().NoError(err)
+
+				return antesuite.TestCaseArgs{
+					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
+					GasLimit:  gasLimit,
+					FeeAmount: validFeeWithTip,
+				}
+			},
+			RunAnte:           true,
+			RunPost:           true,
+			Simulate:          false,
+			ExpPass:           true,
+			ExpErr:            nil,
+			ExpectConsumedGas: expectedConsumedGas - 18,
+			Mock:              true,
+		},
 		{
 			Name: "signer has no funds",
 			Malleate: func(s *antesuite.TestSuite) antesuite.TestCaseArgs {
@@ -353,7 +406,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but deduction is skipped
+			ExpectConsumedGas: 15412, // extra gas consumed because msg server is run, but deduction is skipped
 			Mock:              true,
 		},
 		{
@@ -539,9 +592,9 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 36650
+		expectedConsumedGas = 36668
 
-		expectedConsumedGasResolve = 36524 // slight difference due to denom resolver
+		expectedConsumedGasResolve = 36542 // slight difference due to denom resolver
 
 		gasLimit = 100000
 	)
@@ -650,7 +703,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: 36650 + 18,
 			Mock:              false,
 		},
 		{
@@ -699,7 +752,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: 36650 + 18,
 			Mock:              false,
 		},
 		{
@@ -765,7 +818,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but bank keepers are skipped
+			ExpectConsumedGas: 15412, // extra gas consumed because msg server is run, but bank keepers are skipped
 			Mock:              false,
 		},
 		{
