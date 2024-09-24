@@ -156,4 +156,19 @@ func (s *KeeperTestSuite) TestBaseFeeRequest() {
 
 		s.Require().Equal(resp.GetPrice(), fee)
 	})
+
+	s.Run("can get gas prices", func() {
+		// set denom resolver to nil assuming that it is not set
+		s.feeMarketKeeper.SetDenomResolver(nil)
+
+		req := &types.GasPricesRequest{}
+		resp, err := s.queryServer.GasPrices(s.ctx, req)
+		s.Require().NoError(err)
+		s.Require().NotNil(resp)
+
+		gasPrices, err := s.feeMarketKeeper.GetMinGasPrices(s.ctx)
+		s.Require().NoError(err)
+
+		s.Require().Equal(resp.GetPrices(), gasPrices)
+	})
 }

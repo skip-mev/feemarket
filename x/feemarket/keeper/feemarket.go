@@ -114,6 +114,10 @@ func (k *Keeper) GetMinGasPrices(ctx sdk.Context) (sdk.DecCoins, error) {
 	minGasPrice := sdk.NewDecCoinFromDec(params.FeeDenom, baseGasPrice)
 	minGasPrices := sdk.NewDecCoins(minGasPrice)
 
+	if k.resolver == nil {
+		return minGasPrices, nil
+	}
+
 	extraDenoms, err := k.resolver.ExtraDenoms(ctx)
 	if err != nil {
 		return sdk.NewDecCoins(), err
