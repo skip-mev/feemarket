@@ -37,7 +37,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 func (s *IntegrationTestSuite) SetupTest() {
 	s.encCfg = MakeTestEncodingConfig()
 
-	s.ctx, s.TestKeepers, s.TestMsgServers = testkeeper.NewTestSetup(s.T())
+	s.ctx, s.TestKeepers, s.TestMsgServers = testkeeper.NewTestSetup(s.T(), false)
 }
 
 func (s *IntegrationTestSuite) TestState() {

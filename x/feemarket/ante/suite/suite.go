@@ -3,6 +3,7 @@ package suite
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -106,11 +107,11 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
-func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
+func SetupTestSuite(t *testing.T, mock, distributeFees bool) *TestSuite {
 	s := &TestSuite{}
 
 	s.EncCfg = MakeTestEncodingConfig()
-	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
+	ctx, testKeepers, _ := testkeeper.NewTestSetup(t, distributeFees)
 	s.Ctx = ctx
 
 	s.AccountKeeper = testKeepers.AccountKeeper
@@ -188,6 +189,7 @@ type TestCase struct {
 	ExpErr            error
 	ExpectConsumedGas uint64
 	Mock              bool
+	DistributeFees    bool
 }
 
 type TestCaseArgs struct {
@@ -242,6 +244,11 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 
 	if tc.RunPost && anteErr == nil {
 		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
+	}
+
+	if tc.DistributeFees && !tc.Simulate && args.FeeAmount != nil {
+		postFeeBalance := s.BankKeeper.GetBalance(s.Ctx, s.AccountKeeper.GetModuleAddress(feemarkettypes.FeeCollectorName), args.FeeAmount.GetDenomByIndex(0))
+		require.Equal(t, postFeeBalance.Amount, math.ZeroInt())
 	}
 
 	if tc.ExpPass {
