@@ -281,7 +281,7 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			require.Error(t, postErr)
 			require.ErrorIs(t, postErr, tc.ExpErr)
 
-		case tc.MsgRunSuccess == false:
+		case !tc.MsgRunSuccess:
 			// message failed to run but ante and post should succeed
 			require.NoError(t, anteErr)
 			require.NoError(t, postErr)
