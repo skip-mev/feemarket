@@ -2,8 +2,9 @@ package post_test
 
 import (
 	"fmt"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"testing"
+
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
@@ -11,6 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/post"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
