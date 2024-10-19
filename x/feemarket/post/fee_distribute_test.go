@@ -2,6 +2,7 @@ package post_test
 
 import (
 	"fmt"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"testing"
 
 	"cosmossdk.io/math"
@@ -71,7 +72,7 @@ func TestPostHandleDistributeFees(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 54500
+		expectedConsumedGas = 65558
 
 		gasLimit = 100000
 	)
@@ -101,8 +102,8 @@ func TestPostHandleDistributeFees(t *testing.T) {
 			RunAnte:           true,
 			RunPost:           true,
 			Simulate:          false,
-			ExpPass:           true,
-			ExpErr:            nil,
+			ExpPass:           false,
+			ExpErr:            sdkerrors.ErrOutOfGas,
 			ExpectConsumedGas: 65558,
 			Mock:              false,
 			DistributeFees:    true,

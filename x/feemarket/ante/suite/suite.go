@@ -1,6 +1,7 @@
 package suite
 
 import (
+	"fmt"
 	"testing"
 
 	"cosmossdk.io/math"
@@ -242,13 +243,13 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		tc.StateUpdate(s)
 	}
 
-	if tc.RunPost && anteErr == nil {
-		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
+	if tc.RunPost {
+		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, anteErr == nil)
 	}
 
 	if tc.DistributeFees && !tc.Simulate && args.FeeAmount != nil {
 		postFeeBalance := s.BankKeeper.GetBalance(s.Ctx, s.AccountKeeper.GetModuleAddress(feemarkettypes.FeeCollectorName), args.FeeAmount.GetDenomByIndex(0))
-		require.Equal(t, postFeeBalance.Amount, math.ZeroInt())
+		require.True(t, postFeeBalance.Amount.Equal(math.ZeroInt()), fmt.Errorf("amounts not equal: %s, %s", postFeeBalance.Amount.String(), math.ZeroInt().String()))
 	}
 
 	if tc.ExpPass {
