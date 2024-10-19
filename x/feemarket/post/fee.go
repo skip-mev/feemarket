@@ -96,15 +96,17 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		payCoin = feeCoins[0]
 	}
 
-	// if the tx failed, deal with escrowed funds and return early
-	if !success && !simulate {
-		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(payCoin), params.DistributeFees)
-		if err != nil {
-			return ctx, err
-		}
+	/*
+		// if the tx failed, deal with escrowed funds and return early
+		if !success && !simulate {
+			err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(payCoin), params.DistributeFees)
+			if err != nil {
+				return ctx, err
+			}
 
-		return next(ctx, tx, simulate, success)
-	}
+			return next(ctx, tx, simulate, success)
+		}
+	*/
 
 	feeGas := int64(feeTx.GetGas())
 
