@@ -56,6 +56,9 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
+	feeCoins := feeTx.GetFee()
+	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
+
 	// update fee market params
 	params, err := dfd.feemarketKeeper.GetParams(ctx)
 	if err != nil {
@@ -77,15 +80,6 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return next(ctx, tx, simulate, success)
 	}
 
-	// update fee market state
-	state, err := dfd.feemarketKeeper.GetState(ctx)
-	if err != nil {
-		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
-	}
-
-	feeCoins := feeTx.GetFee()
-	gas := ctx.GasMeter().GasConsumed() // use context gas consumed
-
 	if len(feeCoins) == 0 && !simulate {
 		return ctx, errorsmod.Wrapf(feemarkettypes.ErrNoFeeCoins, "got length %d", len(feeCoins))
 	}
@@ -100,6 +94,16 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 	)
 	if !simulate {
 		payCoin = feeCoins[0]
+	}
+
+	// if the tx failed, deal with escrowed funds and return early
+	if !success && !simulate {
+		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(payCoin), params.DistributeFees)
+		if err != nil {
+			return ctx, err
+		}
+
+		return next(ctx, tx, simulate, success)
 	}
 
 	feeGas := int64(feeTx.GetGas())
@@ -128,6 +132,12 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 
 	if err := dfd.PayOutFeeAndTip(ctx, payCoin, tip); err != nil {
 		return ctx, err
+	}
+
+	// update fee market state
+	state, err := dfd.feemarketKeeper.GetState(ctx)
+	if err != nil {
+		return ctx, errorsmod.Wrapf(err, "unable to get fee market state")
 	}
 
 	err = state.Update(gas, params)

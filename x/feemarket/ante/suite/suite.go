@@ -185,6 +185,7 @@ type TestCase struct {
 	StateUpdate       func(*TestSuite)
 	RunAnte           bool
 	RunPost           bool
+	MsgRunSuccess     bool
 	Simulate          bool
 	ExpPass           bool
 	ExpErr            error
@@ -210,8 +211,8 @@ func (s *TestSuite) DeliverMsgs(t *testing.T, privs []cryptotypes.PrivKey, msgs 
 	s.TxBuilder.SetFeeAmount(feeAmount)
 	s.TxBuilder.SetGasLimit(gasLimit)
 
-	tx, txErr := s.CreateTestTx(privs, accNums, accSeqs, chainID)
-	require.NoError(t, txErr)
+	tx, txCreationErr := s.CreateTestTx(privs, accNums, accSeqs, chainID)
+	require.NoError(t, txCreationErr)
 	return s.AnteHandler(s.Ctx, tx, simulate)
 }
 
@@ -223,7 +224,7 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	// Theoretically speaking, ante handler unit tests should only test
 	// ante handlers, but here we sometimes also test the tx creation
 	// process.
-	tx, txErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
+	tx, txCreationErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
 
 	var (
 		newCtx  sdk.Context
@@ -243,8 +244,8 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		tc.StateUpdate(s)
 	}
 
-	if tc.RunPost {
-		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, anteErr == nil)
+	if tc.RunPost && anteErr == nil {
+		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, tc.MsgRunSuccess)
 	}
 
 	if tc.DistributeFees && !tc.Simulate && args.FeeAmount != nil {
@@ -253,7 +254,7 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	}
 
 	if tc.ExpPass {
-		require.NoError(t, txErr)
+		require.NoError(t, txCreationErr)
 		require.NoError(t, anteErr)
 		require.NoError(t, postErr)
 		require.NotNil(t, newCtx)
@@ -266,9 +267,9 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 
 	} else {
 		switch {
-		case txErr != nil:
-			require.Error(t, txErr)
-			require.ErrorIs(t, txErr, tc.ExpErr)
+		case txCreationErr != nil:
+			require.Error(t, txCreationErr)
+			require.ErrorIs(t, txCreationErr, tc.ExpErr)
 
 		case anteErr != nil:
 			require.Error(t, anteErr)
@@ -279,6 +280,11 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			require.NoError(t, anteErr)
 			require.Error(t, postErr)
 			require.ErrorIs(t, postErr, tc.ExpErr)
+
+		case tc.MsgRunSuccess == false:
+			// message failed to run but ante and post should succeed
+			require.NoError(t, anteErr)
+			require.NoError(t, postErr)
 
 		default:
 			t.Fatal("expected one of txErr, handleErr to be an error")

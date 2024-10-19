@@ -169,7 +169,7 @@ func TestAnteHandleMock(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   types.ErrNoFeeCoins,
@@ -187,7 +187,7 @@ func TestAnteHandleMock(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrOutOfGas,
@@ -390,7 +390,7 @@ func TestAnteHandle(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   types.ErrNoFeeCoins,
@@ -407,12 +407,13 @@ func TestAnteHandle(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       false,
+			Simulate:      false,
+			MsgRunSuccess: true,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          false,
 		},
 	}
 

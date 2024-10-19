@@ -22,8 +22,7 @@ func TestPostHandleDistributeFeesMock(t *testing.T) {
 	// Same data for every test case
 	const (
 		baseDenom              = "stake"
-		resolvableDenom        = "atom"
-		expectedConsumedGas    = 11730
+		expectedConsumedGas    = 11700
 		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
 		gasLimit               = expectedConsumedSimGas
 	)
@@ -51,6 +50,7 @@ func TestPostHandleDistributeFeesMock(t *testing.T) {
 			RunPost:           true,
 			Simulate:          false,
 			ExpPass:           true,
+			MsgRunSuccess:     true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              true,
@@ -73,10 +73,8 @@ func TestPostHandleDistributeFees(t *testing.T) {
 	// Same data for every test case
 	const (
 		baseDenom           = "stake"
-		resolvableDenom     = "atom"
 		expectedConsumedGas = 65558
-
-		gasLimit = 100000
+		gasLimit            = 100000
 	)
 
 	validFeeAmount := types.DefaultMinBaseGasPrice.MulInt64(int64(gasLimit))
@@ -97,16 +95,17 @@ func TestPostHandleDistributeFees(t *testing.T) {
 
 				return antesuite.TestCaseArgs{
 					Msgs:      []sdk.Msg{testdata.NewTestMsg(accs[0].Account.GetAddress())},
-					GasLimit:  35188,
+					GasLimit:  gasLimit,
 					FeeAmount: validFeeWithTip,
 				}
 			},
 			RunAnte:           true,
 			RunPost:           true,
 			Simulate:          false,
+			MsgRunSuccess:     false,
 			ExpPass:           false,
 			ExpErr:            sdkerrors.ErrOutOfGas,
-			ExpectConsumedGas: 65558,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 			DistributeFees:    true,
 		},
