@@ -3,12 +3,14 @@ package suite
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/runtime"
+
+	coretesting "cosmossdk.io/core/testing"
 	storetypes "cosmossdk.io/store/types"
-
-	banktypes "cosmossdk.io/x/bank/types"
-
 	bankkeeper "cosmossdk.io/x/bank/keeper"
+	banktypes "cosmossdk.io/x/bank/types"
 	txsigning "cosmossdk.io/x/tx/signing"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -25,14 +27,14 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/gogoproto/proto"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
-	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -91,7 +93,8 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 	s.T().Helper()
 
-	oldState := s.BankKeeper.ExportGenesis(s.Ctx)
+	oldState, err := s.BankKeeper.ExportGenesis(s.Ctx)
+	s.Require().NoError(err)
 
 	balances := make([]banktypes.Balance, len(accounts))
 	for i, acc := range accounts {
@@ -144,9 +147,10 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		feeGrantKeeper = s.MockFeeGrantKeeper
 	}
 
+	env := runtime.NewEnvironment(runtime.NewKVStoreService(storetypes.NewKVStoreKey("acc")), coretesting.NewNopLogger())
 	// create basic antehandler with the feemarket decorator
 	anteDecorators := []sdk.AnteDecorator{
-		authante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
+		authante.NewSetUpContextDecorator(env), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
 			s.AccountKeeper,
 			bankKeeper,

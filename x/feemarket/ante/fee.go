@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"math"
 
-	errorsmod "cosmossdk.io/errors"
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )

@@ -5,8 +5,8 @@ package mocks
 import (
 	context "context"
 
-	cosmos_sdktypes "github.com/cosmos/cosmos-sdk/types"
 	keeper "cosmossdk.io/x/bank/keeper"
+	cosmos_sdktypes "github.com/cosmos/cosmos-sdk/types"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -103,17 +103,17 @@ func (_m *BankKeeper) BlockedAddr(addr cosmos_sdktypes.AccAddress) bool {
 	return r0
 }
 
-// BurnCoins provides a mock function with given fields: ctx, moduleName, amt
-func (_m *BankKeeper) BurnCoins(ctx context.Context, moduleName string, amt cosmos_sdktypes.Coins) error {
-	ret := _m.Called(ctx, moduleName, amt)
+// BurnCoins provides a mock function with given fields: ctx, address, amt
+func (_m *BankKeeper) BurnCoins(ctx context.Context, address []byte, amt cosmos_sdktypes.Coins) error {
+	ret := _m.Called(ctx, address, amt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for BurnCoins")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, cosmos_sdktypes.Coins) error); ok {
-		r0 = rf(ctx, moduleName, amt)
+	if rf, ok := ret.Get(0).(func(context.Context, []byte, cosmos_sdktypes.Coins) error); ok {
+		r0 = rf(ctx, address, amt)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -325,7 +325,7 @@ func (_m *BankKeeper) DenomsMetadata(_a0 context.Context, _a1 *types.QueryDenoms
 }
 
 // ExportGenesis provides a mock function with given fields: _a0
-func (_m *BankKeeper) ExportGenesis(_a0 context.Context) *types.GenesisState {
+func (_m *BankKeeper) ExportGenesis(_a0 context.Context) (*types.GenesisState, error) {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
@@ -333,6 +333,10 @@ func (_m *BankKeeper) ExportGenesis(_a0 context.Context) *types.GenesisState {
 	}
 
 	var r0 *types.GenesisState
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*types.GenesisState, error)); ok {
+		return rf(_a0)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context) *types.GenesisState); ok {
 		r0 = rf(_a0)
 	} else {
@@ -341,7 +345,13 @@ func (_m *BankKeeper) ExportGenesis(_a0 context.Context) *types.GenesisState {
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetAccountsBalances provides a mock function with given fields: ctx
@@ -666,8 +676,21 @@ func (_m *BankKeeper) HasSupply(ctx context.Context, denom string) bool {
 }
 
 // InitGenesis provides a mock function with given fields: _a0, _a1
-func (_m *BankKeeper) InitGenesis(_a0 context.Context, _a1 *types.GenesisState) {
-	_m.Called(_a0, _a1)
+func (_m *BankKeeper) InitGenesis(_a0 context.Context, _a1 *types.GenesisState) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InitGenesis")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *types.GenesisState) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // InputOutputCoins provides a mock function with given fields: ctx, input, outputs
@@ -1217,8 +1240,7 @@ func (_m *BankKeeper) WithMintCoinsRestriction(_a0 types.MintingRestrictionFn) k
 func NewBankKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *BankKeeper {
+}) *BankKeeper {
 	mock := &BankKeeper{}
 	mock.Mock.Test(t)
 

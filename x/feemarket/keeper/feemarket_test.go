@@ -1,8 +1,9 @@
 package keeper_test
 
 import (
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"cosmossdk.io/math"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )

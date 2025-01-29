@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"cosmossdk.io/math"
 )
 
 // UpdateFeeMarket updates the base fee and learning rate based on the

@@ -1,22 +1,22 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
-	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
+
+	"cosmossdk.io/core/registry"
 )
 
 // RegisterLegacyAminoCodec registers the necessary x/feemarket interfaces (messages) on the
 // provided LegacyAmino codec.
-func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+func RegisterLegacyAminoCodec(cdc registry.AminoRegistrar) {
 	legacy.RegisterAminoMsg(cdc, &MsgParams{}, "feemarket/MsgParams")
 }
 
 // RegisterInterfaces registers the x/feemarket interfaces (messages + msg server) on the
 // provided InterfaceRegistry.
-func RegisterInterfaces(registry types.InterfaceRegistry) {
+func RegisterInterfaces(registry registry.InterfaceRegistrar) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgParams{},
 	)

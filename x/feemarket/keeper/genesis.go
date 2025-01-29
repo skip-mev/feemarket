@@ -1,13 +1,15 @@
 package keeper
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // InitGenesis initializes the feemarket module's state from a given genesis state.
-func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
+func (k *Keeper) InitGenesis(ctx context.Context, gs types.GenesisState) {
 	if err := gs.ValidateBasic(); err != nil {
 		panic(err)
 	}
@@ -30,7 +32,7 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) {
 }
 
 // ExportGenesis returns a GenesisState for a given context.
-func (k *Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
+func (k *Keeper) ExportGenesis(ctx context.Context) *types.GenesisState {
 	// Get the feemarket module's parameters.
 	params, err := k.GetParams(ctx)
 	if err != nil {

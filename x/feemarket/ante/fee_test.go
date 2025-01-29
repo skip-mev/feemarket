@@ -6,11 +6,12 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	_ "github.com/cosmos/cosmos-sdk/x/auth"
+
+	"cosmossdk.io/math"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/types"

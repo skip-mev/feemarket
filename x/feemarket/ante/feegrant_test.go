@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/x/feegrant"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,6 +21,11 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/anypb"
+
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
+	"cosmossdk.io/x/feegrant"
+	signing2 "cosmossdk.io/x/tx/signing"
 
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 
@@ -127,7 +132,14 @@ func TestEscrowFunds(t *testing.T) {
 		tc := stc // to make scopelint happy
 		t.Run(name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
-			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
+			cdc := codec.NewProtoCodec(s.EncCfg.InterfaceRegistry)
+			signingCtx := cdc.InterfaceRegistry().SigningContext()
+			protoTxCfg := tx.NewTxConfig(
+				codec.NewProtoCodec(s.EncCfg.InterfaceRegistry),
+				signingCtx.AddressCodec(),
+				signingCtx.ValidatorAddressCodec(),
+				tx.DefaultSignModes,
+			)
 			// this just tests our handler
 			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper,
 				s.FeeMarketKeeper, authante.NewDeductFeeDecorator(
@@ -150,9 +162,9 @@ func TestEscrowFunds(t *testing.T) {
 			}
 
 			var defaultGenTxGas uint64 = 10
-			tx, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
+			transaction, err := genTxWithFeeGranter(protoTxCfg, msgs, fee, defaultGenTxGas, s.Ctx.ChainID(), accNums, seqs, feeAcc, privs...)
 			require.NoError(t, err)
-			_, err = feeAnteHandler(s.Ctx, tx, false) // tests only feegrant ante
+			_, err = feeAnteHandler(s.Ctx, transaction, false) // tests only feegrant ante
 			if tc.valid {
 				require.NoError(t, err)
 			} else {
@@ -172,7 +184,7 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 
 	memo := simulation.RandStringOfLength(r, simulation.RandIntBetween(r, 0, 100))
 
-	signMode := signing.SignMode_SIGN_MODE_DIRECT
+	signMode := signingv1beta1.SignMode_SIGN_MODE_DIRECT
 
 	// 1st round: set SignatureV2 with empty signatures, to set correct
 	// signer infos.
@@ -202,11 +214,13 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 
 	// 2nd round: once all signer infos are set, every signer can sign.
 	for i, p := range priv {
-		signerData := authsign.SignerData{
+		anyPk, err := codectypes.NewAnyWithValue(p.PubKey())
+		signerData := signing2.SignerData{
+			Address:       p.PubKey().Address().String(),
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
-			PubKey:        p.PubKey(),
+			PubKey:        &anypb.Any{TypeUrl: anyPk.TypeUrl, Value: anyPk.Value},
 		}
 		signBytes, err := authsign.GetSignBytesAdapter(
 			context.Background(), gen.SignModeHandler(), signMode, signerData, tx.GetTx())

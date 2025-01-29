@@ -5,6 +5,8 @@ package mocks
 import (
 	address "cosmossdk.io/core/address"
 
+	appmodulev2 "cosmossdk.io/core/appmodule/v2"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	context "context"
@@ -54,6 +56,24 @@ func (_m *AccountKeeper) GetAccount(ctx context.Context, addr types.AccAddress) 
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(types.AccountI)
 		}
+	}
+
+	return r0
+}
+
+// GetEnvironment provides a mock function with given fields:
+func (_m *AccountKeeper) GetEnvironment() appmodulev2.Environment {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEnvironment")
+	}
+
+	var r0 appmodulev2.Environment
+	if rf, ok := ret.Get(0).(func() appmodulev2.Environment); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(appmodulev2.Environment)
 	}
 
 	return r0
@@ -147,8 +167,7 @@ func (_m *AccountKeeper) SetAccount(ctx context.Context, acc types.AccountI) {
 func NewAccountKeeper(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *AccountKeeper {
+}) *AccountKeeper {
 	mock := &AccountKeeper{}
 	mock.Mock.Test(t)
 

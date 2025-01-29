@@ -3,9 +3,6 @@ package keeper_test
 import (
 	"testing"
 
-	"cosmossdk.io/math"
-	govtypes "cosmossdk.io/x/gov/types"
-	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/address"
@@ -17,6 +14,10 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/suite"
+
+	"cosmossdk.io/math"
+	govtypes "cosmossdk.io/x/gov/types"
+	txsigning "cosmossdk.io/x/tx/signing"
 
 	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
@@ -145,7 +146,8 @@ func MakeTestEncodingConfig() TestEncodingConfig {
 
 	interfaceRegistry := InterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
-	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+	signingCtx := cdc.InterfaceRegistry().SigningContext()
+	txCfg := authtx.NewTxConfig(cdc, signingCtx.AddressCodec(), signingCtx.ValidatorAddressCodec(), authtx.DefaultSignModes)
 
 	std.RegisterLegacyAminoCodec(amino)
 	std.RegisterInterfaces(interfaceRegistry)

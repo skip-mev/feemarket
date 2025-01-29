@@ -3,10 +3,12 @@ package ante
 import (
 	"context"
 
-	"cosmossdk.io/core/address"
-	bankkeeper "cosmossdk.io/x/bank/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	"cosmossdk.io/core/address"
+	appmodulev2 "cosmossdk.io/core/appmodule/v2"
+	bankkeeper "cosmossdk.io/x/bank/keeper"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -23,6 +25,7 @@ type AccountKeeper interface {
 	GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI
 	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 	AddressCodec() address.Codec
+	GetEnvironment() appmodulev2.Environment
 }
 
 // FeeGrantKeeper defines the expected feegrant keeper.

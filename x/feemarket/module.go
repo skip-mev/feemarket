@@ -4,21 +4,18 @@ import (
 	"context"
 	"encoding/json"
 
-	"cosmossdk.io/core/appmodule"
-	"cosmossdk.io/depinject"
-	store "cosmossdk.io/store/types"
-	govtypes "cosmossdk.io/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"google.golang.org/grpc"
 
 	"github.com/spf13/cobra"
 
-	modulev1 "github.com/skip-mev/feemarket/api/feemarket/feemarket/module/v1"
+	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/core/registry"
+
 	"github.com/skip-mev/feemarket/x/feemarket/client/cli"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
@@ -28,39 +25,34 @@ import (
 const ConsensusVersion = 1
 
 var (
-	_ module.HasName        = AppModule{}
 	_ module.HasGenesis     = AppModule{}
-	_ module.AppModuleBasic = AppModule{}
-	_ module.HasServices    = AppModule{}
+	_ module.HasGRPCGateway = AppModule{}
 
-	_ appmodule.AppModule       = AppModule{}
-	_ appmodule.HasBeginBlocker = AppModule{}
-	_ appmodule.HasEndBlocker   = AppModule{}
+	_ appmodule.AppModule             = AppModule{}
+	_ appmodule.HasBeginBlocker       = AppModule{}
+	_ appmodule.HasEndBlocker         = AppModule{}
+	_ appmodule.HasAminoCodec         = AppModule{}
+	_ appmodule.HasRegisterInterfaces = AppModule{}
 )
 
-// AppModuleBasic defines the base interface that the x/feemarket module exposes to the application.
-type AppModuleBasic struct {
-	cdc codec.Codec
-}
-
 // Name returns the name of x/feemarket module.
-func (amb AppModuleBasic) Name() string { return types.ModuleName }
+func (am AppModule) Name() string { return types.ModuleName }
 
 // RegisterLegacyAminoCodec registers the necessary types from the x/feemarket module for amino
 // serialization.
-func (amb AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+func (am AppModule) RegisterLegacyAminoCodec(cdc registry.AminoRegistrar) {
 	types.RegisterLegacyAminoCodec(cdc)
 }
 
 // RegisterInterfaces registers the necessary implementations / interfaces in the x/feemarket
 // module w/ the interface-registry.
-func (amb AppModuleBasic) RegisterInterfaces(ir codectypes.InterfaceRegistry) {
+func (am AppModule) RegisterInterfaces(ir registry.InterfaceRegistrar) {
 	types.RegisterInterfaces(ir)
 }
 
 // RegisterGRPCGatewayRoutes registers the necessary REST routes for the GRPC-gateway to
 // the x/feemarket module QueryService on mux. This method panics on failure.
-func (amb AppModuleBasic) RegisterGRPCGatewayRoutes(cliCtx client.Context, mux *runtime.ServeMux) {
+func (am AppModule) RegisterGRPCGatewayRoutes(cliCtx client.Context, mux *runtime.ServeMux) {
 	// Register the gate-way routes w/ the provided mux.
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(cliCtx)); err != nil {
 		panic(err)
@@ -69,18 +61,18 @@ func (amb AppModuleBasic) RegisterGRPCGatewayRoutes(cliCtx client.Context, mux *
 
 // GetTxCmd is a no-op, as no txs are registered for submission (apart from messages that
 // can only be executed by governance).
-func (amb AppModuleBasic) GetTxCmd() *cobra.Command {
+func (am AppModule) GetTxCmd() *cobra.Command {
 	return nil
 }
 
 // GetQueryCmd returns the x/feemarket module base query cli-command.
-func (amb AppModuleBasic) GetQueryCmd() *cobra.Command {
+func (am AppModule) GetQueryCmd() *cobra.Command {
 	return cli.GetQueryCmd()
 }
 
 // AppModule represents an application module for the x/feemarket module.
 type AppModule struct {
-	AppModuleBasic
+	cdc codec.Codec
 
 	k keeper.Keeper
 }
@@ -92,10 +84,8 @@ func (am AppModule) BeginBlock(_ context.Context) error {
 // NewAppModule returns an application module for the x/feemarket module.
 func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{
-			cdc: cdc,
-		},
-		k: k,
+		cdc: cdc,
+		k:   k,
 	}
 }
 
@@ -114,22 +104,22 @@ func (am AppModule) IsOnePerModuleType() {}
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 { return ConsensusVersion }
 
-// RegisterServices registers the module's services with the app's module configurator.
-func (am AppModule) RegisterServices(cfc module.Configurator) {
-	types.RegisterMsgServer(cfc.MsgServer(), keeper.NewMsgServer(&am.k))
-	types.RegisterQueryServer(cfc.QueryServer(), keeper.NewQueryServer(am.k))
+func (am AppModule) RegisterServices(r grpc.ServiceRegistrar) error {
+	types.RegisterMsgServer(r, keeper.NewMsgServer(&am.k))
+	types.RegisterQueryServer(r, keeper.NewQueryServer(am.k))
+	return nil
 }
 
 // DefaultGenesis returns default genesis state as raw bytes for the feemarket
 // module.
-func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesisState())
+func (am AppModule) DefaultGenesis() json.RawMessage {
+	return am.cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // ValidateGenesis performs genesis state validation for the feemarket module.
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
+func (am AppModule) ValidateGenesis(data json.RawMessage) error {
 	var gs types.GenesisState
-	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
+	if err := am.cdc.UnmarshalJSON(data, &gs); err != nil {
 		return err
 	}
 
@@ -138,66 +128,18 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 
 // InitGenesis performs the genesis initialization for the x/feemarket module. This method returns
 // no validator set updates. This method panics on any errors.
-func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, bz json.RawMessage) {
+func (am AppModule) InitGenesis(ctx context.Context, data json.RawMessage) error {
 	var gs types.GenesisState
-	cdc.MustUnmarshalJSON(bz, &gs)
-
+	if err := am.cdc.UnmarshalJSON(data, &gs); err != nil {
+		return err
+	}
 	am.k.InitGenesis(ctx, gs)
+	return nil
 }
 
 // ExportGenesis returns the feemarket module's exported genesis state as raw
 // JSON bytes. This method panics on any error.
-func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
+func (am AppModule) ExportGenesis(ctx context.Context) (json.RawMessage, error) {
 	gs := am.k.ExportGenesis(ctx)
-	return cdc.MustMarshalJSON(gs)
-}
-
-func init() {
-	appmodule.Register(
-		&modulev1.Module{},
-		appmodule.Provide(ProvideModule),
-	)
-}
-
-type Inputs struct {
-	depinject.In
-
-	Config        *modulev1.Module
-	Cdc           codec.Codec
-	Key           *store.KVStoreKey
-	AccountKeeper types.AccountKeeper
-}
-
-type Outputs struct {
-	depinject.Out
-
-	Keeper keeper.Keeper
-	Module appmodule.AppModule
-}
-
-func ProvideModule(in Inputs) Outputs {
-	var (
-		authority sdk.AccAddress
-		err       error
-	)
-	if in.Config.Authority != "" {
-		authority, err = sdk.AccAddressFromBech32(in.Config.Authority)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		authority = authtypes.NewModuleAddress(govtypes.ModuleName)
-	}
-
-	Keeper := keeper.NewKeeper(
-		in.Cdc,
-		in.Key,
-		in.AccountKeeper,
-		nil,
-		authority.String(),
-	)
-
-	m := NewAppModule(in.Cdc, *Keeper)
-
-	return Outputs{Keeper: *Keeper, Module: m}
+	return am.cdc.MarshalJSON(gs)
 }
