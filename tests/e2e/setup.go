@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path"
 	"strconv"
@@ -28,7 +29,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/skip-mev/chaintestutil/sample"
 	oracleconfig "github.com/skip-mev/slinky/oracle/config"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
@@ -419,7 +419,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	chain ibc.Chain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
-	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, sample.AlphaString(r, 3))
+	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, AlphaString(r, 3))
 	user, err := chain.BuildWallet(ctx, keyName, mnemonic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
@@ -636,4 +636,15 @@ func StartOracle(node *cosmos.ChainNode) error {
 	oracle := node.Sidecars[0]
 
 	return oracle.StartContainer(context.Background())
+}
+
+// AlphaString returns a random string with lowercase alpha char of length n
+func AlphaString(r *rand.Rand, n int) string {
+	letter := []rune("abcdefghijklmnopqrstuvwxyz")
+
+	randomString := make([]rune, n)
+	for i := range randomString {
+		randomString[i] = letter[r.Intn(len(letter))]
+	}
+	return string(randomString)
 }
