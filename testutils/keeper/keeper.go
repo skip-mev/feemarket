@@ -4,15 +4,15 @@ package keeper
 import (
 	"testing"
 
-	"cosmossdk.io/log"
-	storetypes "cosmossdk.io/store/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	testkeeper "github.com/skip-mev/chaintestutil/keeper"
 	"github.com/stretchr/testify/require"
+
+	"cosmossdk.io/log"
+	storetypes "cosmossdk.io/store/types"
+	govtypes "cosmossdk.io/x/gov/types"
 
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
@@ -48,10 +48,7 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	// initialize msg servers
 	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(feeMarketKeeper)
 
-	ctx := sdk.NewContext(tk.Initializer.StateStore, tmproto.Header{
-		Time:   testkeeper.ExampleTimestamp,
-		Height: testkeeper.ExampleHeight,
-	}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(tk.Initializer.StateStore, false, log.NewNopLogger())
 
 	err := feeMarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)

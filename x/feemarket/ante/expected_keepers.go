@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"cosmossdk.io/core/address"
+	bankkeeper "cosmossdk.io/x/bank/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )

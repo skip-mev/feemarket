@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	govtypes "cosmossdk.io/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/mock"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"

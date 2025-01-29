@@ -10,7 +10,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
+	banktypes "cosmossdk.io/x/bank/types"
 )
 
 type Account struct {
@@ -58,7 +60,7 @@ func CreateRandomTx(txCfg client.TxConfig, account Account, nonce, numberMsgs, t
 	sigV2 := signing.SignatureV2{
 		PubKey: account.PrivKey.PubKey(),
 		Data: &signing.SingleSignatureData{
-			SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
+			SignMode:  signingv1beta1.SignMode_SIGN_MODE_DIRECT,
 			Signature: nil,
 		},
 		Sequence: nonce,

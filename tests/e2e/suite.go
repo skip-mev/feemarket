@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+	govtypes "cosmossdk.io/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	oracleconfig "github.com/skip-mev/slinky/oracle/config"
 	"github.com/skip-mev/slinky/providers/apis/marketmap"
 	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
