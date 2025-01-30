@@ -9,6 +9,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	bankkeeper "cosmossdk.io/x/bank/keeper"
 	banktypes "cosmossdk.io/x/bank/types"
+	consensuskeeper "cosmossdk.io/x/consensus/keeper"
 	txsigning "cosmossdk.io/x/tx/signing"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -49,6 +50,7 @@ type TestSuite struct {
 	TxBuilder   client.TxBuilder
 
 	AccountKeeper   feemarketante.AccountKeeper
+	ConsensusKeeper consensuskeeper.Keeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
 	BankKeeper      bankkeeper.Keeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
@@ -150,7 +152,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 	env := runtime.NewEnvironment(runtime.NewKVStoreService(storetypes.NewKVStoreKey("acc")), coretesting.NewNopLogger())
 	// create basic antehandler with the feemarket decorator
 	anteDecorators := []sdk.AnteDecorator{
-		authante.NewSetUpContextDecorator(env), // outermost AnteDecorator. SetUpContext must be called first
+		authante.NewSetUpContextDecorator(env, s.ConsensusKeeper), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
 			s.AccountKeeper,
 			bankKeeper,
@@ -163,7 +165,6 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 				nil,
 			),
 		),
-		authante.NewSigGasConsumeDecorator(s.AccountKeeper, authante.DefaultSigVerificationGasConsumer),
 	}
 
 	s.AnteHandler = sdk.ChainAnteDecorators(anteDecorators...)
@@ -291,7 +292,7 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 		sigV2 := signing.SignatureV2{
 			PubKey: priv.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode:  signing.SignMode(s.ClientCtx.TxConfig.SignModeHandler().DefaultMode()),
+				SignMode:  s.ClientCtx.TxConfig.SignModeHandler().DefaultMode(),
 				Signature: nil,
 			},
 			Sequence: accSeqs[i],
@@ -314,7 +315,8 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 		}
 		sigV2, err := tx.SignWithPrivKey(
 			s.Ctx,
-			signing.SignMode(s.ClientCtx.TxConfig.SignModeHandler().DefaultMode()), signerData,
+			s.ClientCtx.TxConfig.SignModeHandler().DefaultMode(),
+			signerData,
 			s.TxBuilder, priv, s.ClientCtx.TxConfig, accSeqs[i])
 		if err != nil {
 			return nil, err
@@ -355,7 +357,13 @@ func MakeTestEncodingConfig() TestEncodingConfig {
 
 	interfaceRegistry := InterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
-	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+	signingCtx := interfaceRegistry.SigningContext()
+	txCfg := authtx.NewTxConfig(
+		cdc,
+		signingCtx.AddressCodec(),
+		signingCtx.ValidatorAddressCodec(),
+		authtx.DefaultSignModes,
+	)
 
 	std.RegisterLegacyAminoCodec(amino)
 	std.RegisterInterfaces(interfaceRegistry)
