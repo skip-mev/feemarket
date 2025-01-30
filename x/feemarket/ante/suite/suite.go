@@ -100,7 +100,7 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 	}
 
 	oldState.Balances = balances
-	s.BankKeeper.InitGenesis(s.Ctx, oldState)
+	s.Require().NoError(s.BankKeeper.InitGenesis(s.Ctx, oldState))
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
@@ -108,8 +108,8 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
 	fixture := testfixture.NewTestFixture(t, nil)
+	s.Ctx = fixture.Ctx
 	s.EncCfg = fixture.EncodingConfig
-	s.Ctx = sdk.UnwrapSDKContext(fixture.App.Context())
 
 	s.AuthKeeper = fixture.AuthKeeper
 	s.FeeMarketKeeper = fixture.FeeMarketKeeper
@@ -130,7 +130,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.SetupHandlers(mock)
 	s.SetT(t)
 
-	s.BankKeeper.InitGenesis(s.Ctx, &banktypes.GenesisState{})
+	s.Require().NoError(s.BankKeeper.InitGenesis(s.Ctx, &banktypes.GenesisState{}))
 
 	return s
 }

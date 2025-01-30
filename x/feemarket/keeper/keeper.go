@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"strconv"
 
-	"cosmossdk.io/log"
-	storetypes "cosmossdk.io/store/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/log"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 // Keeper is the x/feemarket keeper.
 type Keeper struct {
+	appmodule.Environment
 	cdc      codec.BinaryCodec
-	storeKey storetypes.StoreKey
 	ak       types.AccountKeeper
 	resolver types.DenomResolver
 
@@ -28,7 +28,7 @@ type Keeper struct {
 // NewKeeper constructs a new feemarket keeper.
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey storetypes.StoreKey,
+	env appmodule.Environment,
 	authKeeper types.AccountKeeper,
 	resolver types.DenomResolver,
 	authority string,
@@ -38,11 +38,11 @@ func NewKeeper(
 	}
 
 	k := &Keeper{
-		cdc:       cdc,
-		storeKey:  storeKey,
-		ak:        authKeeper,
-		resolver:  resolver,
-		authority: authority,
+		Environment: env,
+		cdc:         cdc,
+		ak:          authKeeper,
+		resolver:    resolver,
+		authority:   authority,
 	}
 
 	return k
@@ -60,10 +60,13 @@ func (k *Keeper) GetAuthority() string {
 
 // GetEnabledHeight returns the height at which the feemarket was enabled.
 func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	key := types.KeyEnabledHeight
-	bz := store.Get(key)
+	bz, err := store.Get(key)
+	if err != nil {
+		return 0, err
+	}
 	if bz == nil {
 		return -1, nil
 	}
@@ -73,11 +76,13 @@ func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
 
 // SetEnabledHeight sets the height at which the feemarket was enabled.
 func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	bz := []byte(strconv.FormatInt(height, 10))
 
-	store.Set(types.KeyEnabledHeight, bz)
+	if err := store.Set(types.KeyEnabledHeight, bz); err != nil {
+		panic(err) // TODO(technicallyty): fix this.
+	}
 }
 
 // ResolveToDenom converts the given coin to the given denomination.
@@ -96,10 +101,13 @@ func (k *Keeper) SetDenomResolver(resolver types.DenomResolver) {
 
 // GetState returns the feemarket module's state.
 func (k *Keeper) GetState(ctx sdk.Context) (types.State, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	key := types.KeyState
-	bz := store.Get(key)
+	bz, err := store.Get(key)
+	if err != nil {
+		return types.State{}, err
+	}
 
 	state := types.State{}
 	if err := state.Unmarshal(bz); err != nil {
@@ -111,24 +119,29 @@ func (k *Keeper) GetState(ctx sdk.Context) (types.State, error) {
 
 // SetState sets the feemarket module's state.
 func (k *Keeper) SetState(ctx sdk.Context, state types.State) error {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	bz, err := state.Marshal()
 	if err != nil {
 		return err
 	}
 
-	store.Set(types.KeyState, bz)
+	if err := store.Set(types.KeyState, bz); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // GetParams returns the feemarket module's parameters.
 func (k *Keeper) GetParams(ctx sdk.Context) (types.Params, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	key := types.KeyParams
-	bz := store.Get(key)
+	bz, err := store.Get(key)
+	if err != nil {
+		return types.Params{}, err
+	}
 
 	params := types.Params{}
 	if err := params.Unmarshal(bz); err != nil {
@@ -140,14 +153,16 @@ func (k *Keeper) GetParams(ctx sdk.Context) (types.Params, error) {
 
 // SetParams sets the feemarket module's parameters.
 func (k *Keeper) SetParams(ctx sdk.Context, params types.Params) error {
-	store := ctx.KVStore(k.storeKey)
+	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	bz, err := params.Marshal()
 	if err != nil {
 		return err
 	}
 
-	store.Set(types.KeyParams, bz)
+	if err := store.Set(types.KeyParams, bz); err != nil {
+		return err
+	}
 
 	return nil
 }

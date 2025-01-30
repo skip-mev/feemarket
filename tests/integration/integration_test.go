@@ -25,7 +25,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.fixture = testkeeper.NewTestFixture(s.T(), nil)
-	s.ctx = sdk.UnwrapSDKContext(s.fixture.App.Context())
+	s.ctx = s.fixture.Ctx
 }
 
 func (s *IntegrationTestSuite) TestState() {

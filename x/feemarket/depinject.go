@@ -11,7 +11,6 @@ import (
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
-	store "cosmossdk.io/store/types"
 	govtypes "cosmossdk.io/x/gov/types"
 )
 
@@ -25,9 +24,9 @@ func init() {
 type Inputs struct {
 	depinject.In
 
+	Environment   appmodule.Environment
 	Config        *modulev1.Module
 	Cdc           codec.Codec
-	Key           *store.KVStoreKey
 	AccountKeeper types.AccountKeeper
 }
 
@@ -54,7 +53,7 @@ func ProvideModule(in Inputs) Outputs {
 
 	Keeper := keeper.NewKeeper(
 		in.Cdc,
-		in.Key,
+		in.Environment,
 		in.AccountKeeper,
 		nil,
 		authority.String(),

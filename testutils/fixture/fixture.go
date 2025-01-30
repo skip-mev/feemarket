@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
@@ -11,8 +12,9 @@ import (
 	"gotest.tools/v3/assert"
 
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
-	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	"cosmossdk.io/store/metrics"
 	storetypes "cosmossdk.io/store/types"
 	"cosmossdk.io/x/accounts"
 	"cosmossdk.io/x/accounts/accountstd"
@@ -35,17 +37,15 @@ import (
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	codectestutil "github.com/cosmos/cosmos-sdk/codec/testutil"
 	"github.com/cosmos/cosmos-sdk/runtime"
-	"github.com/cosmos/cosmos-sdk/testutil/integration"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 type TestFixture struct {
-	App *integration.App
+	Ctx sdk.Context
 
 	Cdc codec.Codec
 
@@ -59,7 +59,17 @@ type TestFixture struct {
 	FeeGrantKeeper  feegrantkeeper.Keeper
 }
 
+func setupDBs() (store.CommitMultiStore, *dbm.MemDB) {
+	logger := log.NewNopLogger()
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, logger, metrics.NewNoOpMetrics())
+
+	// Create a context using a custom timestamp
+	return stateStore, db
+}
+
 func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *TestFixture {
+	cms, db := setupDBs()
 	t.Helper()
 	keys := storetypes.NewKVStoreKeys(
 		authtypes.StoreKey,
@@ -80,9 +90,7 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 	)
 	cdc := encodingCfg.Codec
 
-	logger := log.NewTestLogger(t)
-
-	router := baseapp.NewMsgServiceRouter()
+	// router := baseapp.NewMsgServiceRouter()
 	queryRouter := baseapp.NewGRPCQueryRouter()
 
 	handler := directHandler{}
@@ -96,10 +104,12 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		accs = append(accs, f)
 	}
 
+	accKey := keys[accounts.StoreKey]
+	cms.MountStoreWithDB(accKey, storetypes.StoreTypeIAVL, db)
+	accStore := runtime.NewKVStoreService(accKey)
 	accountsKeeper, err := accounts.NewKeeper(
 		cdc,
-		runtime.NewEnvironment(
-			runtime.NewKVStoreService(keys[accounts.StoreKey]), log.NewNopLogger(), runtime.EnvWithQueryRouterService(queryRouter), runtime.EnvWithMsgRouterService(router)),
+		runtime.NewEnvironment(accStore, log.NewNopLogger()),
 		addresscodec.NewBech32Codec("cosmos"),
 		cdc.InterfaceRegistry(),
 		nil,
@@ -110,8 +120,10 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 
 	authority := authtypes.NewModuleAddress("gov")
 
+	authKey := keys[authtypes.StoreKey]
+	cms.MountStoreWithDB(authKey, storetypes.StoreTypeIAVL, db)
 	authKeeper := authkeeper.NewAccountKeeper(
-		runtime.NewEnvironment(runtime.NewKVStoreService(keys[authtypes.StoreKey]), log.NewNopLogger()),
+		runtime.NewEnvironment(runtime.NewKVStoreService(authKey), log.NewNopLogger()),
 		cdc,
 		authtypes.ProtoBaseAccount,
 		accountsKeeper,
@@ -125,8 +137,10 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		authority.String(),
 	)
 
+	fgKey := keys[feegrant.StoreKey]
+	cms.MountStoreWithDB(fgKey, storetypes.StoreTypeIAVL, db)
 	fgKeeper := feegrantkeeper.NewKeeper(
-		runtime.NewEnvironment(runtime.NewKVStoreService(keys[accounts.StoreKey]), log.NewNopLogger()),
+		runtime.NewEnvironment(runtime.NewKVStoreService(fgKey), log.NewNopLogger()),
 		cdc,
 		authKeeper,
 	)
@@ -134,54 +148,61 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 	blockedAddresses := map[string]bool{
 		authKeeper.GetAuthority(): false,
 	}
+	bankKey := keys[banktypes.StoreKey]
+	cms.MountStoreWithDB(bankKey, storetypes.StoreTypeIAVL, db)
 	bankKeeper := bankkeeper.NewBaseKeeper(
-		runtime.NewEnvironment(runtime.NewKVStoreService(keys[banktypes.StoreKey]), log.NewNopLogger()),
+		runtime.NewEnvironment(runtime.NewKVStoreService(bankKey), log.NewNopLogger()),
 		cdc,
 		authKeeper,
 		blockedAddresses,
 		authority.String(),
 	)
 
+	fmKey := keys[feemarkettypes.StoreKey]
+	cms.MountStoreWithDB(fmKey, storetypes.StoreTypeIAVL, db)
 	feemarketKeeper := feemarketkeeper.NewKeeper(
 		cdc,
-		keys[feemarkettypes.StoreKey],
+		runtime.NewEnvironment(runtime.NewKVStoreService(fmKey), log.NewNopLogger()),
 		authKeeper,
 		&feemarkettypes.TestDenomResolver{},
 		authority.String(),
 	)
 
+	consensusKey := keys[consensustypes.StoreKey]
+	cms.MountStoreWithDB(consensusKey, storetypes.StoreTypeIAVL, db)
 	consensusKeeper := consensuskeeper.NewKeeper(
 		cdc,
-		runtime.NewEnvironment(runtime.NewKVStoreService(keys[consensustypes.StoreKey]), log.NewNopLogger()),
+		runtime.NewEnvironment(runtime.NewKVStoreService(consensusKey), log.NewNopLogger()),
 		authority.String(),
 	)
 
-	accountsModule := accounts.NewAppModule(cdc, accountsKeeper)
-	authModule := auth.NewAppModule(cdc, authKeeper, accountsKeeper, authsims.RandomGenesisAccounts, nil)
-	bankModule := bank.NewAppModule(cdc, bankKeeper, authKeeper)
-	feemarketModule := feemarket.NewAppModule(cdc, *feemarketKeeper)
-	consensusModule := consensus.NewAppModule(cdc, consensusKeeper)
-	fgModule := feegrantmodule.NewAppModule(cdc, fgKeeper, cdc.InterfaceRegistry())
+	require.NoError(t, cms.LoadLatestVersion())
+	ctx := sdk.NewContext(cms, false, log.NewNopLogger())
+	//accountsModule := accounts.NewAppModule(cdc, accountsKeeper)
+	//authModule := auth.NewAppModule(cdc, authKeeper, accountsKeeper, authsims.RandomGenesisAccounts, nil)
+	//bankModule := bank.NewAppModule(cdc, bankKeeper, authKeeper)
+	//feemarketModule := feemarket.NewAppModule(cdc, *feemarketKeeper)
+	//consensusModule := consensus.NewAppModule(cdc, consensusKeeper)
+	//fgModule := feegrantmodule.NewAppModule(cdc, fgKeeper, cdc.InterfaceRegistry())
 
-	integrationApp := integration.NewIntegrationApp(
-		logger,
-		keys,
-		cdc,
-		encodingCfg.InterfaceRegistry.SigningContext().AddressCodec(),
-		encodingCfg.InterfaceRegistry.SigningContext().ValidatorAddressCodec(),
-		map[string]appmodule.AppModule{
-			accounts.ModuleName:       accountsModule,
-			authtypes.ModuleName:      authModule,
-			banktypes.ModuleName:      bankModule,
-			feemarkettypes.ModuleName: feemarketModule,
-			consensustypes.ModuleName: consensusModule,
-			feegrant.ModuleName:       fgModule,
-		},
-		router,
-		queryRouter,
-	)
+	//integrationApp := integration.NewIntegrationApp(
+	//	logger,
+	//	keys,
+	//	cdc,
+	//	encodingCfg.InterfaceRegistry.SigningContext().AddressCodec(),
+	//	encodingCfg.InterfaceRegistry.SigningContext().ValidatorAddressCodec(),
+	//	map[string]appmodule.AppModule{
+	//		accounts.ModuleName:       accountsModule,
+	//		authtypes.ModuleName:      authModule,
+	//		banktypes.ModuleName:      bankModule,
+	//		feemarkettypes.ModuleName: feemarketModule,
+	//		consensustypes.ModuleName: consensusModule,
+	//		feegrant.ModuleName:       fgModule,
+	//	},
+	//	router,
+	//	queryRouter,
+	//)
 
-	ctx := sdk.UnwrapSDKContext(integrationApp.Context())
 	err = feemarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)
 	err = feemarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
@@ -193,22 +214,8 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 	consensustypes.RegisterInterfaces(cdc.InterfaceRegistry())
 	feegrant.RegisterInterfaces(cdc.InterfaceRegistry())
 
-	authtypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), authkeeper.NewMsgServerImpl(authKeeper))
-	authtypes.RegisterQueryServer(integrationApp.QueryHelper(), authkeeper.NewQueryServer(authKeeper))
-
-	banktypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), bankkeeper.NewMsgServerImpl(bankKeeper))
-
-	feemarkettypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), feemarketkeeper.NewMsgServer(feemarketKeeper))
-	feemarkettypes.RegisterQueryServer(integrationApp.QueryHelper(), feemarketkeeper.NewQueryServer(*feemarketKeeper))
-
-	consensustypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), consensusKeeper)
-	consensustypes.RegisterQueryServer(integrationApp.QueryHelper(), consensusKeeper)
-
-	feegrant.RegisterMsgServer(integrationApp.MsgServiceRouter(), feegrantkeeper.NewMsgServerImpl(fgKeeper))
-	feegrant.RegisterQueryServer(integrationApp.QueryHelper(), fgKeeper)
-
 	return &TestFixture{
-		App:             integrationApp,
+		Ctx:             ctx,
 		Cdc:             cdc,
 		EncodingConfig:  encodingCfg,
 		AuthKeeper:      authKeeper,
