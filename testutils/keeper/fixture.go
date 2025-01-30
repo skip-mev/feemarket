@@ -7,6 +7,7 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
+	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
@@ -44,16 +45,18 @@ import (
 )
 
 type TestFixture struct {
-	app *integration.App
+	App *integration.App
 
-	cdc codec.Codec
+	Cdc codec.Codec
 
-	authKeeper      authkeeper.AccountKeeper
-	accountsKeeper  accounts.Keeper
-	bankKeeper      bankkeeper.Keeper
-	feemarketKeeper *feemarketkeeper.Keeper
-	consensusKeeper consensuskeeper.Keeper
-	feegrantKeeper  feegrantkeeper.Keeper
+	EncodingConfig moduletestutil.TestEncodingConfig
+
+	AuthKeeper      authkeeper.AccountKeeper
+	AccountsKeeper  accounts.Keeper
+	BankKeeper      bankkeeper.Keeper
+	FeeMarketKeeper *feemarketkeeper.Keeper
+	ConsensusKeeper consensuskeeper.Keeper
+	FeeGrantKeeper  feegrantkeeper.Keeper
 }
 
 func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *TestFixture {
@@ -176,34 +179,42 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		queryRouter,
 	)
 
+	ctx := sdk.UnwrapSDKContext(integrationApp.Context())
+	err = feemarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
+	require.NoError(t, err)
+	err = feemarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
+	require.NoError(t, err)
+
 	authtypes.RegisterInterfaces(cdc.InterfaceRegistry())
 	banktypes.RegisterInterfaces(cdc.InterfaceRegistry())
 	feemarkettypes.RegisterInterfaces(cdc.InterfaceRegistry())
 	consensustypes.RegisterInterfaces(cdc.InterfaceRegistry())
+	feegrant.RegisterInterfaces(cdc.InterfaceRegistry())
 
 	authtypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), authkeeper.NewMsgServerImpl(authKeeper))
 	authtypes.RegisterQueryServer(integrationApp.QueryHelper(), authkeeper.NewQueryServer(authKeeper))
 
-	banktypes.RegisterMsgServer(router, bankkeeper.NewMsgServerImpl(bankKeeper))
+	banktypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), bankkeeper.NewMsgServerImpl(bankKeeper))
 
-	feemarkettypes.RegisterMsgServer(router, feemarketkeeper.NewMsgServer(feemarketKeeper))
-	feemarkettypes.RegisterQueryServer(router, feemarketkeeper.NewQueryServer(*feemarketKeeper))
+	feemarkettypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), feemarketkeeper.NewMsgServer(feemarketKeeper))
+	feemarkettypes.RegisterQueryServer(integrationApp.QueryHelper(), feemarketkeeper.NewQueryServer(*feemarketKeeper))
 
-	consensustypes.RegisterQueryServer(router, consensusKeeper)
-	consensustypes.RegisterMsgServer(router, consensusKeeper)
+	consensustypes.RegisterMsgServer(integrationApp.MsgServiceRouter(), consensusKeeper)
+	consensustypes.RegisterQueryServer(integrationApp.QueryHelper(), consensusKeeper)
 
-	feegrant.RegisterQueryServer(router, fgKeeper)
-	feegrant.RegisterMsgServer(router, feegrantkeeper.NewMsgServerImpl(fgKeeper))
+	feegrant.RegisterMsgServer(integrationApp.MsgServiceRouter(), feegrantkeeper.NewMsgServerImpl(fgKeeper))
+	feegrant.RegisterQueryServer(integrationApp.QueryHelper(), fgKeeper)
 
 	return &TestFixture{
-		app:             integrationApp,
-		cdc:             cdc,
-		accountsKeeper:  accountsKeeper,
-		authKeeper:      authKeeper,
-		bankKeeper:      bankKeeper,
-		feemarketKeeper: feemarketKeeper,
-		consensusKeeper: consensusKeeper,
-		feegrantKeeper:  fgKeeper,
+		App:             integrationApp,
+		Cdc:             cdc,
+		EncodingConfig:  encodingCfg,
+		AuthKeeper:      authKeeper,
+		AccountsKeeper:  accountsKeeper,
+		BankKeeper:      bankKeeper,
+		FeeMarketKeeper: feemarketKeeper,
+		ConsensusKeeper: consensusKeeper,
+		FeeGrantKeeper:  fgKeeper,
 	}
 }
 
