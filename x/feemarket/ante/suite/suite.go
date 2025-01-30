@@ -144,7 +144,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 		feeGrantKeeper = s.MockFeeGrantKeeper
 	}
 
-	env := runtime.NewEnvironment(runtime.NewKVStoreService(storetypes.NewKVStoreKey("acc")), coretesting.NewNopLogger())
+	env := runtime.NewEnvironment(nil, coretesting.NewNopLogger())
 	// create basic antehandler with the feemarket decorator
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(env, s.ConsensusKeeper), // outermost AnteDecorator. SetUpContext must be called first

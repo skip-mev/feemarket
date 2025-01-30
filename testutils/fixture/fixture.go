@@ -2,8 +2,10 @@ package fixture
 
 import (
 	"context"
+	"math"
 	"testing"
 
+	cmtproto "github.com/cometbft/cometbft/api/cometbft/types/v1"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/skip-mev/feemarket/x/feemarket"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
@@ -206,6 +208,9 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 	err = feemarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)
 	err = feemarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
+	require.NoError(t, err)
+
+	err = consensusKeeper.ParamsStore.Set(ctx, cmtproto.ConsensusParams{Block: &cmtproto.BlockParams{MaxGas: math.MaxInt64, MaxBytes: math.MaxInt64}})
 	require.NoError(t, err)
 
 	authtypes.RegisterInterfaces(cdc.InterfaceRegistry())
