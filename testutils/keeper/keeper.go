@@ -4,15 +4,21 @@ package keeper
 import (
 	"testing"
 
+	codectestutil "github.com/cosmos/cosmos-sdk/codec/testutil"
+	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	testkeeper "github.com/skip-mev/chaintestutil/keeper"
+	"github.com/skip-mev/feemarket/x/feemarket"
 	"github.com/stretchr/testify/require"
 
-	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
+	bankkeeper "cosmossdk.io/x/bank/keeper"
+	distributionkeeper "cosmossdk.io/x/distribution/keeper"
+	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	govtypes "cosmossdk.io/x/gov/types"
+	stakingkeeper "cosmossdk.io/x/staking/keeper"
 
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
@@ -20,13 +26,17 @@ import (
 
 // TestKeepers holds all keepers used during keeper tests for all modules
 type TestKeepers struct {
-	testkeeper.TestKeepers
+	AccountKeeper  authkeeper.AccountKeeper
+	BankKeeper     bankkeeper.Keeper
+	DistrKeeper    distributionkeeper.Keeper
+	StakingKeeper  stakingkeeper.Keeper
+	FeeGrantKeeper feegrantkeeper.Keeper
+
 	FeeMarketKeeper *feemarketkeeper.Keeper
 }
 
 // TestMsgServers holds all message servers used during keeper tests for all modules
 type TestMsgServers struct {
-	testkeeper.TestMsgServers
 	FeeMarketMsgServer feemarkettypes.MsgServer
 }
 
@@ -36,19 +46,17 @@ var additionalMaccPerms = map[string][]string{
 }
 
 // NewTestSetup returns initialized instances of all the keepers and message servers of the modules
-func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
-	options = append(options, testkeeper.WithAdditionalModuleAccounts(additionalMaccPerms))
-
-	_, tk, tms := testkeeper.NewTestSetup(t, options...)
-
+func NewTestSetup(t *testing.T) (sdk.Context, TestKeepers, TestMsgServers) {
+	tk := TestKeepers{} // TODO(technicallyty): fill this out.
 	// initialize extra keeper
-	feeMarketKeeper := FeeMarket(tk.Initializer, tk.AccountKeeper)
-	require.NoError(t, tk.Initializer.LoadLatest())
+	feeMarketKeeper := FeeMarket(tk.AccountKeeper)
 
 	// initialize msg servers
 	feeMarketMsgSrv := feemarketkeeper.NewMsgServer(feeMarketKeeper)
 
-	ctx := sdk.NewContext(tk.Initializer.StateStore, false, log.NewNopLogger())
+	key := storetypes.NewKVStoreKey(feemarkettypes.StoreKey)
+	testCtx := testutil.DefaultContextWithDB(t, key, storetypes.NewTransientStoreKey("transient_test"))
+	ctx := testCtx.Ctx
 
 	err := feeMarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)
@@ -56,12 +64,10 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 	require.NoError(t, err)
 
 	testKeepers := TestKeepers{
-		TestKeepers:     tk,
 		FeeMarketKeeper: feeMarketKeeper,
 	}
 
 	testMsgServers := TestMsgServers{
-		TestMsgServers:     tms,
 		FeeMarketMsgServer: feeMarketMsgSrv,
 	}
 
@@ -70,14 +76,13 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 
 // FeeMarket initializes the fee market module using the testkeepers intializer.
 func FeeMarket(
-	initializer *testkeeper.Initializer,
 	authKeeper authkeeper.AccountKeeper,
 ) *feemarketkeeper.Keeper {
 	storeKey := storetypes.NewKVStoreKey(feemarkettypes.StoreKey)
-	initializer.StateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, initializer.DB)
+	encCfg := moduletestutil.MakeTestEncodingConfig(codectestutil.CodecOptions{}, feemarket.AppModule{})
 
 	return feemarketkeeper.NewKeeper(
-		initializer.Codec,
+		encCfg.Codec,
 		storeKey,
 		authKeeper,
 		&feemarkettypes.TestDenomResolver{},
