@@ -4,35 +4,27 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/runtime"
-
-	coretesting "cosmossdk.io/core/testing"
-	storetypes "cosmossdk.io/store/types"
-	bankkeeper "cosmossdk.io/x/bank/keeper"
-	banktypes "cosmossdk.io/x/bank/types"
-	consensuskeeper "cosmossdk.io/x/consensus/keeper"
-	txsigning "cosmossdk.io/x/tx/signing"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/address"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/gogoproto/proto"
-
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
+	coretesting "cosmossdk.io/core/testing"
+	storetypes "cosmossdk.io/store/types"
+	"cosmossdk.io/x/accounts"
+	bankkeeper "cosmossdk.io/x/bank/keeper"
+	banktypes "cosmossdk.io/x/bank/types"
+	consensuskeeper "cosmossdk.io/x/consensus/keeper"
+
+	testfixture "github.com/skip-mev/feemarket/testutils/fixture"
 	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	"github.com/skip-mev/feemarket/x/feemarket/ante/mocks"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
@@ -49,15 +41,16 @@ type TestSuite struct {
 	ClientCtx   client.Context
 	TxBuilder   client.TxBuilder
 
-	AccountKeeper   feemarketante.AccountKeeper
+	AuthKeeper      feemarketante.AccountKeeper
 	ConsensusKeeper consensuskeeper.Keeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
 	BankKeeper      bankkeeper.Keeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
+	AccountsKeeper  accounts.Keeper
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
-	EncCfg             TestEncodingConfig
+	EncCfg             testutil.TestEncodingConfig
 
 	MsgServer feemarkettypes.MsgServer
 }
@@ -80,12 +73,12 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 
 	for i := 0; i < numAccs; i++ {
 		priv, _, addr := testdata.KeyTestPubAddr()
-		acc := s.AccountKeeper.NewAccountWithAddress(s.Ctx, addr)
+		acc := s.AuthKeeper.NewAccountWithAddress(s.Ctx, addr)
 		err := acc.SetAccountNumber(uint64(i + 1000))
 		if err != nil {
 			panic(err)
 		}
-		s.AccountKeeper.SetAccount(s.Ctx, acc)
+		s.AuthKeeper.SetAccount(s.Ctx, acc)
 		accounts = append(accounts, TestAccount{acc, priv})
 	}
 
@@ -114,14 +107,16 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	s.EncCfg = MakeTestEncodingConfig()
-	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
-	s.Ctx = ctx
+	fixture := testfixture.NewTestFixture(t, nil)
+	s.EncCfg = fixture.EncodingConfig
+	s.Ctx = sdk.UnwrapSDKContext(fixture.App.Context())
 
-	s.AccountKeeper = testKeepers.AccountKeeper
-	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
-	s.BankKeeper = testKeepers.BankKeeper
-	s.FeeGrantKeeper = testKeepers.FeeGrantKeeper
+	s.AuthKeeper = fixture.AuthKeeper
+	s.FeeMarketKeeper = fixture.FeeMarketKeeper
+	s.BankKeeper = fixture.BankKeeper
+	s.FeeGrantKeeper = fixture.FeeGrantKeeper
+	s.ConsensusKeeper = fixture.ConsensusKeeper
+	s.AccountsKeeper = fixture.AccountsKeeper
 
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
@@ -154,12 +149,12 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 	anteDecorators := []sdk.AnteDecorator{
 		authante.NewSetUpContextDecorator(env, s.ConsensusKeeper), // outermost AnteDecorator. SetUpContext must be called first
 		feemarketante.NewFeeMarketCheckDecorator( // fee market replaces fee deduct decorator
-			s.AccountKeeper,
+			s.AuthKeeper,
 			bankKeeper,
 			feeGrantKeeper,
 			s.FeeMarketKeeper,
 			authante.NewDeductFeeDecorator(
-				s.AccountKeeper,
+				s.AuthKeeper,
 				bankKeeper,
 				feeGrantKeeper,
 				nil,
@@ -172,7 +167,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 	// create basic postHandler with the feemarket decorator
 	postDecorators := []sdk.PostDecorator{
 		feemarketpost.NewFeeMarketDeductDecorator(
-			s.AccountKeeper,
+			s.AuthKeeper,
 			bankKeeper,
 			s.FeeMarketKeeper,
 		),
@@ -332,72 +327,7 @@ func (s *TestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, 
 	return s.TxBuilder.GetTx(), nil
 }
 
-// NewTestFeeAmount is a test fee amount.
-func NewTestFeeAmount() sdk.Coins {
-	return sdk.NewCoins(sdk.NewInt64Coin("stake", 150))
-}
-
 // NewTestGasLimit is a test fee gas limit.
 func NewTestGasLimit() uint64 {
 	return 200000
-}
-
-// TestEncodingConfig specifies the concrete encoding types to use for a given app.
-// This is provided for compatibility between protobuf and amino implementations.
-type TestEncodingConfig struct {
-	InterfaceRegistry codectypes.InterfaceRegistry
-	Codec             codec.Codec
-	TxConfig          client.TxConfig
-	Amino             *codec.LegacyAmino
-}
-
-// MakeTestEncodingConfig creates a test EncodingConfig for a test configuration.
-func MakeTestEncodingConfig() TestEncodingConfig {
-	amino := codec.NewLegacyAmino()
-
-	interfaceRegistry := InterfaceRegistry()
-	cdc := codec.NewProtoCodec(interfaceRegistry)
-	signingCtx := interfaceRegistry.SigningContext()
-	txCfg := authtx.NewTxConfig(
-		cdc,
-		signingCtx.AddressCodec(),
-		signingCtx.ValidatorAddressCodec(),
-		authtx.DefaultSignModes,
-	)
-
-	std.RegisterLegacyAminoCodec(amino)
-	std.RegisterInterfaces(interfaceRegistry)
-
-	return TestEncodingConfig{
-		InterfaceRegistry: interfaceRegistry,
-		Codec:             cdc,
-		TxConfig:          txCfg,
-		Amino:             amino,
-	}
-}
-
-func InterfaceRegistry() codectypes.InterfaceRegistry {
-	interfaceRegistry, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
-		ProtoFiles: proto.HybridResolver,
-		SigningOptions: txsigning.Options{
-			AddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
-			},
-			ValidatorAddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-			},
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// always register
-	cryptocodec.RegisterInterfaces(interfaceRegistry)
-	authtypes.RegisterInterfaces(interfaceRegistry)
-
-	// call extra registry functions
-	feemarkettypes.RegisterInterfaces(interfaceRegistry)
-
-	return interfaceRegistry
 }

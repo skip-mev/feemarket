@@ -19,7 +19,7 @@ import (
 	govtypes "cosmossdk.io/x/gov/types"
 	txsigning "cosmossdk.io/x/tx/signing"
 
-	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
+	testkeeper "github.com/skip-mev/feemarket/testutils/fixture"
 	"github.com/skip-mev/feemarket/x/feemarket/keeper"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/skip-mev/feemarket/x/feemarket/types/mocks"

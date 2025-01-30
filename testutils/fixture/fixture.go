@@ -1,4 +1,4 @@
-package keeper
+package fixture
 
 import (
 	"context"
@@ -67,6 +67,7 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		accounts.StoreKey,
 		feemarkettypes.StoreKey,
 		feegrant.StoreKey,
+		consensustypes.StoreKey,
 	)
 	encodingCfg := moduletestutil.MakeTestEncodingConfig(
 		codectestutil.CodecOptions{},
@@ -75,6 +76,7 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		accounts.AppModule{},
 		feemarket.AppModule{},
 		feegrantmodule.AppModule{},
+		consensus.AppModule{},
 	)
 	cdc := encodingCfg.Codec
 

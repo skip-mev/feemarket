@@ -141,9 +141,9 @@ func TestEscrowFunds(t *testing.T) {
 				tx.DefaultSignModes,
 			)
 			// this just tests our handler
-			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper,
+			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AuthKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper,
 				s.FeeMarketKeeper, authante.NewDeductFeeDecorator(
-					s.AccountKeeper,
+					s.AuthKeeper,
 					s.MockBankKeeper,
 					s.MockFeeGrantKeeper,
 					nil,
@@ -155,7 +155,7 @@ func TestEscrowFunds(t *testing.T) {
 			fee := sdk.NewCoins(sdk.NewInt64Coin("stake", tc.fee))
 			msgs := []sdk.Msg{testdata.NewTestMsg(signer.Account.GetAddress())}
 
-			acc := s.AccountKeeper.GetAccount(s.Ctx, signer.Account.GetAddress())
+			acc := s.AuthKeeper.GetAccount(s.Ctx, signer.Account.GetAddress())
 			privs, accNums, seqs := []cryptotypes.PrivKey{signer.Priv}, []uint64{0}, []uint64{0}
 			if acc != nil {
 				accNums, seqs = []uint64{acc.GetAccountNumber()}, []uint64{acc.GetSequence()}
@@ -198,23 +198,26 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 		}
 	}
 
-	tx := gen.NewTxBuilder()
-	err := tx.SetMsgs(msgs...)
+	transaction := gen.NewTxBuilder()
+	err := transaction.SetMsgs(msgs...)
 	if err != nil {
 		return nil, err
 	}
-	err = tx.SetSignatures(sigs...)
+	err = transaction.SetSignatures(sigs...)
 	if err != nil {
 		return nil, err
 	}
-	tx.SetMemo(memo)
-	tx.SetFeeAmount(feeAmt)
-	tx.SetGasLimit(gas)
-	tx.SetFeeGranter(feeGranter)
+	transaction.SetMemo(memo)
+	transaction.SetFeeAmount(feeAmt)
+	transaction.SetGasLimit(gas)
+	transaction.SetFeeGranter(feeGranter)
 
 	// 2nd round: once all signer infos are set, every signer can sign.
 	for i, p := range priv {
 		anyPk, err := codectypes.NewAnyWithValue(p.PubKey())
+		if err != nil {
+			return nil, err
+		}
 		signerData := signing2.SignerData{
 			Address:       p.PubKey().Address().String(),
 			ChainID:       chainID,
@@ -223,7 +226,7 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 			PubKey:        &anypb.Any{TypeUrl: anyPk.TypeUrl, Value: anyPk.Value},
 		}
 		signBytes, err := authsign.GetSignBytesAdapter(
-			context.Background(), gen.SignModeHandler(), signMode, signerData, tx.GetTx())
+			context.Background(), gen.SignModeHandler(), signMode, signerData, transaction.GetTx())
 		if err != nil {
 			panic(err)
 		}
@@ -232,11 +235,11 @@ func genTxWithFeeGranter(gen client.TxConfig, msgs []sdk.Msg, feeAmt sdk.Coins, 
 			panic(err)
 		}
 		sigs[i].Data.(*signing.SingleSignatureData).Signature = sig
-		err = tx.SetSignatures(sigs...)
+		err = transaction.SetSignatures(sigs...)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	return tx.GetTx(), nil
+	return transaction.GetTx(), nil
 }

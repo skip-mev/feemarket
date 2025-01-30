@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
-	testkeeper "github.com/skip-mev/feemarket/testutils/keeper"
+	testkeeper "github.com/skip-mev/feemarket/testutils/fixture"
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 
 	"cosmossdk.io/math"
