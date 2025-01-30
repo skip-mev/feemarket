@@ -43,7 +43,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
-type fixture struct {
+type TestFixture struct {
 	app *integration.App
 
 	cdc codec.Codec
@@ -56,12 +56,7 @@ type fixture struct {
 	feegrantKeeper  feegrantkeeper.Keeper
 }
 
-func (f fixture) mustAddr(address []byte) string {
-	s, _ := f.authKeeper.AddressCodec().BytesToString(address)
-	return s
-}
-
-func initFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *fixture {
+func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *TestFixture {
 	t.Helper()
 	keys := storetypes.NewKVStoreKeys(
 		authtypes.StoreKey,
@@ -200,7 +195,7 @@ func initFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *fixtu
 	feegrant.RegisterQueryServer(router, fgKeeper)
 	feegrant.RegisterMsgServer(router, feegrantkeeper.NewMsgServerImpl(fgKeeper))
 
-	return &fixture{
+	return &TestFixture{
 		app:             integrationApp,
 		cdc:             cdc,
 		accountsKeeper:  accountsKeeper,
