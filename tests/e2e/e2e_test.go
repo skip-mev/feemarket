@@ -8,7 +8,7 @@ import (
 	testutil2 "github.com/cosmos/cosmos-sdk/codec/testutil"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
+	"github.com/strangelove-ventures/interchaintest/v9"
 	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v9/ibc"
 	"github.com/stretchr/testify/suite"

@@ -393,7 +393,7 @@ func (s *TestSuite) SendCoins(ctx context.Context, keyName, sender, receiver str
 		ctx,
 		s.chain,
 		keyName,
-		false,
+		true,
 		"bank",
 		"send",
 		sender,
@@ -415,16 +415,30 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	ctx context.Context,
 	keyNamePrefix, mnemonic string,
 	amount int64,
-	chain ibc.Chain,
+	chain *cosmos.CosmosChain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
-	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, AlphaString(r, 3))
+	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, AlphaString(r, 5))
 	user, err := chain.BuildWallet(ctx, keyName, mnemonic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
 	}
 
 	s.FundUser(ctx, chain, amount, user)
+	// TODO(technicallyty): this is a temporary hack. SDK v0.52 no longer initializes accounts upon receiving funds.
+	// The account _must_ send a tx to be initialized in state, so we do a dummy 1stake bank send here.
+	// The receiver address is a random one found from mintscan.
+	//s.T().Logf("initializing account %q", user.FormattedAddress())
+	//s.SendCoins(
+	//	ctx,
+	//	keyName,
+	//	user.FormattedAddress(),
+	//	"cosmos100rcxlgvhqzhspe99al085psfj9j0kqg59fwpy", // random address. just to get this to work.
+	//	sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1))),
+	//	sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1000000000000))),
+	//	1000000,
+	//)
+	//s.Require().NoError(err)
 	return user, nil
 }
 
@@ -449,7 +463,7 @@ func (s *TestSuite) GetAndFundTestUsers(
 	ctx context.Context,
 	keyNamePrefix string,
 	amount int64,
-	chain ibc.Chain,
+	chain *cosmos.CosmosChain,
 ) ibc.Wallet {
 	user, err := s.GetAndFundTestUserWithMnemonic(ctx, keyNamePrefix, "", amount, chain)
 	s.Require().NoError(err)
@@ -486,12 +500,6 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	bc := cosmos.NewBroadcaster(s.T(), chain)
 
 	ctx := context.Background()
-	clientCC, err := bc.GetClientContext(ctx, user)
-	s.Require().NoError(err)
-	querier := authtypes.NewQueryClient(clientCC.GRPCClient)
-	res, err := querier.Accounts(ctx, &authtypes.QueryAccountsRequest{})
-	s.T().Logf("error?: %v", err)
-	s.T().Logf("accounts: %s", res.String())
 	// create tx factory + Client Context
 	txf, err := bc.GetFactory(ctx, user)
 	s.Require().NoError(err)
@@ -555,3 +563,8 @@ func AlphaString(r *rand.Rand, n int) string {
 	}
 	return string(randomString)
 }
+
+/*
+
+simd tx bank send cosmos1akl02chz6s65r3hda56j0l6e8e68ulxhmar2u9 cosmos1feg8kqevnkz5p5qyr9f5ta2qyszmqlv48hhr4a 10stake --fees 200000stake --chain-id chain-id-0 --from cosmos1akl02chz6s65r3hda56j0l6e8e68ulxhmar2u9
+*/
