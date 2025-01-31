@@ -49,11 +49,11 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.encCfg = MakeTestEncodingConfig()
 	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
-	ctx, tk, tm := testkeeper.NewTestSetup(s.T())
+	fixture := testkeeper.NewTestFixture(s.T(), nil)
 
-	s.ctx = ctx
-	s.feeMarketKeeper = tk.FeeMarketKeeper
-	s.msgServer = tm.FeeMarketMsgServer
+	s.ctx = fixture.Ctx
+	s.feeMarketKeeper = fixture.FeeMarketKeeper
+	s.msgServer = keeper.NewMsgServer(s.feeMarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
 	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
 }
