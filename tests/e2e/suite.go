@@ -16,12 +16,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/apis/marketmap"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
+	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v9/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -38,58 +35,6 @@ var r *rand.Rand
 func init() {
 	s := rand.NewSource(1)
 	r = rand.New(s)
-}
-
-func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
-	return ibc.SidecarConfig{
-		ProcessName: "oracle",
-		Image:       image,
-		HomeDir:     "/oracle",
-		Ports:       []string{"8080", "8081"},
-		StartCmd: []string{
-			"slinky",
-			"--oracle-config", "/oracle/oracle.json",
-		},
-		ValidatorProcess: true,
-		PreStart:         true,
-	}
-}
-
-func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
-	cfg := marketmap.DefaultAPIConfig
-	cfg.Endpoints = []oracleconfig.Endpoint{
-		{
-			URL: url,
-		},
-	}
-
-	// Create the oracle config
-	oracleConfig := oracleconfig.OracleConfig{
-		UpdateInterval: 500 * time.Millisecond,
-		MaxPriceAge:    1 * time.Minute,
-		Host:           "0.0.0.0",
-		Port:           "8080",
-		Providers: map[string]oracleconfig.ProviderConfig{
-			marketmap.Name: {
-				Name: marketmap.Name,
-				API:  cfg,
-				Type: "market_map_provider",
-			},
-		},
-	}
-
-	return oracleConfig
-}
-
-func DefaultMarketMap() mmtypes.MarketMap {
-	return mmtypes.MarketMap{}
-}
-
-func GetOracleSideCar(node *cosmos.ChainNode) *cosmos.SidecarProcess {
-	if len(node.Sidecars) == 0 {
-		panic("no sidecars found")
-	}
-	return node.Sidecars[0]
 }
 
 type TestTxConfig struct {

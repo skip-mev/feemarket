@@ -132,6 +132,7 @@ func TestEscrowFunds(t *testing.T) {
 		tc := stc // to make scopelint happy
 		t.Run(name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
 			cdc := codec.NewProtoCodec(s.EncCfg.InterfaceRegistry)
 			signingCtx := cdc.InterfaceRegistry().SigningContext()
 			protoTxCfg := tx.NewTxConfig(

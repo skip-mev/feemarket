@@ -9,9 +9,9 @@ import (
 	"cosmossdk.io/x/gov"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
+	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v9/ibc"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
@@ -30,11 +30,6 @@ var (
 
 	image = ibc.DockerImage{
 		Repository: "feemarket-e2e",
-		Version:    "latest",
-		UidGid:     "1000:1000",
-	}
-	oracleImage = ibc.DockerImage{
-		Repository: "ghcr.io/skip-mev/slinky-sidecar",
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
@@ -114,7 +109,6 @@ var (
 func TestE2ETestSuite(t *testing.T) {
 	s := e2e.NewIntegrationSuite(
 		spec,
-		oracleImage,
 		txCfg,
 	)
 

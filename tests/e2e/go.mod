@@ -3,7 +3,8 @@ module github.com/skip-mev/feemarket/tests/e2e
 go 1.22.3
 
 replace (
-	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.0.0-beta.1.0.20240124105859-5ad1805d0e79
+ 	github.com/strangelove-ventures/interchaintest/v9 => github.com/gjermundgaraba/interchaintest/v9 v9.0.0-20250124210659-93297de69a64
+ 	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.10.0-beta.2
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.1.0
@@ -11,17 +12,17 @@ replace (
 	github.com/skip-mev/feemarket => ../../
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
+	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.52.0-rc.2
 )
 
 require (
+
 	cosmossdk.io/math v1.3.0
 	github.com/cometbft/cometbft v0.38.8
 	github.com/cosmos/cosmos-sdk v0.50.7
 	github.com/pelletier/go-toml/v2 v2.2.2
-	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
 	github.com/skip-mev/feemarket v1.0.1
 	github.com/skip-mev/slinky v1.0.0
-	github.com/strangelove-ventures/interchaintest/v8 v8.4.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.64.1

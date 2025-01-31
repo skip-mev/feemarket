@@ -200,6 +200,9 @@ func TestAnteHandleMock(t *testing.T) {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, tc.Mock)
 			s.Ctx = s.Ctx.WithBlockHeight(420)
+			if tc.Simulate {
+				s.Ctx = s.Ctx.WithExecMode(sdk.ExecModeSimulate)
+			}
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
@@ -421,6 +424,10 @@ func TestAnteHandle(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
+			if tc.Simulate {
+				s.Ctx = s.Ctx.WithExecMode(sdk.ExecModeSimulate)
+			}
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 

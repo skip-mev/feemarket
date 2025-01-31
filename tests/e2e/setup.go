@@ -29,11 +29,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pelletier/go-toml/v2"
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
+	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v9/ibc"
+	"github.com/strangelove-ventures/interchaintest/v9/testutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -41,8 +40,7 @@ import (
 )
 
 const (
-	oracleConfigPath = "oracle.json"
-	appConfigPath    = "config/app.toml"
+	appConfigPath = "config/app.toml"
 )
 
 type KeyringOverride struct {
@@ -522,48 +520,6 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	return bz
 }
 
-// SetOracleConfigsOnApp writes the oracle configuration to the given node's application config.
-func SetOracleConfigsOnApp(node *cosmos.ChainNode) {
-	oracle := GetOracleSideCar(node)
-
-	// read the app config from the node
-	bz, err := node.ReadFile(context.Background(), appConfigPath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Unmarshall the app config to update the oracle and metrics file paths.
-	var appConfig map[string]interface{}
-	err = toml.Unmarshal(bz, &appConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	oracleAppConfig, ok := appConfig["oracle"].(map[string]interface{})
-	if !ok {
-		panic("oracle config not found")
-	}
-
-	// Update the file paths to the oracle and metrics configs.
-	oracleAppConfig["enabled"] = true
-	oracleAppConfig["oracle_address"] = fmt.Sprintf("%s:%s", oracle.HostName(), "8080")
-	oracleAppConfig["client_timeout"] = "1s"
-	oracleAppConfig["metrics_enabled"] = true
-	oracleAppConfig["prometheus_server_address"] = fmt.Sprintf("localhost:%s", "8081")
-
-	appConfig["oracle"] = oracleAppConfig
-	bz, err = toml.Marshal(appConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	// Write back the app config.
-	err = node.WriteFile(context.Background(), bz, appConfigPath)
-	if err != nil {
-		panic(err)
-	}
-}
-
 // AddSidecarToNode adds the sidecar configured by the given config to the given node. These are configured
 // so that the sidecar is started before the node is started.
 func AddSidecarToNode(node *cosmos.ChainNode, conf ibc.SidecarConfig) {
@@ -580,62 +536,6 @@ func AddSidecarToNode(node *cosmos.ChainNode, conf ibc.SidecarConfig) {
 		conf.StartCmd,
 		conf.Env,
 	)
-}
-
-// SetOracleConfigsOnOracle writes the oracle and metrics configs to the given node's
-// oracle sidecar.
-func SetOracleConfigsOnOracle(
-	oracle *cosmos.SidecarProcess,
-	oracleCfg oracleconfig.OracleConfig,
-) {
-	// marshal the oracle config
-	bz, err := json.Marshal(oracleCfg)
-	if err != nil {
-		panic(err)
-	}
-
-	// write the oracle config to the node
-	err = oracle.WriteFile(context.Background(), bz, oracleConfigPath)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// RestartOracle restarts the oracle sidecar for a given node
-func RestartOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	if err := oracle.StopContainer(context.Background()); err != nil {
-		return err
-	}
-
-	return oracle.StartContainer(context.Background())
-}
-
-// StopOracle stops the oracle sidecar for a given node
-func StopOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	return oracle.StopContainer(context.Background())
-}
-
-// StartOracle starts the oracle sidecar for a given node
-func StartOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	return oracle.StartContainer(context.Background())
 }
 
 // AlphaString returns a random string with lowercase alpha char of length n
