@@ -42,6 +42,7 @@ require (
 )
 
 require (
+	cosmossdk.io/collections v1.0.0
 	cosmossdk.io/core/testing v0.0.1
 	cosmossdk.io/x/accounts v0.2.0-rc.1
 	cosmossdk.io/x/accounts/defaults/base v0.2.0-rc.1
@@ -55,8 +56,10 @@ require (
 	cosmossdk.io/x/group v0.2.0-rc.1
 	cosmossdk.io/x/mint v0.2.0-rc.1
 	cosmossdk.io/x/params v0.2.0-rc.1
+	cosmossdk.io/x/protocolpool v0.0.0-20241218110910-47409028a73d
 	cosmossdk.io/x/slashing v0.2.0-rc.1
 	cosmossdk.io/x/staking v0.2.0-rc.1
+	gotest.tools/v3 v3.5.1
 )
 
 require (
@@ -70,10 +73,8 @@ require (
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
 	cloud.google.com/go/storage v1.42.0 // indirect
-	cosmossdk.io/collections v1.0.0 // indirect
 	cosmossdk.io/schema v1.0.0 // indirect
 	cosmossdk.io/x/epochs v0.0.0-20241218110910-47409028a73d // indirect
-	cosmossdk.io/x/protocolpool v0.0.0-20241218110910-47409028a73d // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.3.4 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
@@ -373,7 +374,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools/v3 v3.5.1 // indirect
 	honnef.co/go/tools v0.4.7 // indirect
 	mvdan.cc/unparam v0.0.0-20240528143540-8a5130ca722f // indirect
 	rsc.io/qr v0.2.0 // indirect

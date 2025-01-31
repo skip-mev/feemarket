@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
-	"cosmossdk.io/x/bank"
-	"cosmossdk.io/x/gov"
+	"github.com/cosmos/cosmos-sdk/codec/address"
+	testutil2 "github.com/cosmos/cosmos-sdk/codec/testutil"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
 	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v9/ibc"
 	"github.com/stretchr/testify/suite"
+
+	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/x/bank"
+	"cosmossdk.io/x/gov"
 
 	"github.com/skip-mev/feemarket/tests/e2e"
 	"github.com/skip-mev/feemarket/x/feemarket"
@@ -33,11 +36,18 @@ var (
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
+	codecOpts = testutil2.CodecOptions{
+		AccAddressPrefix: "cosmos",
+		ValAddressPrefix: "cosmosval",
+		AddressCodec:     address.NewBech32Codec("cosmos"),
+		ValidatorCodec:   address.NewBech32Codec("cosmosval"),
+	}
 	encodingConfig = testutil.MakeTestEncodingConfig(
-		bank.AppModuleBasic{},
-		gov.AppModuleBasic{},
-		auth.AppModuleBasic{},
-		feemarket.AppModuleBasic{},
+		codecOpts,
+		bank.AppModule{},
+		gov.AppModule{},
+		auth.AppModule{},
+		feemarket.AppModule{},
 	)
 	noHostMount   = false
 	gasAdjustment = 10.0

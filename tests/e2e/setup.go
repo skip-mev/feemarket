@@ -15,9 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"cosmossdk.io/math"
-	banktypes "cosmossdk.io/x/bank/types"
-	stakingtypes "cosmossdk.io/x/staking/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	comettypes "github.com/cometbft/cometbft/types"
@@ -28,13 +25,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/pelletier/go-toml/v2"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
 	"github.com/strangelove-ventures/interchaintest/v9/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v9/ibc"
 	"github.com/strangelove-ventures/interchaintest/v9/testutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"cosmossdk.io/math"
+	banktypes "cosmossdk.io/x/bank/types"
+	stakingtypes "cosmossdk.io/x/staking/types"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -512,7 +512,7 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	// sign the tx
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	s.Require().NoError(err)
-	s.Require().NoError(tx.Sign(cc.CmdContext, txf, cc.GetFromName(), txBuilder, true))
+	s.Require().NoError(tx.Sign(cc, txf, cc.GetFromAddress().String(), txBuilder, true))
 
 	// encode and return
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
