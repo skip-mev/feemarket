@@ -361,6 +361,7 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 	}
 
 	tx := s.CreateTx(s.chain, sender, fees.String(), gas, false, msgs...)
+	s.T().Logf("created tx for msgs: %v", msgs)
 
 	// get an rpc endpoint for the chain
 	c := s.chain.Nodes()[0].Client
@@ -485,6 +486,12 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	bc := cosmos.NewBroadcaster(s.T(), chain)
 
 	ctx := context.Background()
+	clientCC, err := bc.GetClientContext(ctx, user)
+	s.Require().NoError(err)
+	querier := authtypes.NewQueryClient(clientCC.GRPCClient)
+	res, err := querier.Accounts(ctx, &authtypes.QueryAccountsRequest{})
+	s.T().Logf("error?: %v", err)
+	s.T().Logf("accounts: %s", res.String())
 	// create tx factory + Client Context
 	txf, err := bc.GetFactory(ctx, user)
 	s.Require().NoError(err)

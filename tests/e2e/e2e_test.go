@@ -38,9 +38,9 @@ var (
 	}
 	codecOpts = testutil2.CodecOptions{
 		AccAddressPrefix: "cosmos",
-		ValAddressPrefix: "cosmosval",
+		ValAddressPrefix: "cosmosvaloper",
 		AddressCodec:     address.NewBech32Codec("cosmos"),
-		ValidatorCodec:   address.NewBech32Codec("cosmosval"),
+		ValidatorCodec:   address.NewBech32Codec("cosmosvaloper"),
 	}
 	encodingConfig = testutil.MakeTestEncodingConfig(
 		codecOpts,

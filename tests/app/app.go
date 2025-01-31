@@ -24,8 +24,6 @@ import (
 
 	"cosmossdk.io/x/accounts/accountstd"
 	baseaccount "cosmossdk.io/x/accounts/defaults/base"
-	"cosmossdk.io/x/accounts/testing/account_abstraction"
-	"cosmossdk.io/x/accounts/testing/counter"
 	txdecode "cosmossdk.io/x/tx/decode"
 
 	accounts "cosmossdk.io/x/accounts"
@@ -313,9 +311,6 @@ func NewSimApp(
 		signingCtx.AddressCodec(),
 		appCodec.InterfaceRegistry(),
 		txDecoder,
-		// TESTING: do not add
-		accountstd.AddAccount("counter", counter.NewAccount),
-		accountstd.AddAccount("aa_minimal", account_abstraction.NewMinimalAbstractedAccount),
 		// Lockup account
 		accountstd.AddAccount(lockup.CONTINUOUS_LOCKING_ACCOUNT, lockup.NewContinuousLockingAccount),
 		accountstd.AddAccount(lockup.PERIODIC_LOCKING_ACCOUNT, lockup.NewPeriodicLockingAccount),
@@ -330,7 +325,16 @@ func NewSimApp(
 	}
 	app.AccountKeeper = accountsKeeper
 
-	app.AuthKeeper = authkeeper.NewAccountKeeper(runtime.NewEnvironment(runtime.NewKVStoreService(keys[authtypes.StoreKey]), logger.With(log.ModuleKey, "x/auth")), appCodec, authtypes.ProtoBaseAccount, accountsKeeper, maccPerms, signingCtx.AddressCodec(), sdk.Bech32MainPrefix, govModuleAddr)
+	app.AuthKeeper = authkeeper.NewAccountKeeper(
+		runtime.NewEnvironment(runtime.NewKVStoreService(keys[authtypes.StoreKey]), logger.With(log.ModuleKey, "x/auth")),
+		appCodec,
+		authtypes.ProtoBaseAccount,
+		accountsKeeper,
+		maccPerms,
+		signingCtx.AddressCodec(),
+		sdk.Bech32MainPrefix,
+		govModuleAddr,
+	)
 
 	blockedAddrs := BlockedAddresses()
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
@@ -567,8 +571,8 @@ func NewSimApp(
 	// proposals are being built and verified.
 	anteHandlerOptions := ante.HandlerOptions{
 		Environment:              runtime.NewEnvironment(nil, logger, runtime.EnvWithMsgRouterService(app.MsgServiceRouter()), runtime.EnvWithQueryRouterService(app.GRPCQueryRouter())), // nil is set as the kvstoreservice to avoid module access
-		AccountAbstractionKeeper: app.AccountKeeper,
 		AccountKeeper:            app.AuthKeeper,
+		AccountAbstractionKeeper: app.AccountKeeper,
 		BankKeeper:               app.BankKeeper,
 		ConsensusKeeper:          app.ConsensusParamsKeeper,
 		SignModeHandler:          txConfig.SignModeHandler(),

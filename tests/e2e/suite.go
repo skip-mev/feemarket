@@ -322,15 +322,24 @@ func (s *TestSuite) TestSendTxDecrease() {
 
 			smallSend := func(wg *sync.WaitGroup, userA, userB ibc.Wallet) {
 				defer wg.Done()
+				coins := sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt)))
+				bal := s.QueryBalance(userA)
+				s.T().Logf("user %q has balance: %s", userA.FormattedAddress(), bal.String())
+				bal = s.QueryBalance(userB)
+				s.T().Logf("user %q has balance: %s", userB.FormattedAddress(), bal.String())
+				s.T().Logf("sending %s from %q to %q (gas: %d, fee: %s)", coins.String(), userA.FormattedAddress(), userB.FormattedAddress(), gas, minBaseFee.String())
+
 				txResp, err := s.SendCoinsMultiBroadcast(
 					context.Background(),
 					userA,
 					userB,
-					sdk.NewCoins(sdk.NewCoin(s.chain.Config().Denom, math.NewInt(sendAmt))),
+					coins,
 					minBaseFeeCoins,
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
+				s.T().Logf("txResp: %v", txResp)
+				s.T().Logf("error?: %v", err)
 				if err != nil {
 					s.T().Log(err)
 				} else if txResp != nil && txResp.CheckTx.Code != 0 {

@@ -1,8 +1,9 @@
 package app
 
 import (
-	circuitante "cosmossdk.io/x/circuit/ante"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante/unorderedtx"
+
+	circuitante "cosmossdk.io/x/circuit/ante"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -28,6 +29,10 @@ type AnteHandlerOptions struct {
 func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
+	}
+
+	if options.CircuitKeeper == nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "circuit keeper is required for ante builder")
 	}
 
 	if options.BankKeeper == nil {
@@ -57,6 +62,7 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 			options.TxFeeChecker,
 		),
 	) // fees are deducted in the fee market deduct post handler
+	_ = feemarketDecorator
 	anteDecorators := []sdk.AnteDecorator{
 		ante.NewSetUpContextDecorator(options.Environment, options.ConsensusKeeper), // outermost AnteDecorator. SetUpContext must be called first
 		circuitante.NewCircuitBreakerDecorator(options.CircuitKeeper),
@@ -66,10 +72,10 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		ante.NewUnorderedTxDecorator(unorderedtx.DefaultMaxTimeoutDuration, options.UnorderedTxManager, options.Environment, ante.DefaultSha256Cost),
 		ante.NewValidateMemoDecorator(options.AccountKeeper),
 		ante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-		feemarketDecorator,
 		ante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper, options.TxFeeChecker),
 		ante.NewValidateSigCountDecorator(options.AccountKeeper),
 		ante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler, options.SigGasConsumer, options.AccountAbstractionKeeper),
+		feemarketDecorator,
 	}
 
 	return sdk.ChainAnteDecorators(anteDecorators...), nil
