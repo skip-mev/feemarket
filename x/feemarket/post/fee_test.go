@@ -156,7 +156,7 @@ func TestPostHandleMock(t *testing.T) {
 	const (
 		baseDenom              = "stake"
 		resolvableDenom        = "atom"
-		expectedConsumedGas    = 10631
+		expectedConsumedGas    = 11724
 		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
 		gasLimit               = expectedConsumedSimGas
 	)
@@ -246,7 +246,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 24214,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -268,7 +268,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 11724,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              true,
 		},
 		{
@@ -290,7 +290,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 11724,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              true,
 		},
 		{
@@ -312,7 +312,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 24214,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -379,7 +379,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 11724,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              true,
 		},
 		{
@@ -401,7 +401,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 24214,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -423,7 +423,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 11724,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              true,
 		},
 		{
@@ -445,7 +445,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 24214,
+			ExpectConsumedGas: expectedConsumedSimGas,
 			Mock:              true,
 		},
 		{
@@ -546,9 +546,9 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 36650
+		expectedConsumedGas = 25643
 
-		expectedConsumedGasResolve = 36524 // slight difference due to denom resolver
+		expectedConsumedGasResolve = 25517 // slight difference due to denom resolver
 
 		gasLimit = 100000
 	)
@@ -596,7 +596,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			Mock:              false,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 		},
 		{
 			Name: "0 gas given should fail",
@@ -632,7 +632,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -657,7 +657,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -706,7 +706,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -725,7 +725,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -797,7 +797,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25517,
+			ExpectConsumedGas: expectedConsumedGasResolve,
 			Mock:              false,
 		},
 		{
@@ -822,7 +822,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -841,7 +841,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -890,7 +890,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25517,
+			ExpectConsumedGas: expectedConsumedGasResolve,
 			Mock:              false,
 		},
 		{
@@ -909,7 +909,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 25643,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
