@@ -253,7 +253,7 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 		s.Ctx = newCtx
 		if tc.RunPost {
 			consumedGas := newCtx.GasMeter().GasConsumed()
-			require.Equal(t, tc.ExpectConsumedGas, consumedGas)
+			require.Equal(t, tc.ExpectConsumedGas, consumedGas, "expected to consume %d gas, consumed %d", tc.ExpectConsumedGas, consumedGas)
 		}
 
 	} else {

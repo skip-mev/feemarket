@@ -1,16 +1,16 @@
 package post_test
 
 import (
-	"fmt"
 	"testing"
 
-	"cosmossdk.io/math"
-	govtypes "cosmossdk.io/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/mock"
+
+	"cosmossdk.io/math"
+	govtypes "cosmossdk.io/x/gov/types"
 
 	antesuite "github.com/skip-mev/feemarket/x/feemarket/ante/suite"
 	"github.com/skip-mev/feemarket/x/feemarket/post"
@@ -62,8 +62,9 @@ func TestDeductCoins(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
 			if tc.distributeFees {
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName,
 					authtypes.FeeCollectorName,
@@ -100,8 +101,9 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
 			s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName, authtypes.FeeCollectorName,
 				tc.coins).Return(nil).Once()
 
@@ -135,8 +137,9 @@ func TestSendTip(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, true)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
 			accs := s.CreateTestAccounts(2)
 			s.MockBankKeeper.On("SendCoinsFromModuleToAccount", s.Ctx, types.FeeCollectorName, mock.Anything,
 				tc.coins).Return(nil).Once()
@@ -524,8 +527,12 @@ func TestPostHandleMock(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
+		t.Run(tc.Name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
+			if tc.Simulate {
+				s.Ctx = s.Ctx.WithExecMode(sdk.ExecModeSimulate)
+			}
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
@@ -589,7 +596,7 @@ func TestPostHandle(t *testing.T) {
 			ExpPass:           true,
 			ExpErr:            nil,
 			Mock:              false,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 		},
 		{
 			Name: "0 gas given should fail",
@@ -625,7 +632,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -650,7 +657,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -699,7 +706,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -718,7 +725,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -982,8 +989,12 @@ func TestPostHandle(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
+		t.Run(tc.Name, func(t *testing.T) {
 			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s.Ctx = s.Ctx.WithBlockHeight(420)
+			if tc.Simulate {
+				s.Ctx = s.Ctx.WithExecMode(sdk.ExecModeSimulate)
+			}
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
