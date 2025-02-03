@@ -154,8 +154,10 @@ func TestSendTip(t *testing.T) {
 func TestPostHandleMock(t *testing.T) {
 	// Same data for every test case
 	const (
-		baseDenom              = "stake"
-		resolvableDenom        = "atom"
+		baseDenom       = "stake"
+		resolvableDenom = "atom"
+		// these expected gas consumptions are from viewing the transaction gas consumed. it will likely change between different
+		// Cosmos SDK versions.
 		expectedConsumedGas    = 11724
 		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
 		gasLimit               = expectedConsumedSimGas
@@ -544,8 +546,10 @@ func TestPostHandleMock(t *testing.T) {
 func TestPostHandle(t *testing.T) {
 	// Same data for every test case
 	const (
-		baseDenom           = "stake"
-		resolvableDenom     = "atom"
+		baseDenom       = "stake"
+		resolvableDenom = "atom"
+		// these expected gas consumptions are from viewing the transaction gas consumed. it will likely change between different
+		// Cosmos SDK versions.
 		expectedConsumedGas = 25643
 
 		expectedConsumedGasResolve = 25517 // slight difference due to denom resolver
