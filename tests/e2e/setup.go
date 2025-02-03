@@ -21,6 +21,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/address"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -361,7 +362,6 @@ func (s *TestSuite) SendCoinsMultiBroadcast(ctx context.Context, sender, receive
 	}
 
 	tx := s.CreateTx(s.chain, sender, fees.String(), gas, false, msgs...)
-	s.T().Logf("created tx for msgs: %v", msgs)
 
 	// get an rpc endpoint for the chain
 	c := s.chain.Nodes()[0].Client
@@ -428,17 +428,17 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	// TODO(technicallyty): this is a temporary hack. SDK v0.52 no longer initializes accounts upon receiving funds.
 	// The account _must_ send a tx to be initialized in state, so we do a dummy 1stake bank send here.
 	// The receiver address is a random one found from mintscan.
-	//s.T().Logf("initializing account %q", user.FormattedAddress())
-	//s.SendCoins(
-	//	ctx,
-	//	keyName,
-	//	user.FormattedAddress(),
-	//	"cosmos100rcxlgvhqzhspe99al085psfj9j0kqg59fwpy", // random address. just to get this to work.
-	//	sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1))),
-	//	sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1000000000000))),
-	//	1000000,
-	//)
-	//s.Require().NoError(err)
+	s.T().Logf("initializing account %q", user.FormattedAddress())
+	s.SendCoins(
+		ctx,
+		user.FormattedAddress(),
+		user.FormattedAddress(),
+		"cosmos100rcxlgvhqzhspe99al085psfj9j0kqg59fwpy", // random address. just to get this to work.
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1))),
+		sdk.NewCoins(sdk.NewCoin(chainCfg.Denom, math.NewInt(1000000000000))),
+		1000000,
+	)
+	s.Require().NoError(err)
 	return user, nil
 }
 
@@ -527,7 +527,8 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	// sign the tx
 	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	s.Require().NoError(err)
-	s.Require().NoError(tx.Sign(cc, txf, cc.GetFromAddress().String(), txBuilder, true))
+	cc = cc.WithAddressCodec(address.NewBech32Codec("cosmos"))
+	s.Require().NoError(tx.Sign(cc, txf, user.KeyName(), txBuilder, true))
 
 	// encode and return
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())

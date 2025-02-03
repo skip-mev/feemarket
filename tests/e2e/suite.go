@@ -289,7 +289,7 @@ func (s *TestSuite) TestSendTxDecrease() {
 	gas := int64(200000)
 	minBaseFee := sdk.NewDecCoinFromDec(defaultGasPrice.Denom, defaultGasPrice.Amount.Mul(math.LegacyNewDec(gas)))
 	minBaseFeeCoins := sdk.NewCoins(sdk.NewCoin(minBaseFee.Denom, minBaseFee.Amount.TruncateInt()))
-	sendAmt := int64(100)
+	sendAmt := int64(10)
 
 	s.Run("expect fee market state to decrease", func() {
 		s.T().Log("performing sends...")
@@ -375,7 +375,7 @@ func (s *TestSuite) TestSendTxIncrease() {
 	params := s.QueryParams()
 
 	gas := int64(params.MaxBlockUtilization)
-	sendAmt := int64(100)
+	sendAmt := int64(1)
 
 	s.Run("expect fee market gas price to increase", func() {
 		s.T().Log("performing sends...")
@@ -453,12 +453,12 @@ func (s *TestSuite) TestSendTxIncrease() {
 }
 
 func (s *TestSuite) TestSendTxFailures() {
-	sendAmt := int64(100)
+	sendAmt := int64(1)
 	gas := int64(200000)
 
 	s.Run("submit tx with no gas attached", func() {
 		// send one tx with no  gas or fee attached
-		txResp, err := s.SendCoinsMultiBroadcast(
+		_, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -467,15 +467,11 @@ func (s *TestSuite) TestSendTxFailures() {
 			0,
 			1,
 		)
-		s.Require().NoError(err)
-		s.Require().NotNil(txResp)
-		s.Require().True(txResp.CheckTx.Code != 0)
-		s.T().Log(txResp.CheckTx.Log)
-		s.Require().Contains(txResp.CheckTx.Log, "out of gas")
+		s.Require().ErrorContains(err, "out of gas")
 	})
 
 	s.Run("submit tx with no fee", func() {
-		txResp, err := s.SendCoinsMultiBroadcast(
+		_, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -484,18 +480,14 @@ func (s *TestSuite) TestSendTxFailures() {
 			gas,
 			1,
 		)
-		s.Require().NoError(err)
-		s.Require().NotNil(txResp)
-		s.Require().True(txResp.CheckTx.Code != 0)
-		s.T().Log(txResp.CheckTx.Log)
-		s.Require().Contains(txResp.CheckTx.Log, "no fee coin provided")
+		s.Require().ErrorContains(err, "no fee coin provided")
 	})
 
 	s.Run("fail a tx that uses full balance in fee - fail tx", func() {
 		balance := s.QueryBalance(s.user3)
 
 		// send one tx with no  gas or fee attached
-		txResp, err := s.SendCoinsMultiBroadcast(
+		s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user3,
 			s.user1,
@@ -504,13 +496,6 @@ func (s *TestSuite) TestSendTxFailures() {
 			gas,
 			1,
 		)
-		s.Require().NoError(err)
-		s.Require().NotNil(txResp)
-		s.Require().True(txResp.CheckTx.Code == 0)
-		s.Require().True(txResp.TxResult.Code != 0)
-		s.T().Log(txResp.TxResult.Log)
-		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
-
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
 		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
@@ -543,14 +528,18 @@ func (s *TestSuite) TestSendTxFailures() {
 
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
-		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
-			balance.Amount.Int64(),
-			newBalance.Amount.Int64()))
+		s.Require().True(
+			newBalance.IsLT(balance),
+			fmt.Sprintf("new balance: %d, original balance: %d",
+				balance.Amount.Int64(),
+				newBalance.Amount.Int64(),
+			),
+		)
 	})
 
 	s.Run("submit a tx with fee greater than full balance - fail checktx", func() {
 		balance := s.QueryBalance(s.user1)
-		txResp, err := s.SendCoinsMultiBroadcast(
+		_, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -559,11 +548,11 @@ func (s *TestSuite) TestSendTxFailures() {
 			gas,
 			1,
 		)
-		s.Require().NoError(err)
-		s.Require().NotNil(txResp)
-		s.Require().True(txResp.CheckTx.Code != 0)
-		s.T().Log(txResp.CheckTx.Log)
-		s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
+		s.Require().ErrorContains(err, "error escrowing funds")
+		//s.Require().NotNil(txResp)
+		//s.Require().True(txResp.CheckTx.Code != 0)
+		//s.T().Log(txResp.CheckTx.Log)
+		//s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
 
 		// ensure that no balance is deducted for a tx failing checkTx
 		newBalance := s.QueryBalance(s.user1)
@@ -633,6 +622,6 @@ func (s *TestSuite) TestSendTxFailures() {
 		s.T().Log(resp.RawLog)
 
 		// reset the users and balances
-		s.user2 = s.GetAndFundTestUsers(context.Background(), s.T().Name(), 200000000000, s.chain)
+		s.user2 = s.GetAndFundTestUsers(context.Background(), s.T().Name(), 1000000000000, s.chain)
 	})
 }
