@@ -246,7 +246,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedSimGas,
+			ExpectConsumedGas: 24214,
 			Mock:              true,
 		},
 		{
@@ -268,7 +268,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 11724,
 			Mock:              true,
 		},
 		{
@@ -290,7 +290,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 11724,
 			Mock:              true,
 		},
 		{
@@ -312,7 +312,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedSimGas,
+			ExpectConsumedGas: 24214,
 			Mock:              true,
 		},
 		{
@@ -356,7 +356,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but deduction is skipped
+			ExpectConsumedGas: 16433, // extra gas consumed because msg server is run, but deduction is skipped
 			Mock:              true,
 		},
 		{
@@ -379,7 +379,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 11724,
 			Mock:              true,
 		},
 		{
@@ -401,7 +401,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedSimGas,
+			ExpectConsumedGas: 24214,
 			Mock:              true,
 		},
 		{
@@ -423,7 +423,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 11724,
 			Mock:              true,
 		},
 		{
@@ -445,7 +445,7 @@ func TestPostHandleMock(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedSimGas,
+			ExpectConsumedGas: 24214,
 			Mock:              true,
 		},
 		{
@@ -772,7 +772,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 15340, // extra gas consumed because msg server is run, but bank keepers are skipped
+			ExpectConsumedGas: 16433, // extra gas consumed because msg server is run, but bank keepers are skipped
 			Mock:              false,
 		},
 		{
@@ -797,7 +797,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGasResolve,
+			ExpectConsumedGas: 25517,
 			Mock:              false,
 		},
 		{
@@ -822,7 +822,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -841,7 +841,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{
@@ -890,7 +890,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGasResolve,
+			ExpectConsumedGas: 25517,
 			Mock:              false,
 		},
 		{
@@ -909,7 +909,7 @@ func TestPostHandle(t *testing.T) {
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: expectedConsumedGas,
+			ExpectConsumedGas: 25643,
 			Mock:              false,
 		},
 		{

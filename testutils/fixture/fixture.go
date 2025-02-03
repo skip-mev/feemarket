@@ -28,10 +28,12 @@ import (
 	"cosmossdk.io/x/consensus"
 	consensuskeeper "cosmossdk.io/x/consensus/keeper"
 	consensustypes "cosmossdk.io/x/consensus/types"
+	distrtypes "cosmossdk.io/x/distribution/types"
 	"cosmossdk.io/x/feegrant"
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	minttypes "cosmossdk.io/x/mint/types"
+	stakingtypes "cosmossdk.io/x/staking/types"
 	"cosmossdk.io/x/tx/signing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -130,7 +132,11 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		authtypes.ProtoBaseAccount,
 		accountsKeeper,
 		map[string][]string{
+			authtypes.FeeCollectorName:      nil,
+			distrtypes.ModuleName:           nil,
 			minttypes.ModuleName:            {authtypes.Minter},
+			stakingtypes.BondedPoolName:     {authtypes.Burner, authtypes.Staking},
+			stakingtypes.NotBondedPoolName:  {authtypes.Burner, authtypes.Staking},
 			feemarkettypes.ModuleName:       nil,
 			feemarkettypes.FeeCollectorName: {authtypes.Burner},
 		},
