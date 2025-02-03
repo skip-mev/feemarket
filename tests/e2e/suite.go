@@ -333,8 +333,6 @@ func (s *TestSuite) TestSendTxDecrease() {
 					gas,
 					s.txConfig.SmallSendsNum,
 				)
-				s.T().Logf("txResp: %v", txResp)
-				s.T().Logf("error?: %v", err)
 				if err != nil {
 					s.T().Log(err)
 				} else if txResp != nil && txResp.CheckTx.Code != 0 {
@@ -549,10 +547,6 @@ func (s *TestSuite) TestSendTxFailures() {
 			1,
 		)
 		s.Require().ErrorContains(err, "error escrowing funds")
-		//s.Require().NotNil(txResp)
-		//s.Require().True(txResp.CheckTx.Code != 0)
-		//s.T().Log(txResp.CheckTx.Log)
-		//s.Require().Contains(txResp.CheckTx.Log, "error escrowing funds")
 
 		// ensure that no balance is deducted for a tx failing checkTx
 		newBalance := s.QueryBalance(s.user1)
