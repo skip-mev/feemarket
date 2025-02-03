@@ -51,10 +51,6 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "bank keeper keeper is required for ante builder")
 	}
 
-	if options.TxFeeChecker == nil {
-		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "tx fee checker is required")
-	}
-
 	if options.FeegrantKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "feegrant keeper is required for ante builder")
 	}
