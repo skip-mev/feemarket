@@ -485,7 +485,7 @@ func (s *TestSuite) TestSendTxFailures() {
 		balance := s.QueryBalance(s.user3)
 
 		// send one tx with no  gas or fee attached
-		s.SendCoinsMultiBroadcast(
+		_, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user3,
 			s.user1,
@@ -494,6 +494,7 @@ func (s *TestSuite) TestSendTxFailures() {
 			gas,
 			1,
 		)
+		s.Require().NoError(err)
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
 		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
