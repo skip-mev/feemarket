@@ -186,30 +186,6 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 
 	require.NoError(t, cms.LoadLatestVersion())
 	ctx := sdk.NewContext(cms, false, log.NewNopLogger())
-	//accountsModule := accounts.NewAppModule(cdc, accountsKeeper)
-	//authModule := auth.NewAppModule(cdc, authKeeper, accountsKeeper, authsims.RandomGenesisAccounts, nil)
-	//bankModule := bank.NewAppModule(cdc, bankKeeper, authKeeper)
-	//feemarketModule := feemarket.NewAppModule(cdc, *feemarketKeeper)
-	//consensusModule := consensus.NewAppModule(cdc, consensusKeeper)
-	//fgModule := feegrantmodule.NewAppModule(cdc, fgKeeper, cdc.InterfaceRegistry())
-
-	//integrationApp := integration.NewIntegrationApp(
-	//	logger,
-	//	keys,
-	//	cdc,
-	//	encodingCfg.InterfaceRegistry.SigningContext().AddressCodec(),
-	//	encodingCfg.InterfaceRegistry.SigningContext().ValidatorAddressCodec(),
-	//	map[string]appmodule.AppModule{
-	//		accounts.ModuleName:       accountsModule,
-	//		authtypes.ModuleName:      authModule,
-	//		banktypes.ModuleName:      bankModule,
-	//		feemarkettypes.ModuleName: feemarketModule,
-	//		consensustypes.ModuleName: consensusModule,
-	//		feegrant.ModuleName:       fgModule,
-	//	},
-	//	router,
-	//	queryRouter,
-	//)
 
 	err = feemarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)

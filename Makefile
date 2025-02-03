@@ -186,7 +186,7 @@ proto-update-deps:
 
 lint: use-main
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab
+	./scripts/lint.sh
 
 lint-fix: use-main
 	@echo "--> Running linter"

@@ -45,7 +45,7 @@ func RandomAccounts(r *rand.Rand, n int) []Account {
 
 func CreateRandomTx(txCfg client.TxConfig, account Account, nonce, numberMsgs, timeout uint64, gasLimit uint64, fees ...sdk.Coin) (authsigning.Tx, error) {
 	msgs := make([]sdk.Msg, numberMsgs)
-	for i := 0; i < int(numberMsgs); i++ {
+	for i := 0; i < int(numberMsgs); i++ { //nolint:gosec
 		msgs[i] = &banktypes.MsgSend{
 			FromAddress: account.Address.String(),
 			ToAddress:   account.Address.String(),

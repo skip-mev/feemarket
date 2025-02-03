@@ -116,7 +116,7 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		payCoin = feeCoins[0]
 	}
 
-	feeGas := int64(feeTx.GetGas())
+	feeGas := int64(feeTx.GetGas()) //nolint:gosec
 
 	minGasPrice, err := dfd.feemarketKeeper.GetMinGasPrice(ctx, payCoin.GetDenom())
 	if err != nil {
@@ -154,7 +154,7 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, err
 	}
 
-	ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice))
+	ctx = ctx.WithPriority(GetTxPriority(priorityFee, int64(gas), baseGasPrice)) //nolint:gosec
 
 	return next(ctx, tx, simulate)
 }
@@ -238,7 +238,7 @@ func CheckTxFee(ctx sdk.Context, gasPrice sdk.DecCoin, feeCoin sdk.Coin, feeGas 
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas, where fee = ceil(minGasPrice * gas).
-		gasConsumed := int64(ctx.GasMeter().GasConsumed())
+		gasConsumed := int64(ctx.GasMeter().GasConsumed()) //nolint:gosec
 		gcDec := sdkmath.LegacyNewDec(gasConsumed)
 		glDec := sdkmath.LegacyNewDec(feeGas)
 

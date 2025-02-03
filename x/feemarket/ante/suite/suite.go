@@ -74,7 +74,7 @@ func (s *TestSuite) CreateTestAccounts(numAccs int) []TestAccount {
 	for i := 0; i < numAccs; i++ {
 		priv, _, addr := testdata.KeyTestPubAddr()
 		acc := s.AuthKeeper.NewAccountWithAddress(s.Ctx, addr)
-		err := acc.SetAccountNumber(uint64(i + 1000))
+		err := acc.SetAccountNumber(uint64(i + 1000)) //nolint:gosec
 		if err != nil {
 			panic(err)
 		}

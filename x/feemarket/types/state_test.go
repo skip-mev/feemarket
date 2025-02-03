@@ -4,8 +4,9 @@ import (
 	"math/rand"
 	"testing"
 
-	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
+
+	"cosmossdk.io/math"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -351,7 +352,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		expectedLR := prevLR.Add(params.Alpha)
 		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
 
-		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization()) / 2)
+		expectedNetUtilization := math.LegacyNewDec(-1 * int64(params.TargetBlockUtilization()) / 2) //nolint:gosec
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
 		expectedGasPrice := prevBF.Mul(expectedLRAdjustment).Add(deltaDiff)
 
@@ -381,7 +382,7 @@ func TestState_UpdateBaseGasPrice(t *testing.T) {
 		expectedLR := prevLR.Add(params.Alpha)
 		expectedLRAdjustment := (expectedLR.Mul(expectedUtilization)).Add(math.LegacyOneDec())
 
-		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4)
+		expectedNetUtilization := math.LegacyNewDec(int64(params.MaxBlockUtilization) / 4) //nolint:gosec
 		deltaDiff := expectedNetUtilization.Mul(params.Delta)
 		expectedGasPrice := prevBGS.Mul(expectedLRAdjustment).Add(deltaDiff)
 		require.Equal(t, expectedLR, lr)
@@ -448,7 +449,7 @@ func TestState_UpdateLearningRate(t *testing.T) {
 		params := types.DefaultParams()
 
 		randomValue := rand.Int63n(1000000000)
-		state.Window[0] = uint64(randomValue)
+		state.Window[0] = uint64(randomValue) //nolint:gosec
 
 		state.UpdateLearningRate(params)
 		expectedLearningRate := math.LegacyMustNewDecFromStr("0.125")

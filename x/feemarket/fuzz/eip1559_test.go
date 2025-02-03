@@ -3,9 +3,10 @@ package fuzz_test
 import (
 	"testing"
 
-	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
+
+	"cosmossdk.io/math"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -77,13 +78,13 @@ func TestGasPrice(t *testing.T) {
 // EIP-1559 fee market implementation.
 func CreateRandomParams(t *rapid.T) types.Params {
 	a := rapid.Uint64Range(1, 1000).Draw(t, "alpha")
-	alpha := math.LegacyNewDec(int64(a)).Quo(math.LegacyNewDec(1000))
+	alpha := math.LegacyNewDec(int64(a)).Quo(math.LegacyNewDec(1000)) //nolint:gosec
 
 	b := rapid.Uint64Range(50, 99).Draw(t, "beta")
-	beta := math.LegacyNewDec(int64(b)).Quo(math.LegacyNewDec(100))
+	beta := math.LegacyNewDec(int64(b)).Quo(math.LegacyNewDec(100)) //nolint:gosec
 
 	g := rapid.Uint64Range(10, 50).Draw(t, "gamma")
-	gamma := math.LegacyNewDec(int64(g)).Quo(math.LegacyNewDec(100))
+	gamma := math.LegacyNewDec(int64(g)).Quo(math.LegacyNewDec(100)) //nolint:gosec
 
 	maxBlockUtilization := rapid.Uint64Range(2, 30_000_000).Draw(t, "max_block_utilization")
 
