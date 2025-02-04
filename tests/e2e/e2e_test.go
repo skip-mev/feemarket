@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec/address"
-	testutil2 "github.com/cosmos/cosmos-sdk/codec/testutil"
+	codectestutil "github.com/cosmos/cosmos-sdk/codec/testutil"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/strangelove-ventures/interchaintest/v9"
@@ -36,7 +36,7 @@ var (
 		Version:    "latest",
 		UidGid:     "1000:1000",
 	}
-	codecOpts = testutil2.CodecOptions{
+	codecOpts = codectestutil.CodecOptions{
 		AccAddressPrefix: "cosmos",
 		ValAddressPrefix: "cosmosvaloper",
 		AddressCodec:     address.NewBech32Codec("cosmos"),

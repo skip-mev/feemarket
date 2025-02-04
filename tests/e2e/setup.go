@@ -564,8 +564,3 @@ func AlphaString(r *rand.Rand, n int) string {
 	}
 	return string(randomString)
 }
-
-/*
-
-simd tx bank send cosmos1akl02chz6s65r3hda56j0l6e8e68ulxhmar2u9 cosmos1feg8kqevnkz5p5qyr9f5ta2qyszmqlv48hhr4a 10stake --fees 200000stake --chain-id chain-id-0 --from cosmos1akl02chz6s65r3hda56j0l6e8e68ulxhmar2u9
-*/

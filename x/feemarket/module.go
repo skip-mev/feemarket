@@ -25,8 +25,9 @@ import (
 const ConsensusVersion = 1
 
 var (
-	_ module.HasGenesis     = AppModule{}
-	_ module.HasGRPCGateway = AppModule{}
+	_ module.HasGenesis          = AppModule{}
+	_ module.HasGRPCGateway      = AppModule{}
+	_ module.HasRegisterServices = AppModule{}
 
 	_ appmodule.AppModule             = AppModule{}
 	_ appmodule.HasBeginBlocker       = AppModule{}

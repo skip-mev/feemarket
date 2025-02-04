@@ -27,7 +27,9 @@ func (k *Keeper) InitGenesis(ctx context.Context, gs types.GenesisState) {
 	}
 
 	// always init enabled height to -1 until it is explicitly set later in the application
-	k.SetEnabledHeight(sdk.UnwrapSDKContext(ctx), -1)
+	if err := k.SetEnabledHeight(sdk.UnwrapSDKContext(ctx), -1); err != nil {
+		panic(err)
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context.

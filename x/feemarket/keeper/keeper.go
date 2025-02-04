@@ -75,14 +75,15 @@ func (k *Keeper) GetEnabledHeight(ctx sdk.Context) (int64, error) {
 }
 
 // SetEnabledHeight sets the height at which the feemarket was enabled.
-func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) {
+func (k *Keeper) SetEnabledHeight(ctx sdk.Context, height int64) error {
 	store := k.Environment.KVStoreService.OpenKVStore(ctx)
 
 	bz := []byte(strconv.FormatInt(height, 10))
 
 	if err := store.Set(types.KeyEnabledHeight, bz); err != nil {
-		panic(err) // TODO(technicallyty): fix this.
+		return err
 	}
+	return nil
 }
 
 // ResolveToDenom converts the given coin to the given denomination.

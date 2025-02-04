@@ -19,7 +19,6 @@ import (
 	"cosmossdk.io/store/metrics"
 	storetypes "cosmossdk.io/store/types"
 	"cosmossdk.io/x/accounts"
-	"cosmossdk.io/x/accounts/accountstd"
 	baseaccount "cosmossdk.io/x/accounts/defaults/base"
 	accountsv1 "cosmossdk.io/x/accounts/v1"
 	"cosmossdk.io/x/bank"
@@ -72,7 +71,7 @@ func setupDBs() (store.CommitMultiStore, *dbm.MemDB) {
 	return stateStore, db
 }
 
-func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *TestFixture {
+func NewTestFixture(t *testing.T) *TestFixture {
 	cms, db := setupDBs()
 	t.Helper()
 	keys := storetypes.NewKVStoreKeys(
@@ -94,19 +93,10 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 	)
 	cdc := encodingCfg.Codec
 
-	// router := baseapp.NewMsgServiceRouter()
 	queryRouter := baseapp.NewGRPCQueryRouter()
 
 	handler := directHandler{}
 	account := baseaccount.NewAccount("base", signing.NewHandlerMap(handler), baseaccount.WithSecp256K1PubKey())
-
-	var accs []accountstd.AccountCreatorFunc
-	for name, acc := range extraAccs {
-		f := accountstd.AddAccount(name, func(_ accountstd.Dependencies) (accountstd.Interface, error) {
-			return acc, nil
-		})
-		accs = append(accs, f)
-	}
 
 	accKey := keys[accounts.StoreKey]
 	cms.MountStoreWithDB(accKey, storetypes.StoreTypeIAVL, db)
@@ -117,7 +107,7 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		addresscodec.NewBech32Codec("cosmos"),
 		cdc.InterfaceRegistry(),
 		nil,
-		append(accs, account)...,
+		account,
 	)
 	assert.NilError(t, err)
 	accountsv1.RegisterQueryServer(queryRouter, accounts.NewQueryServer(accountsKeeper))
@@ -213,6 +203,8 @@ func NewTestFixture(t *testing.T, extraAccs map[string]accountstd.Interface) *Te
 		FeeGrantKeeper:  fgKeeper,
 	}
 }
+
+var _ signing.SignModeHandler = &directHandler{}
 
 type directHandler struct{}
 

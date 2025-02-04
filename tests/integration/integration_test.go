@@ -24,7 +24,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	s.fixture = testkeeper.NewTestFixture(s.T(), nil)
+	s.fixture = testkeeper.NewTestFixture(s.T())
 	s.ctx = s.fixture.Ctx
 }
 

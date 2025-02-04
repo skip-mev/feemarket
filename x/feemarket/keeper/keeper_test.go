@@ -49,13 +49,14 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.encCfg = MakeTestEncodingConfig()
 	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
-	fixture := testkeeper.NewTestFixture(s.T(), nil)
+	fixture := testkeeper.NewTestFixture(s.T())
 
 	s.ctx = fixture.Ctx
 	s.feeMarketKeeper = fixture.FeeMarketKeeper
 	s.msgServer = keeper.NewMsgServer(s.feeMarketKeeper)
 	s.queryServer = keeper.NewQueryServer(*s.feeMarketKeeper)
-	s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
+	err := s.feeMarketKeeper.SetEnabledHeight(s.ctx, -1)
+	s.Require().NoError(err)
 }
 
 func (s *KeeperTestSuite) TestState() {
@@ -123,7 +124,8 @@ func (s *KeeperTestSuite) TestParams() {
 
 func (s *KeeperTestSuite) TestEnabledHeight() {
 	s.Run("get and set values", func() {
-		s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
+		err := s.feeMarketKeeper.SetEnabledHeight(s.ctx, 10)
+		s.Require().NoError(err)
 
 		got, err := s.feeMarketKeeper.GetEnabledHeight(s.ctx)
 		s.Require().NoError(err)

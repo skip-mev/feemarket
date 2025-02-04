@@ -107,7 +107,7 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
 
-	fixture := testfixture.NewTestFixture(t, nil)
+	fixture := testfixture.NewTestFixture(t)
 	s.Ctx = fixture.Ctx
 	s.EncCfg = fixture.EncodingConfig
 
@@ -124,7 +124,8 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.ClientCtx = client.Context{}.WithTxConfig(s.EncCfg.TxConfig)
 	s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 
-	s.FeeMarketKeeper.SetEnabledHeight(s.Ctx, -1)
+	err := s.FeeMarketKeeper.SetEnabledHeight(s.Ctx, -1)
+	s.Require().NoError(err)
 	s.MsgServer = feemarketkeeper.NewMsgServer(s.FeeMarketKeeper)
 
 	s.SetupHandlers(mock)

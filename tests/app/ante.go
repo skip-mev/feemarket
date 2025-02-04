@@ -67,7 +67,6 @@ func NewAnteHandler(options AnteHandlerOptions) (sdk.AnteHandler, error) {
 			options.TxFeeChecker,
 		),
 	) // fees are deducted in the fee market deduct post handler
-	_ = feemarketDecorator
 	anteDecorators := []sdk.AnteDecorator{
 		ante.NewSetUpContextDecorator(options.Environment, options.ConsensusKeeper), // outermost AnteDecorator. SetUpContext must be called first
 		circuitante.NewCircuitBreakerDecorator(options.CircuitKeeper),
