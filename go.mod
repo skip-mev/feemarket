@@ -1,8 +1,6 @@
 module github.com/skip-mev/feemarket
 
-go 1.23.4
-
-toolchain go1.23.5
+go 1.23.5
 
 require (
 	cosmossdk.io/api v0.8.2
@@ -57,7 +55,6 @@ require (
 	cosmossdk.io/x/gov v0.0.0-20241218110910-47409028a73d
 	cosmossdk.io/x/group v0.2.0-rc.1
 	cosmossdk.io/x/mint v0.2.0-rc.1
-	cosmossdk.io/x/params v0.2.0-rc.1
 	cosmossdk.io/x/protocolpool v0.0.0-20241218110910-47409028a73d
 	cosmossdk.io/x/slashing v0.2.0-rc.1
 	cosmossdk.io/x/staking v0.2.0-rc.1
