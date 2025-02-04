@@ -176,9 +176,18 @@ proto-update-deps:
 ###                                Linting                                  ###
 ###############################################################################
 
+#? lint-install: Install golangci-lint
+lint-install:
+ifneq ($(golangci_installed_version),$(golangci_version))
+	@echo "--> Installing golangci-lint $(golangci_version)"
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golangci_version)
+endif
+
+#? lint: Run golangci-lint
 lint:
 	@echo "--> Running linter"
-	./scripts/lint.sh
+	$(MAKE) lint-install
+	@./scripts/lint.sh --timeout=10m
 
 lint-fix:
 	@echo "--> Running linter"
