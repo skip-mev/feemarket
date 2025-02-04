@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	corestore "cosmossdk.io/core/store"
-	lockup "cosmossdk.io/x/accounts/defaults/lockup"
+	"cosmossdk.io/x/accounts/defaults/lockup"
 	"cosmossdk.io/x/evidence"
 
 	"cosmossdk.io/x/protocolpool"
@@ -26,7 +26,7 @@ import (
 	baseaccount "cosmossdk.io/x/accounts/defaults/base"
 	txdecode "cosmossdk.io/x/tx/decode"
 
-	accounts "cosmossdk.io/x/accounts"
+	"cosmossdk.io/x/accounts"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -79,7 +79,7 @@ import (
 	"cosmossdk.io/x/circuit"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
-	consensus "cosmossdk.io/x/consensus"
+	"cosmossdk.io/x/consensus"
 	consensusparamkeeper "cosmossdk.io/x/consensus/keeper"
 	consensusparamtypes "cosmossdk.io/x/consensus/types"
 	distr "cosmossdk.io/x/distribution"

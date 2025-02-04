@@ -17,6 +17,25 @@ import (
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
+func TestFoo(t *testing.T) {
+	testCases := []struct {
+		pass bool
+	}{
+		{true},
+		{false},
+	}
+
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("case-%d", i), func(t *testing.T) {
+			if !tc.pass {
+				t.Fail()
+			} else {
+				fmt.Println("pass")
+			}
+		})
+	}
+}
+
 func TestAnteHandleMock(t *testing.T) {
 	// Same data for every test case
 	gasLimit := antesuite.NewTestGasLimit()
