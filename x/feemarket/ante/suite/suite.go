@@ -106,6 +106,7 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
 func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s := &TestSuite{}
+	s.SetT(t)
 
 	fixture := testfixture.NewTestFixture(t)
 	s.Ctx = fixture.Ctx
@@ -129,7 +130,6 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.MsgServer = feemarketkeeper.NewMsgServer(s.FeeMarketKeeper)
 
 	s.SetupHandlers(mock)
-	s.SetT(t)
 
 	s.Require().NoError(s.BankKeeper.InitGenesis(s.Ctx, &banktypes.GenesisState{}))
 
