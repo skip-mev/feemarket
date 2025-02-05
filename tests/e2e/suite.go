@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v9"
@@ -101,52 +100,7 @@ type TestSuite struct {
 	txConfig TestTxConfig
 }
 
-// Option is a function that modifies the TestSuite
-type Option func(*TestSuite)
-
-// WithDenom sets the token denom
-func WithDenom(denom string) Option {
-	return func(s *TestSuite) {
-		s.denom = denom
-	}
-}
-
-// WithGasPrices sets gas prices.
-func WithGasPrices(gasPrices string) Option {
-	return func(s *TestSuite) {
-		s.gasPrices = gasPrices
-	}
-}
-
-// WithAuthority sets the authority address
-func WithAuthority(addr sdk.AccAddress) Option {
-	return func(s *TestSuite) {
-		s.authority = addr
-	}
-}
-
-// WithBlockTime sets the block time
-func WithBlockTime(t time.Duration) Option {
-	return func(s *TestSuite) {
-		s.blockTime = t
-	}
-}
-
-// WithInterchainConstructor sets the interchain constructor
-func WithInterchainConstructor(ic InterchainConstructor) Option {
-	return func(s *TestSuite) {
-		s.icc = ic
-	}
-}
-
-// WithChainConstructor sets the chain constructor
-func WithChainConstructor(cc ChainConstructor) Option {
-	return func(s *TestSuite) {
-		s.cc = cc
-	}
-}
-
-func NewIntegrationSuite(spec *interchaintest.ChainSpec, txCfg TestTxConfig, opts ...Option) *TestSuite {
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, txCfg TestTxConfig) *TestSuite {
 	if err := txCfg.Validate(); err != nil {
 		panic(err)
 	}
@@ -161,18 +115,7 @@ func NewIntegrationSuite(spec *interchaintest.ChainSpec, txCfg TestTxConfig, opt
 		txConfig:  txCfg,
 	}
 
-	for _, opt := range opts {
-		opt(suite)
-	}
-
 	return suite
-}
-
-func (s *TestSuite) WithKeyringOptions(cdc codec.Codec, opts keyring.Option) {
-	s.broadcasterOverrides = &KeyringOverride{
-		cdc:            cdc,
-		keyringOptions: opts,
-	}
 }
 
 func (s *TestSuite) SetupSuite() {
@@ -456,7 +399,7 @@ func (s *TestSuite) TestSendTxFailures() {
 
 	s.Run("submit tx with no gas attached", func() {
 		// send one tx with no  gas or fee attached
-		_, err := s.SendCoinsMultiBroadcast(
+		resp, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -466,10 +409,11 @@ func (s *TestSuite) TestSendTxFailures() {
 			1,
 		)
 		s.Require().ErrorContains(err, "out of gas")
+		s.Require().Nil(resp)
 	})
 
 	s.Run("submit tx with no fee", func() {
-		_, err := s.SendCoinsMultiBroadcast(
+		resp, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -479,13 +423,14 @@ func (s *TestSuite) TestSendTxFailures() {
 			1,
 		)
 		s.Require().ErrorContains(err, "no fee coin provided")
+		s.Require().Nil(resp)
 	})
 
 	s.Run("fail a tx that uses full balance in fee - fail tx", func() {
 		balance := s.QueryBalance(s.user3)
 
 		// send one tx with no  gas or fee attached
-		_, err := s.SendCoinsMultiBroadcast(
+		resp, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user3,
 			s.user1,
@@ -495,6 +440,10 @@ func (s *TestSuite) TestSendTxFailures() {
 			1,
 		)
 		s.Require().NoError(err)
+		s.Require().NotNil(resp)
+		s.Require().Equal(resp.CheckTx.Code, uint32(0))
+		s.Require().Equal(resp.TxResult.Code, uint32(5))
+		s.Require().Contains(resp.TxResult.Log, "insufficient funds")
 		// ensure that balance is deducted for any tx passing checkTx
 		newBalance := s.QueryBalance(s.user3)
 		s.Require().True(newBalance.IsLT(balance), fmt.Sprintf("new balance: %d, original balance: %d",
@@ -520,9 +469,8 @@ func (s *TestSuite) TestSendTxFailures() {
 		)
 		s.Require().NoError(err)
 		s.Require().NotNil(txResp)
-		s.Require().True(txResp.CheckTx.Code == 0)
-		s.Require().True(txResp.TxResult.Code != 0)
-		s.T().Log(txResp.TxResult.Log)
+		s.Require().Equal(txResp.CheckTx.Code, uint32(0))
+		s.Require().NotEqual(txResp.TxResult.Code, uint32(0))
 		s.Require().Contains(txResp.TxResult.Log, "insufficient funds")
 
 		// ensure that balance is deducted for any tx passing checkTx
@@ -538,7 +486,7 @@ func (s *TestSuite) TestSendTxFailures() {
 
 	s.Run("submit a tx with fee greater than full balance - fail checktx", func() {
 		balance := s.QueryBalance(s.user1)
-		_, err := s.SendCoinsMultiBroadcast(
+		resp, err := s.SendCoinsMultiBroadcast(
 			context.Background(),
 			s.user1,
 			s.user3,
@@ -548,6 +496,7 @@ func (s *TestSuite) TestSendTxFailures() {
 			1,
 		)
 		s.Require().ErrorContains(err, "error escrowing funds")
+		s.Require().Nil(resp)
 
 		// ensure that no balance is deducted for a tx failing checkTx
 		newBalance := s.QueryBalance(s.user1)
