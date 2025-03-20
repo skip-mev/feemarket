@@ -122,7 +122,7 @@ func (dfd feeMarketCheckDecorator) anteHandle(ctx sdk.Context, tx sdk.Tx, simula
 		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", payCoin.GetDenom())
 	}
 
-	ctx.Logger().Info("fee deduct ante handle",
+	ctx.Logger().Debug("fee deduct ante handle",
 		"min gas prices", minGasPrice,
 		"fee", feeCoins,
 		"gas limit", gas,
