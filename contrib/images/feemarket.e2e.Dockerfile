@@ -1,4 +1,4 @@
-FROM golang:1.22-bullseye AS builder
+FROM golang:1.23-alphine AS builder
 
 WORKDIR /src/feemarket
 COPY . .
