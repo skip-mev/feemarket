@@ -117,7 +117,7 @@ TEST_E2E_TAGS = e2e
 
 test-e2e: $(TEST_E2E_DEPS)
 	@echo "Running e2e tests..."
-	@go test ./tests/e2e/e2e_test.go -timeout 30m -p 1 -race -v -tags='$(TEST_E2E_TAGS)'
+	cd tests/e2e && go test . -timeout 30m -p 1 -race -v -tags='$(TEST_E2E_TAGS)'
 
 test-unit:
 	@go test -v -race $(shell go list ./... | grep -v tests/)
