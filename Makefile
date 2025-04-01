@@ -16,13 +16,6 @@ COVER_HTML_FILE := cover.html
 ##                                Workspaces                                 ##
 ###############################################################################
 
-use-main:
-	@go work edit -use .
-	@go work edit -dropuse ./tests/e2e
-
-use-e2e:
-	@go work edit -dropuse .
-	@go work edit -use ./tests/e2e
 
 tidy:
 	@go mod tidy
@@ -107,11 +100,11 @@ build-and-start-app: build-test-app
 ##                                  Docker                                   ##
 ###############################################################################
 
-docker-build: use-main
+docker-build:
 	@echo "Building E2E Docker image..."
 	@DOCKER_BUILDKIT=1 docker build -t skip-mev/feemarket-e2e -f contrib/images/feemarket.e2e.Dockerfile .
 
-docker-build-e2e: use-main
+docker-build-e2e:
 	@echo "Building e2e-test Docker image..."
 	@DOCKER_BUILDKIT=1 docker build -t feemarket-e2e -f contrib/images/feemarket.e2e.Dockerfile .
 
@@ -119,7 +112,7 @@ docker-build-e2e: use-main
 ###                                  Tests                                  ###
 ###############################################################################
 
-TEST_E2E_DEPS = docker-build-e2e use-e2e
+TEST_E2E_DEPS = docker-build-e2e
 TEST_E2E_TAGS = e2e
 
 test-e2e: $(TEST_E2E_DEPS)
@@ -184,13 +177,13 @@ proto-update-deps:
 ###                                Linting                                  ###
 ###############################################################################
 
-lint: use-main
+lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint run
 
-lint-fix: use-main
+lint-fix:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --out-format=tab --issues-exit-code=0
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint run --fix --issues-exit-code=0
 
 lint-markdown:
 	@echo "--> Running markdown linter"
@@ -202,12 +195,12 @@ lint-markdown:
 ###                                Formatting                               ###
 ###############################################################################
 
-format: use-main
+format:
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run mvdan.cc/gofumpt -w .
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run github.com/client9/misspell/cmd/misspell -w
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/skip-mev/feemarket
 
-mocks: use-main
+mocks:
 	@echo "--> generating mocks"
 	@go install github.com/vektra/mockery/v2
 	@go generate ./...

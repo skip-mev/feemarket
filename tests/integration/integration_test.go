@@ -44,10 +44,10 @@ func (s *IntegrationTestSuite) TestState() {
 	s.Run("set and get default eip1559 state", func() {
 		state := types.DefaultState()
 
-		err := s.TestKeepers.FeeMarketKeeper.SetState(s.ctx, state)
+		err := s.FeeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
 
-		gotState, err := s.TestKeepers.FeeMarketKeeper.GetState(s.ctx)
+		gotState, err := s.FeeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().EqualValues(state, gotState)
@@ -56,10 +56,10 @@ func (s *IntegrationTestSuite) TestState() {
 	s.Run("set and get aimd eip1559 state", func() {
 		state := types.DefaultAIMDState()
 
-		err := s.TestKeepers.FeeMarketKeeper.SetState(s.ctx, state)
+		err := s.FeeMarketKeeper.SetState(s.ctx, state)
 		s.Require().NoError(err)
 
-		gotState, err := s.TestKeepers.FeeMarketKeeper.GetState(s.ctx)
+		gotState, err := s.FeeMarketKeeper.GetState(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().Equal(state, gotState)
@@ -70,10 +70,10 @@ func (s *IntegrationTestSuite) TestParams() {
 	s.Run("set and get default params", func() {
 		params := types.DefaultParams()
 
-		err := s.TestKeepers.FeeMarketKeeper.SetParams(s.ctx, params)
+		err := s.FeeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		gotParams, err := s.TestKeepers.FeeMarketKeeper.GetParams(s.ctx)
+		gotParams, err := s.FeeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().EqualValues(params, gotParams)
@@ -93,10 +93,10 @@ func (s *IntegrationTestSuite) TestParams() {
 			Enabled:             true,
 		}
 
-		err := s.TestKeepers.FeeMarketKeeper.SetParams(s.ctx, params)
+		err := s.FeeMarketKeeper.SetParams(s.ctx, params)
 		s.Require().NoError(err)
 
-		gotParams, err := s.TestKeepers.FeeMarketKeeper.GetParams(s.ctx)
+		gotParams, err := s.FeeMarketKeeper.GetParams(s.ctx)
 		s.Require().NoError(err)
 
 		s.Require().EqualValues(params, gotParams)
