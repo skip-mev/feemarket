@@ -39,21 +39,24 @@ func (app *TestApp) ExportAppStateAndValidators(forZeroHeight bool, jailAllowedA
 		AppState:        appState,
 		Validators:      validators,
 		Height:          height,
-		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
+		ConsensusParams: app.GetConsensusParams(ctx),
 	}, err
 }
 
 // prepare for fresh start at zero height
 // NOTE zero height genesis is a temporary feature which will be deprecated
 //
+<<<<<<< HEAD
 //	in favour of export at a block height
 func (app *TestApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
 	applyAllowedAddrs := false
+=======
+//	in favor of export at a block height
+func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
+	applyAllowedAddrs := len(jailAllowedAddrs) > 0
+>>>>>>> 63379b8 (chore: update to sdk v0.53.0 (#151))
 
 	// check if there is a allowed address list
-	if len(jailAllowedAddrs) > 0 {
-		applyAllowedAddrs = true
-	}
 
 	allowedAddrsMap := make(map[string]bool)
 
