@@ -63,7 +63,7 @@ func TestDeductCoins(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, tc.distributeFees)
 			if tc.distributeFees {
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName,
 					authtypes.FeeCollectorName,
@@ -101,7 +101,7 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, false)
 			s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName, authtypes.FeeCollectorName,
 				tc.coins).Return(nil).Once()
 
@@ -136,7 +136,7 @@ func TestSendTip(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, false)
 			accs := s.CreateTestAccounts(2)
 			s.MockBankKeeper.On("SendCoinsFromModuleToAccount", s.Ctx, types.FeeCollectorName, mock.Anything,
 				tc.coins).Return(nil).Once()
@@ -525,7 +525,7 @@ func TestPostHandleMock(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
@@ -983,7 +983,7 @@ func TestPostHandle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
