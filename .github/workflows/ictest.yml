@@ -25,4 +25,4 @@ jobs:
       - name: tests
         if: env.GIT_DIFF
         run: |
-          go work init && make test-e2e
+          make test-e2e

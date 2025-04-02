@@ -1,59 +1,56 @@
+version: "2"
 run:
-  tests: true
-  timeout: 10m
-  sort-results: true
-  allow-parallel-runners: true
   concurrency: 4
-
+  tests: true
+  allow-parallel-runners: true
 linters:
-  disable-all: true
+  default: none
   enable:
-    - dogsled
     - copyloopvar
+    - dogsled
     - goconst
     - gocritic
-    - gofumpt
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - nakedret
     - nolintlint
-    - staticcheck
     - revive
-    - stylecheck
-    - typecheck
+    - staticcheck
     - unconvert
     - unused
-    # - errcheck
-
+  settings:
+    dogsled:
+      max-blank-identifiers: 3
+    nolintlint:
+      require-explanation: false
+      require-specific: false
+      allow-unused: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gosec
+        text: Use of weak random number generator
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-rules:
-    - text: "Use of weak random number generator"
-      linters:
-        - gosec
-    # - text: "ST1003:"
-    #   linters:
-    #     - stylecheck
-    # - text: "ST1016:"
-    #   linters:
-    #     - stylecheck
-    # - text: "leading space"
-    #   linters:
-    #     - nolintlint
-
   max-issues-per-linter: 10000
   max-same-issues: 10000
-
-linters-settings:
-  dogsled:
-    max-blank-identifiers: 3
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
-  nolintlint:
-    allow-unused: false
-    allow-leading-space: true
-    require-explanation: false
-    require-specific: false
+formatters:
+  enable:
+    - gofumpt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
