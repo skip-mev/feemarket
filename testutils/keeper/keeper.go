@@ -36,7 +36,7 @@ var additionalMaccPerms = map[string][]string{
 }
 
 // NewTestSetup returns initialized instances of all the keepers and message servers of the modules
-func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
+func NewTestSetup(t testing.TB, distributeFees bool, options ...testkeeper.SetupOption) (sdk.Context, TestKeepers, TestMsgServers) {
 	options = append(options, testkeeper.WithAdditionalModuleAccounts(additionalMaccPerms))
 
 	_, tk, tms := testkeeper.NewTestSetup(t, options...)
@@ -55,7 +55,9 @@ func NewTestSetup(t testing.TB, options ...testkeeper.SetupOption) (sdk.Context,
 
 	err := feeMarketKeeper.SetState(ctx, feemarkettypes.DefaultState())
 	require.NoError(t, err)
-	err = feeMarketKeeper.SetParams(ctx, feemarkettypes.DefaultParams())
+	params := feemarkettypes.DefaultParams()
+	params.DistributeFees = distributeFees
+	err = feeMarketKeeper.SetParams(ctx, params)
 	require.NoError(t, err)
 
 	testKeepers := TestKeepers{
