@@ -344,5 +344,5 @@ replace (
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2
 )
 
-// simulation and fee UX
-retract [v1.0.0, v1.0.2]
+// simulation and fee UX, blackberry fix
+retract [v1.0.0, v1.0.4]
