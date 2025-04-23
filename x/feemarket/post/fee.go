@@ -109,7 +109,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		return ctx, errorsmod.Wrapf(err, "unable to get min gas price for denom %s", payCoin.GetDenom())
 	}
 
-	ctx.Logger().Info("fee deduct post handle",
+	ctx.Logger().Debug("fee deduct post handle",
 		"min gas prices", minGasPrice,
 		"gas consumed", gas,
 	)
@@ -121,7 +121,7 @@ func (dfd FeeMarketDeductDecorator) PostHandle(ctx sdk.Context, tx sdk.Tx, simul
 		}
 	}
 
-	ctx.Logger().Info("fee deduct post handle",
+	ctx.Logger().Debug("fee deduct post handle",
 		"fee", payCoin,
 		"tip", tip,
 	)
