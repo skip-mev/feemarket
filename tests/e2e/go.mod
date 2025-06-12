@@ -17,8 +17,8 @@ replace (
 
 require (
 	cosmossdk.io/math v1.5.2
-	github.com/cometbft/cometbft v0.38.17
-	github.com/cosmos/cosmos-sdk v0.53.0-rc.2
+
+	github.com/cosmos/cosmos-sdk v0.54.0-alpha.0.0.20250610194259-ef7b561f7019
 	github.com/pelletier/go-toml/v2 v2.2.3
 	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
 	github.com/skip-mev/feemarket v1.0.1
@@ -26,7 +26,7 @@ require (
 	github.com/strangelove-ventures/interchaintest/v8 v8.4.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.71.1
+	google.golang.org/grpc v1.73.0
 )
 
 require (
@@ -285,4 +285,5 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 	pgregory.net/rapid v1.2.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
+	github.com/cometbft/cometbft/v2 v2.0.0-20250611063609-4e308d824f1f
 )
