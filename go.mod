@@ -23,7 +23,7 @@ require (
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/skip-mev/chaintestutil v0.0.0-20240514161515-056d7ba45610
+	github.com/skip-mev/chaintestutil v0.0.0-20250612160920-d055afe95d25
 	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
