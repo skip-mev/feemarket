@@ -45,8 +45,6 @@ require (
 	cloud.google.com/go/storage v1.49.0 // indirect
 	cosmossdk.io/collections v1.2.1 // indirect
 	cosmossdk.io/schema v1.1.0 // indirect
-	cosmossdk.io/x/feegrant v0.1.1 // indirect
-	cosmossdk.io/x/upgrade v0.1.2 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
@@ -74,7 +72,6 @@ require (
 	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
-	github.com/cometbft/cometbft v0.38.17 // indirect
 	github.com/cometbft/cometbft-db v1.0.4 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
