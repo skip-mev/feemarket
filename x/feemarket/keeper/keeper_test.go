@@ -48,7 +48,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.encCfg = MakeTestEncodingConfig()
 	s.authorityAccount = authtypes.NewModuleAddress(govtypes.ModuleName)
 	s.accountKeeper = mocks.NewAccountKeeper(s.T())
-	ctx, tk, tm := testkeeper.NewTestSetup(s.T())
+	ctx, tk, tm := testkeeper.NewTestSetup(s.T(), false)
 
 	s.ctx = ctx
 	s.feeMarketKeeper = tk.FeeMarketKeeper
