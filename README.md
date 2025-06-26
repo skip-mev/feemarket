@@ -1,3 +1,9 @@
+# ⚠️ x/feemarket - No Longer Maintained ⚠️
+
+🚨 **This project is no longer being maintained and will not be supported by current integrators.** If you wish to use this project, we strongly recommend forking and maintaining the code for any dependency or feature improvements you require. 🚨
+
+---
+
 # `x/feemarket` Module
 
 ## Abstract
