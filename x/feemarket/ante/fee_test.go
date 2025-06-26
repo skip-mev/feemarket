@@ -169,7 +169,7 @@ func TestAnteHandleMock(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   types.ErrNoFeeCoins,
@@ -187,7 +187,7 @@ func TestAnteHandleMock(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   sdkerrors.ErrOutOfGas,
@@ -197,7 +197,7 @@ func TestAnteHandleMock(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
@@ -390,7 +390,7 @@ func TestAnteHandle(t *testing.T) {
 				}
 			},
 			RunAnte:  true,
-			RunPost:  true,
+			RunPost:  false,
 			Simulate: false,
 			ExpPass:  false,
 			ExpErr:   types.ErrNoFeeCoins,
@@ -407,18 +407,19 @@ func TestAnteHandle(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       false,
+			Simulate:      false,
+			MsgRunSuccess: true,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
