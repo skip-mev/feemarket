@@ -534,6 +534,7 @@ func NewSimApp(
 		AccountKeeper:   app.AccountKeeper,
 		BankKeeper:      app.BankKeeper,
 		FeeMarketKeeper: app.FeeMarketKeeper,
+		StakingKeeper:   app.StakingKeeper,
 	}
 	postHandler, err := NewPostHandler(postHandlerOptions)
 	if err != nil {
