@@ -36,6 +36,7 @@ func NewFeeMarketDeductDecorator(ak AccountKeeper, bk BankKeeper, fmk FeeMarketK
 		accountKeeper:   ak,
 		bankKeeper:      bk,
 		feemarketKeeper: fmk,
+		stakingKeeper:   sk,
 	}
 }
 
