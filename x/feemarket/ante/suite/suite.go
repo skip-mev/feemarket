@@ -24,6 +24,7 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -50,6 +51,7 @@ type TestSuite struct {
 	FeeMarketKeeper *feemarketkeeper.Keeper
 	BankKeeper      bankkeeper.Keeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
+	StakingKeeper   stakingkeeper.Keeper
 
 	MockBankKeeper     *mocks.BankKeeper
 	MockFeeGrantKeeper *mocks.FeeGrantKeeper
@@ -117,6 +119,7 @@ func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
 	s.FeeMarketKeeper = testKeepers.FeeMarketKeeper
 	s.BankKeeper = testKeepers.BankKeeper
 	s.FeeGrantKeeper = testKeepers.FeeGrantKeeper
+	s.StakingKeeper = *testKeepers.StakingKeeper
 
 	s.MockBankKeeper = mocks.NewBankKeeper(t)
 	s.MockFeeGrantKeeper = mocks.NewFeeGrantKeeper(t)
@@ -170,6 +173,7 @@ func (s *TestSuite) SetupHandlers(mock bool) {
 			s.AccountKeeper,
 			bankKeeper,
 			s.FeeMarketKeeper,
+			s.StakingKeeper,
 		),
 	}
 
