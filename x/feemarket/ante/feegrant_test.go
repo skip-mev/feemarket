@@ -126,7 +126,7 @@ func TestEscrowFunds(t *testing.T) {
 	for name, stc := range cases {
 		tc := stc // to make scopelint happy
 		t.Run(name, func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, false)
 			protoTxCfg := tx.NewTxConfig(codec.NewProtoCodec(s.EncCfg.InterfaceRegistry), tx.DefaultSignModes)
 			// this just tests our handler
 			dfd := feemarketante.NewFeeMarketCheckDecorator(s.AccountKeeper, s.MockBankKeeper, s.MockFeeGrantKeeper,

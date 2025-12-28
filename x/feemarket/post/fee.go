@@ -159,18 +159,8 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 	var events sdk.Events
 
 	// deduct the fees and tip
-	if !fee.IsNil() {
-		err := DeductCoins(dfd.bankKeeper, ctx, sdk.NewCoins(fee), params.DistributeFees)
-		if err != nil {
-			return err
-		}
-
-		events = append(events, sdk.NewEvent(
-			feemarkettypes.EventTypeFeePay,
-			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
-		))
-	}
-
+	// fees from previous transactions may be stuck in escrow if transaction is out of gas
+	// distribute the stuck escrow fees based on the distribute fees parameter
 	proposer := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
 	if !tip.IsNil() {
 		err := SendTip(dfd.bankKeeper, ctx, proposer, sdk.NewCoins(tip))
@@ -182,6 +172,30 @@ func (dfd FeeMarketDeductDecorator) PayOutFeeAndTip(ctx sdk.Context, fee, tip sd
 			feemarkettypes.EventTypeTipPay,
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTip, tip.String()),
 			sdk.NewAttribute(feemarkettypes.AttributeKeyTipPayee, proposer.String()),
+		))
+	}
+
+	if params.DistributeFees {
+		feemarketCollector := dfd.accountKeeper.GetModuleAccount(ctx, feemarkettypes.FeeCollectorName)
+		feesToDistribute := dfd.bankKeeper.GetAllBalances(ctx, feemarketCollector.GetAddress())
+		if !feesToDistribute.IsZero() {
+			err := DeductCoins(dfd.bankKeeper, ctx, feesToDistribute, params.DistributeFees)
+			if err != nil {
+				return err
+			}
+			if feesToDistribute.AmountOf(fee.Denom).GT(fee.Amount) {
+				events = append(events, sdk.NewEvent(
+					feemarkettypes.EventTypeDistributeStuckEscrowFees,
+					sdk.NewAttribute(sdk.AttributeKeyFee, feesToDistribute.Sub(fee).String()),
+				))
+			}
+		}
+	}
+
+	if !fee.IsNil() {
+		events = append(events, sdk.NewEvent(
+			feemarkettypes.EventTypeFeePay,
+			sdk.NewAttribute(sdk.AttributeKeyFee, fee.String()),
 		))
 	}
 
