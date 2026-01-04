@@ -1,8 +1,10 @@
 package suite
 
 import (
+	"fmt"
 	"testing"
 
+	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -106,11 +108,11 @@ func (s *TestSuite) SetAccountBalances(accounts []TestAccountBalance) {
 }
 
 // SetupTestSuite setups a new test, with new app, context, and anteHandler.
-func SetupTestSuite(t *testing.T, mock bool) *TestSuite {
+func SetupTestSuite(t *testing.T, mock, distributeFees bool) *TestSuite {
 	s := &TestSuite{}
 
 	s.EncCfg = MakeTestEncodingConfig()
-	ctx, testKeepers, _ := testkeeper.NewTestSetup(t)
+	ctx, testKeepers, _ := testkeeper.NewTestSetup(t, distributeFees)
 	s.Ctx = ctx
 
 	s.AccountKeeper = testKeepers.AccountKeeper
@@ -183,11 +185,13 @@ type TestCase struct {
 	StateUpdate       func(*TestSuite)
 	RunAnte           bool
 	RunPost           bool
+	MsgRunSuccess     bool
 	Simulate          bool
 	ExpPass           bool
 	ExpErr            error
 	ExpectConsumedGas uint64
 	Mock              bool
+	DistributeFees    bool
 }
 
 type TestCaseArgs struct {
@@ -207,8 +211,8 @@ func (s *TestSuite) DeliverMsgs(t *testing.T, privs []cryptotypes.PrivKey, msgs 
 	s.TxBuilder.SetFeeAmount(feeAmount)
 	s.TxBuilder.SetGasLimit(gasLimit)
 
-	tx, txErr := s.CreateTestTx(privs, accNums, accSeqs, chainID)
-	require.NoError(t, txErr)
+	tx, txCreationErr := s.CreateTestTx(privs, accNums, accSeqs, chainID)
+	require.NoError(t, txCreationErr)
 	return s.AnteHandler(s.Ctx, tx, simulate)
 }
 
@@ -220,7 +224,7 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	// Theoretically speaking, ante handler unit tests should only test
 	// ante handlers, but here we sometimes also test the tx creation
 	// process.
-	tx, txErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
+	tx, txCreationErr := s.CreateTestTx(args.Privs, args.AccNums, args.AccSeqs, args.ChainID)
 
 	var (
 		newCtx  sdk.Context
@@ -241,11 +245,16 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 	}
 
 	if tc.RunPost && anteErr == nil {
-		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, true)
+		newCtx, postErr = s.PostHandler(s.Ctx, tx, tc.Simulate, tc.MsgRunSuccess)
+	}
+
+	if tc.DistributeFees && !tc.Simulate && args.FeeAmount != nil {
+		postFeeBalance := s.BankKeeper.GetBalance(s.Ctx, s.AccountKeeper.GetModuleAddress(feemarkettypes.FeeCollectorName), args.FeeAmount.GetDenomByIndex(0))
+		require.True(t, postFeeBalance.Amount.Equal(math.ZeroInt()), fmt.Errorf("amounts not equal: %s, %s", postFeeBalance.Amount.String(), math.ZeroInt().String()))
 	}
 
 	if tc.ExpPass {
-		require.NoError(t, txErr)
+		require.NoError(t, txCreationErr)
 		require.NoError(t, anteErr)
 		require.NoError(t, postErr)
 		require.NotNil(t, newCtx)
@@ -258,9 +267,9 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 
 	} else {
 		switch {
-		case txErr != nil:
-			require.Error(t, txErr)
-			require.ErrorIs(t, txErr, tc.ExpErr)
+		case txCreationErr != nil:
+			require.Error(t, txCreationErr)
+			require.ErrorIs(t, txCreationErr, tc.ExpErr)
 
 		case anteErr != nil:
 			require.Error(t, anteErr)
@@ -271,6 +280,11 @@ func (s *TestSuite) RunTestCase(t *testing.T, tc TestCase, args TestCaseArgs) {
 			require.NoError(t, anteErr)
 			require.Error(t, postErr)
 			require.ErrorIs(t, postErr, tc.ExpErr)
+
+		case !tc.MsgRunSuccess:
+			// message failed to run but ante and post should succeed
+			require.NoError(t, anteErr)
+			require.NoError(t, postErr)
 
 		default:
 			t.Fatal("expected one of txErr, handleErr to be an error")

@@ -63,7 +63,7 @@ func TestDeductCoins(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, tc.distributeFees)
 			if tc.distributeFees {
 				s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName,
 					authtypes.FeeCollectorName,
@@ -101,7 +101,7 @@ func TestDeductCoinsAndDistribute(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, false)
 			s.MockBankKeeper.On("SendCoinsFromModuleToModule", s.Ctx, types.FeeCollectorName, authtypes.FeeCollectorName,
 				tc.coins).Return(nil).Once()
 
@@ -136,7 +136,7 @@ func TestSendTip(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Case %s", tc.name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, true)
+			s := antesuite.SetupTestSuite(t, true, false)
 			accs := s.CreateTestAccounts(2)
 			s.MockBankKeeper.On("SendCoinsFromModuleToAccount", s.Ctx, types.FeeCollectorName, mock.Anything,
 				tc.coins).Return(nil).Once()
@@ -153,7 +153,7 @@ func TestPostHandleMock(t *testing.T) {
 	const (
 		baseDenom              = "stake"
 		resolvableDenom        = "atom"
-		expectedConsumedGas    = 10631
+		expectedConsumedGas    = 10601
 		expectedConsumedSimGas = expectedConsumedGas + post.BankSendGasConsumption
 		gasLimit               = expectedConsumedSimGas
 	)
@@ -179,12 +179,13 @@ func TestPostHandleMock(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInsufficientFunds,
-			Mock:     true,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrInsufficientFunds,
+			Mock:          true,
 		},
 		{
 			Name: "signer has no funds - simulate",
@@ -217,12 +218,13 @@ func TestPostHandleMock(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     true,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          true,
 		},
 		{
 			Name: "0 gas given should pass - simulate",
@@ -240,6 +242,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -262,6 +265,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -284,6 +288,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -306,6 +311,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -350,6 +356,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -373,6 +380,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -395,6 +403,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -417,6 +426,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -439,6 +449,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -459,6 +470,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           false,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -479,6 +491,7 @@ func TestPostHandleMock(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           false,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -496,12 +509,13 @@ func TestPostHandleMock(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   types.ErrNoFeeCoins,
-			Mock:     true,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        types.ErrNoFeeCoins,
+			Mock:          true,
 		},
 		{
 			Name: "no gas limit - fail",
@@ -514,18 +528,19 @@ func TestPostHandleMock(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     true,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
@@ -539,9 +554,9 @@ func TestPostHandle(t *testing.T) {
 	const (
 		baseDenom           = "stake"
 		resolvableDenom     = "atom"
-		expectedConsumedGas = 36650
+		expectedConsumedGas = 36620
 
-		expectedConsumedGasResolve = 36524 // slight difference due to denom resolver
+		expectedConsumedGasResolve = 36494 // slight difference due to denom resolver
 
 		gasLimit = 100000
 	)
@@ -565,12 +580,13 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInsufficientFunds,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrInsufficientFunds,
+			Mock:          false,
 		},
 		{
 			Name: "signer has no funds - simulate - pass",
@@ -585,6 +601,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -602,12 +619,13 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validFee,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          false,
 		},
 		{
 			Name: "0 gas given should pass - simulate",
@@ -622,6 +640,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -647,10 +666,11 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -696,10 +716,11 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
-			ExpectConsumedGas: 36650,
+			ExpectConsumedGas: expectedConsumedGas,
 			Mock:              false,
 		},
 		{
@@ -715,6 +736,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -762,6 +784,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -787,6 +810,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -812,6 +836,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -832,6 +857,7 @@ func TestPostHandle(t *testing.T) {
 			RunAnte:           true,
 			RunPost:           true,
 			Simulate:          true,
+			MsgRunSuccess:     true,
 			ExpPass:           true,
 			ExpErr:            nil,
 			ExpectConsumedGas: expectedConsumedGas,
@@ -854,12 +880,13 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: validResolvableFeeWithTip,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrInsufficientFunds,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrInsufficientFunds,
+			Mock:          false,
 		},
 		{
 			Name: "signer has enough funds, should pass with tip - resolvable denom",
@@ -880,6 +907,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          false,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -899,6 +927,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           true,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -918,6 +947,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           false,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -937,6 +967,7 @@ func TestPostHandle(t *testing.T) {
 			},
 			RunAnte:           true,
 			RunPost:           false,
+			MsgRunSuccess:     true,
 			Simulate:          true,
 			ExpPass:           true,
 			ExpErr:            nil,
@@ -954,12 +985,13 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   types.ErrNoFeeCoins,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        types.ErrNoFeeCoins,
+			Mock:          false,
 		},
 		{
 			Name: "no gas limit - fail",
@@ -972,18 +1004,19 @@ func TestPostHandle(t *testing.T) {
 					FeeAmount: nil,
 				}
 			},
-			RunAnte:  true,
-			RunPost:  true,
-			Simulate: false,
-			ExpPass:  false,
-			ExpErr:   sdkerrors.ErrOutOfGas,
-			Mock:     false,
+			RunAnte:       true,
+			RunPost:       true,
+			MsgRunSuccess: true,
+			Simulate:      false,
+			ExpPass:       false,
+			ExpErr:        sdkerrors.ErrOutOfGas,
+			Mock:          false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Case %s", tc.Name), func(t *testing.T) {
-			s := antesuite.SetupTestSuite(t, tc.Mock)
+			s := antesuite.SetupTestSuite(t, tc.Mock, false)
 			s.TxBuilder = s.ClientCtx.TxConfig.NewTxBuilder()
 			args := tc.Malleate(s)
 
