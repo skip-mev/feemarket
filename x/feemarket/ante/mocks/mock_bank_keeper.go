@@ -121,6 +121,114 @@ func (_m *BankKeeper) BurnCoins(ctx context.Context, moduleName string, amt cosm
 	return r0
 }
 
+// CreditVirtualAccounts provides a mock function with given fields: ctx
+func (_m *BankKeeper) CreditVirtualAccounts(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreditVirtualAccounts")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UncheckedSetBalance provides a mock function with given fields: ctx, addr, balance
+func (_m *BankKeeper) UncheckedSetBalance(ctx context.Context, addr cosmos_sdktypes.AccAddress, balance cosmos_sdktypes.Coin) error {
+	ret := _m.Called(ctx, addr, balance)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UncheckedSetBalance")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, cosmos_sdktypes.AccAddress, cosmos_sdktypes.Coin) error); ok {
+		r0 = rf(ctx, addr, balance)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendCoinsFromAccountToModuleVirtual provides a mock function with given fields: ctx, senderAddr, recipientModule, amt
+func (_m *BankKeeper) SendCoinsFromAccountToModuleVirtual(ctx context.Context, senderAddr cosmos_sdktypes.AccAddress, recipientModule string, amt cosmos_sdktypes.Coins) error {
+	ret := _m.Called(ctx, senderAddr, recipientModule, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsFromAccountToModuleVirtual")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, cosmos_sdktypes.AccAddress, string, cosmos_sdktypes.Coins) error); ok {
+		r0 = rf(ctx, senderAddr, recipientModule, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendCoinsFromModuleToAccountVirtual provides a mock function with given fields: ctx, senderModule, recipientAddr, amt
+func (_m *BankKeeper) SendCoinsFromModuleToAccountVirtual(ctx context.Context, senderModule string, recipientAddr cosmos_sdktypes.AccAddress, amt cosmos_sdktypes.Coins) error {
+	ret := _m.Called(ctx, senderModule, recipientAddr, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsFromModuleToAccountVirtual")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, cosmos_sdktypes.AccAddress, cosmos_sdktypes.Coins) error); ok {
+		r0 = rf(ctx, senderModule, recipientAddr, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendCoinsFromVirtual provides a mock function with given fields: ctx, fromAddr, toAddr, amt
+func (_m *BankKeeper) SendCoinsFromVirtual(ctx context.Context, fromAddr cosmos_sdktypes.AccAddress, toAddr cosmos_sdktypes.AccAddress, amt cosmos_sdktypes.Coins) error {
+	ret := _m.Called(ctx, fromAddr, toAddr, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsFromVirtual")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, cosmos_sdktypes.AccAddress, cosmos_sdktypes.AccAddress, cosmos_sdktypes.Coins) error); ok {
+		r0 = rf(ctx, fromAddr, toAddr, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendCoinsToVirtual provides a mock function with given fields: ctx, fromAddr, toAddr, amt
+func (_m *BankKeeper) SendCoinsToVirtual(ctx context.Context, fromAddr cosmos_sdktypes.AccAddress, toAddr cosmos_sdktypes.AccAddress, amt cosmos_sdktypes.Coins) error {
+	ret := _m.Called(ctx, fromAddr, toAddr, amt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendCoinsToVirtual")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, cosmos_sdktypes.AccAddress, cosmos_sdktypes.AccAddress, cosmos_sdktypes.Coins) error); ok {
+		r0 = rf(ctx, fromAddr, toAddr, amt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ClearSendRestriction provides a mock function with given fields:
 func (_m *BankKeeper) ClearSendRestriction() {
 	_m.Called()

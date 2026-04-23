@@ -3,11 +3,12 @@
 package mocks
 
 import (
+	"context"
+	"time"
+
 	address "cosmossdk.io/core/address"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -140,6 +141,60 @@ func (_m *AccountKeeper) NewAccountWithAddress(ctx context.Context, addr types.A
 // SetAccount provides a mock function with given fields: ctx, acc
 func (_m *AccountKeeper) SetAccount(ctx context.Context, acc types.AccountI) {
 	_m.Called(ctx, acc)
+}
+
+// UnorderedTransactionsEnabled provides a mock function with given fields:
+func (_m *AccountKeeper) UnorderedTransactionsEnabled() bool {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnorderedTransactionsEnabled")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func() bool); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// RemoveExpiredUnorderedNonces provides a mock function with given fields: ctx
+func (_m *AccountKeeper) RemoveExpiredUnorderedNonces(ctx types.Context) error {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RemoveExpiredUnorderedNonces")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(types.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// TryAddUnorderedNonce provides a mock function with given fields: ctx, sender, timestamp
+func (_m *AccountKeeper) TryAddUnorderedNonce(ctx types.Context, sender []byte, timestamp time.Time) error {
+	ret := _m.Called(ctx, sender, timestamp)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TryAddUnorderedNonce")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(types.Context, []byte, time.Time) error); ok {
+		r0 = rf(ctx, sender, timestamp)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewAccountKeeper creates a new instance of AccountKeeper. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

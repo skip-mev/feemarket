@@ -2,11 +2,12 @@ package ante
 
 import (
 	"context"
+	"time"
 
 	"cosmossdk.io/core/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
@@ -23,6 +24,9 @@ type AccountKeeper interface {
 	GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI
 	NewAccountWithAddress(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 	AddressCodec() address.Codec
+	UnorderedTransactionsEnabled() bool
+	RemoveExpiredUnorderedNonces(ctx sdk.Context) error
+	TryAddUnorderedNonce(ctx sdk.Context, sender []byte, timestamp time.Time) error
 }
 
 // FeeGrantKeeper defines the expected feegrant keeper.
@@ -36,7 +40,11 @@ type FeeGrantKeeper interface {
 //
 //go:generate mockery --name BankKeeper --filename mock_bank_keeper.go
 type BankKeeper interface {
-	bankkeeper.Keeper
+	authtypes.BankKeeper
+	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
+	ExportGenesis(ctx context.Context) *banktypes.GenesisState
+	InitGenesis(ctx context.Context, state *banktypes.GenesisState)
 }
 
 // FeeMarketKeeper defines the expected feemarket keeper.

@@ -144,9 +144,9 @@ test-all: test-unit test-integration test-e2e test-fuzz
 ###                                Protobuf                                 ###
 ###############################################################################
 
-protoVer=0.14.0
+protoVer=0.18.1
 protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
-protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+protoImage=$(DOCKER) run --rm -e GOTOOLCHAIN=auto -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
 
 proto-all: proto-format proto-lint proto-gen
 
@@ -169,7 +169,7 @@ proto-check-breaking:
 
 proto-update-deps:
 	@echo "Updating Protobuf dependencies"
-	$(DOCKER) run --rm -v $(CURDIR)/proto:/workspace --workdir /workspace $(protoImageName) buf mod update
+	$(DOCKER) run --rm -e GOTOOLCHAIN=auto -v $(CURDIR)/proto:/workspace --workdir /workspace $(protoImageName) buf mod update
 
 .PHONY: proto-all proto-gen proto-format proto-lint proto-check-breaking proto-update-deps
 
@@ -177,13 +177,15 @@ proto-update-deps:
 ###                                Linting                                  ###
 ###############################################################################
 
+GOLANGCI_LINT_VERSION ?= v2.6.1
+
 lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint run
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run
 
 lint-fix:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint run --fix --issues-exit-code=0
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run --fix --issues-exit-code=0
 
 lint-markdown:
 	@echo "--> Running markdown linter"

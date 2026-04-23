@@ -27,23 +27,24 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/skip-mev/chaintestutil/sample"
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+	interchaintest "github.com/cosmos/interchaintest/v11"
+	"github.com/cosmos/interchaintest/v11/chain/cosmos"
+	"github.com/cosmos/interchaintest/v11/ibc"
+	"github.com/cosmos/interchaintest/v11/testutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
-const (
-	oracleConfigPath = "oracle.json"
-	appConfigPath    = "config/app.toml"
-)
+func randomAlphaLower(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyz"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[r.Intn(len(letters))]
+	}
+	return string(b)
+}
 
 type KeyringOverride struct {
 	keyringOptions keyring.Option
@@ -313,7 +314,7 @@ func (s *TestSuite) setupBroadcaster() {
 	s.bc = bc
 }
 
-// sniped from here: https://github.com/strangelove-ventures/interchaintest ref: 9341b001214d26be420f1ca1ab0f15bad17faee6
+// Adapted from interchaintest keyring extraction patterns (see github.com/cosmos/interchaintest).
 func (s *TestSuite) keyringDirFromNode() string {
 	node := s.chain.Nodes()[0]
 
@@ -419,7 +420,7 @@ func (s *TestSuite) GetAndFundTestUserWithMnemonic(
 	chain ibc.Chain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
-	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, sample.AlphaString(r, 3))
+	keyName := fmt.Sprintf("%s-%s-%s", keyNamePrefix, chainCfg.ChainID, randomAlphaLower(3))
 	user, err := chain.BuildWallet(ctx, keyName, mnemonic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source user wallet: %w", err)
@@ -520,120 +521,4 @@ func (s *TestSuite) CreateTx(chain *cosmos.CosmosChain, user cosmos.User, fee st
 	bz, err := cc.TxConfig.TxEncoder()(txBuilder.GetTx())
 	s.Require().NoError(err)
 	return bz
-}
-
-// SetOracleConfigsOnApp writes the oracle configuration to the given node's application config.
-func SetOracleConfigsOnApp(node *cosmos.ChainNode) {
-	oracle := GetOracleSideCar(node)
-
-	// read the app config from the node
-	bz, err := node.ReadFile(context.Background(), appConfigPath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Unmarshall the app config to update the oracle and metrics file paths.
-	var appConfig map[string]interface{}
-	err = toml.Unmarshal(bz, &appConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	oracleAppConfig, ok := appConfig["oracle"].(map[string]interface{})
-	if !ok {
-		panic("oracle config not found")
-	}
-
-	// Update the file paths to the oracle and metrics configs.
-	oracleAppConfig["enabled"] = true
-	oracleAppConfig["oracle_address"] = fmt.Sprintf("%s:%s", oracle.HostName(), "8080")
-	oracleAppConfig["client_timeout"] = "1s"
-	oracleAppConfig["metrics_enabled"] = true
-	oracleAppConfig["prometheus_server_address"] = fmt.Sprintf("localhost:%s", "8081")
-
-	appConfig["oracle"] = oracleAppConfig
-	bz, err = toml.Marshal(appConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	// Write back the app config.
-	err = node.WriteFile(context.Background(), bz, appConfigPath)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// AddSidecarToNode adds the sidecar configured by the given config to the given node. These are configured
-// so that the sidecar is started before the node is started.
-func AddSidecarToNode(node *cosmos.ChainNode, conf ibc.SidecarConfig) {
-	// create the sidecar process
-	node.NewSidecarProcess(
-		context.Background(),
-		true,
-		conf.ProcessName,
-		node.DockerClient,
-		node.NetworkID,
-		conf.Image,
-		conf.HomeDir,
-		conf.Ports,
-		conf.StartCmd,
-		conf.Env,
-	)
-}
-
-// SetOracleConfigsOnOracle writes the oracle and metrics configs to the given node's
-// oracle sidecar.
-func SetOracleConfigsOnOracle(
-	oracle *cosmos.SidecarProcess,
-	oracleCfg oracleconfig.OracleConfig,
-) {
-	// marshal the oracle config
-	bz, err := json.Marshal(oracleCfg)
-	if err != nil {
-		panic(err)
-	}
-
-	// write the oracle config to the node
-	err = oracle.WriteFile(context.Background(), bz, oracleConfigPath)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// RestartOracle restarts the oracle sidecar for a given node
-func RestartOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	if err := oracle.StopContainer(context.Background()); err != nil {
-		return err
-	}
-
-	return oracle.StartContainer(context.Background())
-}
-
-// StopOracle stops the oracle sidecar for a given node
-func StopOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	return oracle.StopContainer(context.Background())
-}
-
-// StartOracle starts the oracle sidecar for a given node
-func StartOracle(node *cosmos.ChainNode) error {
-	if len(node.Sidecars) != 1 {
-		panic("expected node to have oracle sidecar")
-	}
-
-	oracle := node.Sidecars[0]
-
-	return oracle.StartContainer(context.Background())
 }
