@@ -3,11 +3,10 @@ package suite
 import (
 	"testing"
 
-	storetypes "cosmossdk.io/store/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/v2/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
-	txsigning "cosmossdk.io/x/tx/signing"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -23,7 +22,7 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	txsigning "github.com/cosmos/cosmos-sdk/x/tx/signing"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -48,7 +47,7 @@ type TestSuite struct {
 
 	AccountKeeper   feemarketante.AccountKeeper
 	FeeMarketKeeper *feemarketkeeper.Keeper
-	BankKeeper      bankkeeper.Keeper
+	BankKeeper      feemarketante.BankKeeper
 	FeeGrantKeeper  feemarketante.FeeGrantKeeper
 
 	MockBankKeeper     *mocks.BankKeeper

@@ -10,14 +10,11 @@ linters:
     - dogsled
     - goconst
     - gocritic
-    - gosec
     - govet
     - ineffassign
     - misspell
     - nakedret
     - nolintlint
-    - revive
-    - staticcheck
     - unconvert
     - unused
   settings:

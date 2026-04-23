@@ -16,12 +16,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/apis/marketmap"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	interchaintest "github.com/cosmos/interchaintest/v11"
+	"github.com/cosmos/interchaintest/v11/chain/cosmos"
+	"github.com/cosmos/interchaintest/v11/ibc"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -38,58 +35,6 @@ var r *rand.Rand
 func init() {
 	s := rand.NewSource(1)
 	r = rand.New(s)
-}
-
-func DefaultOracleSidecar(image ibc.DockerImage) ibc.SidecarConfig {
-	return ibc.SidecarConfig{
-		ProcessName: "oracle",
-		Image:       image,
-		HomeDir:     "/oracle",
-		Ports:       []string{"8080", "8081"},
-		StartCmd: []string{
-			"slinky",
-			"--oracle-config", "/oracle/oracle.json",
-		},
-		ValidatorProcess: true,
-		PreStart:         true,
-	}
-}
-
-func DefaultOracleConfig(url string) oracleconfig.OracleConfig {
-	cfg := marketmap.DefaultAPIConfig
-	cfg.Endpoints = []oracleconfig.Endpoint{
-		{
-			URL: url,
-		},
-	}
-
-	// Create the oracle config
-	oracleConfig := oracleconfig.OracleConfig{
-		UpdateInterval: 500 * time.Millisecond,
-		MaxPriceAge:    1 * time.Minute,
-		Host:           "0.0.0.0",
-		Port:           "8080",
-		Providers: map[string]oracleconfig.ProviderConfig{
-			marketmap.Name: {
-				Name: marketmap.Name,
-				API:  cfg,
-				Type: "market_map_provider",
-			},
-		},
-	}
-
-	return oracleConfig
-}
-
-func DefaultMarketMap() mmtypes.MarketMap {
-	return mmtypes.MarketMap{}
-}
-
-func GetOracleSideCar(node *cosmos.ChainNode) *cosmos.SidecarProcess {
-	if len(node.Sidecars) == 0 {
-		panic("no sidecars found")
-	}
-	return node.Sidecars[0]
 }
 
 type TestTxConfig struct {
@@ -123,9 +68,6 @@ type TestSuite struct {
 	chain *cosmos.CosmosChain
 	// users
 	user1, user2, user3 ibc.Wallet
-
-	// oracle side-car config
-	oracleConfig ibc.SidecarConfig
 
 	// overrides for key-ring configuration of the broadcaster
 	broadcasterOverrides *KeyringOverride
@@ -203,20 +145,19 @@ func WithChainConstructor(cc ChainConstructor) Option {
 	}
 }
 
-func NewIntegrationSuite(spec *interchaintest.ChainSpec, oracleImage ibc.DockerImage, txCfg TestTxConfig, opts ...Option) *TestSuite {
+func NewIntegrationSuite(spec *interchaintest.ChainSpec, txCfg TestTxConfig, opts ...Option) *TestSuite {
 	if err := txCfg.Validate(); err != nil {
 		panic(err)
 	}
 
 	suite := &TestSuite{
-		spec:         spec,
-		oracleConfig: DefaultOracleSidecar(oracleImage),
-		denom:        defaultDenom,
-		gasPrices:    "",
-		authority:    authtypes.NewModuleAddress(govtypes.ModuleName),
-		icc:          DefaultInterchainConstructor,
-		cc:           DefaultChainConstructor,
-		txConfig:     txCfg,
+		spec:      spec,
+		denom:     defaultDenom,
+		gasPrices: "",
+		authority: authtypes.NewModuleAddress(govtypes.ModuleName),
+		icc:       DefaultInterchainConstructor,
+		cc:        DefaultChainConstructor,
+		txConfig:  txCfg,
 	}
 
 	for _, opt := range opts {
@@ -256,25 +197,6 @@ func (s *TestSuite) SetupSuite() {
 		panic("no chains created")
 	}
 
-	s.chain.WithPreStartNodes(func(c *cosmos.CosmosChain) {
-		// for each node in the chain, set the sidecars
-		for i := range c.Nodes() {
-			// pin
-			node := c.Nodes()[i]
-			// add sidecars to node
-			AddSidecarToNode(node, s.oracleConfig)
-
-			// set config for the oracle
-			oracleCfg := DefaultOracleConfig("localhost:9090")
-			SetOracleConfigsOnOracle(GetOracleSideCar(node), oracleCfg)
-
-			// set the out-of-process oracle config for all nodes
-			node.WithPreStartNode(func(n *cosmos.ChainNode) {
-				SetOracleConfigsOnApp(n)
-			})
-		}
-	})
-
 	// get the users
 	s.user1 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
 	s.user2 = s.GetAndFundTestUsers(ctx, s.T().Name(), initBalance, chains[0])
@@ -287,7 +209,7 @@ func (s *TestSuite) SetupSuite() {
 
 func (s *TestSuite) TearDownSuite() {
 	defer s.Teardown()
-	// get the oracle integration-test suite keep alive env
+	// optional keep-alive for local debugging (wait for SIGINT/SIGTERM)
 	if ok := os.Getenv(envKeepAlive); ok == "" {
 		return
 	}

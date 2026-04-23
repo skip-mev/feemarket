@@ -5,21 +5,19 @@ import (
 	"testing"
 	"time"
 
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
+	interchaintest "github.com/cosmos/interchaintest/v11"
+	"github.com/cosmos/interchaintest/v11/chain/cosmos"
+	"github.com/cosmos/interchaintest/v11/ibc"
+	"github.com/cosmos/interchaintest/v11/testreporter"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 )
 
-// ChainConstructor returns the chain that will be using slinky, as well as any additional chains
-// that are needed for the test. The first chain returned will be the chain that is used in the
-// slinky integration tests.
+// ChainConstructor returns the primary test chain and any additional chains. The first chain is the
+// feemarket chain under test.
 type ChainConstructor func(t *testing.T, spec *interchaintest.ChainSpec, gasPrices string) []*cosmos.CosmosChain
 
-// Interchain is an interface representing the set of chains that are used in the slinky e2e tests, as well
-// as any additional relayer / ibc-path information
+// Interchain captures relayer / IBC-path information when tests use multiple linked chains.
 type Interchain interface {
 	Relayer() ibc.Relayer
 	Reporter() *testreporter.RelayerExecReporter

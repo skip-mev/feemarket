@@ -1,7 +1,9 @@
-FROM golang:1.24-bullseye AS builder
+FROM golang:1.25-bookworm AS builder
 
 WORKDIR /src/feemarket
 COPY . .
+
+ENV GOTOOLCHAIN=auto
 
 RUN make tidy
 RUN make build-test-app

@@ -8,9 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	interchaintest "github.com/cosmos/interchaintest/v11"
+	"github.com/cosmos/interchaintest/v11/chain/cosmos"
+	"github.com/cosmos/interchaintest/v11/ibc"
 	"github.com/stretchr/testify/suite"
 
 	sdkmath "cosmossdk.io/math"
@@ -32,12 +32,7 @@ var (
 	image = ibc.DockerImage{
 		Repository: "feemarket-e2e",
 		Version:    "latest",
-		UidGid:     "1000:1000",
-	}
-	oracleImage = ibc.DockerImage{
-		Repository: "ghcr.io/skip-mev/slinky-sidecar",
-		Version:    "latest",
-		UidGid:     "1000:1000",
+		UIDGID:     "1000:1000",
 	}
 	encodingConfig = testutil.MakeTestEncodingConfig(
 		bank.AppModuleBasic{},
@@ -113,11 +108,7 @@ var (
 )
 
 func TestE2ETestSuite(t *testing.T) {
-	s := e2e.NewIntegrationSuite(
-		spec,
-		oracleImage,
-		txCfg,
-	)
+	s := e2e.NewIntegrationSuite(spec, txCfg)
 
 	suite.Run(t, s)
 }
